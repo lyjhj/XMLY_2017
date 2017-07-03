@@ -502,5 +502,9 @@ def routenameitem(final):
         #  route表里根据id查找的结果只会有一个
         routeitem.append(result[0].RouteName)
     return routeitem
+
+def te():
+    print 'te'
+
 #Map 功能函数 定义 end
 
