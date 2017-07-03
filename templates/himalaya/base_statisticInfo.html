@@ -1,0 +1,697 @@
+{% load staticfiles %}
+{% load highlight %}
+{% load pagination_tags %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>基础文献搜索统计分析 - 喜马拉雅多媒体数据</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+
+    <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleofstatisticInfo.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <!--<![endif]-->
+
+    {#    内容滑动菜单栏样式#}
+    <link rel="stylesheet" href="{% static 'himadatabase/test/docs.min.css' %}" type="text/css">
+    {#    内容滑动菜单栏样式#}
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+
+
+</head>
+
+
+
+<body id="top" class="lang_zh search-results " >
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+<input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+
+<div class="sidebar" id="search-filters" role="menu">
+
+    <h2 class="sr-only">专栏选项</h2>
+
+    <section>
+        {% if sqs.fields.fileType.0.1%}
+            <h4> 文件类型</h4>
+            <ul class="list-unstyled">
+                {% for file_type in sqs.fields.fileType %}
+                    {% if file_type.1 %}
+                        <li role="menuitem">
+                            <a name="search" href="{{ request.get_full_path }}&fileType={{ file_type.0|urlencode }}&page=1"
+                               title="{{ file_type.0 }}">
+                                <span class="badge">{{ file_type.1 }}</span>
+                                <span class="title">{{ file_type.0 }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        {% if sqs.fields.language.0.1 %}
+            <h4>语言</h4>
+            <ul class="list-unstyled">
+                {% for lan in sqs.fields.language %}
+                    {% if lan.1 %}
+                        <li role="menuitem">
+                            <a name="search" href="{{ request.get_full_path }}&language={{ lan.0 |urlencode }}&page=1" title="{{ lan.0 }}">
+                                <span class="badge">{{ lan.1 }}</span>
+                                <span class="title">{{ lan.0 }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+
+            </ul>
+        {% endif %}
+    </section>
+
+
+    <section>
+        {% if sqs.fields.discipline.0.1 %}
+            <h4>文件学科</h4>
+            <ul class="list-unstyled">
+                {% for dis in sqs.fields.discipline %}
+                    {% if dis.1 %}
+                        <li role="menuitem">
+                            <a name="search" href="{{ request.get_full_path }}&discipline={{ dis.0 |urlencode }}&page=1" title="{{ dis.0 }}">
+                                <span class="badge">{{ dis.1 }}</span>
+                                <span class="title">{{ dis.0 }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+
+    <section>
+        {% if sqs.fields.spatial.0.1 %}
+            <h4>文件空间范围</h4>
+            <ul class="list-unstyled">
+                {% for spa in sqs.fields.spatial %}
+                    {% if spa.1 %}
+                        <li role="menuitem">
+                            <a name="search" href="{{ request.get_full_path }}&spatial={{ spa.0 |urlencode }}&page=1" title="{{ spa.0 }}">
+                                <span class="badge">{{ spa.1 }}</span>
+                                <span class="title">{{ spa.0 }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        {% if sqs.fields.fileFormat.0.1 %}
+            <h4>格式</h4>
+            <ul class="list-unstyled">
+                {% for file_f in sqs.fields.fileFormat %}
+                    {% if file_f.1 %}
+                        <li role="menuitem">
+                            <a name="search" href="{{ request.get_full_path }}&fileFormat={{ file_f.0 |urlencode }}&page=1"
+                               title="{{ file_f.0 }}">
+                                <span class="badge">{{ file_f.1 }}</span>
+                                <span class="title">{{ file_f.0 }}</span>
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+
+</div>
+
+<div id="sidebar-toggle-button">
+    <label for="sidebar-toggle-checkbox" class="btn btn-block">
+        <img src="{% static 'img/menu.png' %}" alt=""/>
+    </label>
+</div>
+
+
+<div id="page-main" class="container-fluid" style="min-height: 10px">
+    <div class="row">
+        <form action="{% url 'himalaya:search' %}" method="get">
+        <div class="col-sm-8 col-sm-offset-3">
+            {#    <form id="site-search" class="form-horizontal" action="/">#}
+            <div class="row" >
+                <div class="col-sm-8">
+                    <div class="form-group">
+                            <div class="input-group">
+                                <input type="search" class="form-control" lang="zh" name="q" aria-label="搜索"
+                                       value="{{ query }}"
+                                       placeholder="搜索喜马拉雅多媒体数据" data-typeahead-url=".js"
+                                       data-suggest-url="/zh/search/suggest/">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" name="search" value="query">
+                                <span class="glyphicon glyphicon-search"></span>
+                                搜索
+                            </button>
+                        </span>
+                            </div>
+                    </div>
+                </div>
+
+                <!--高级查询功能 start-->
+                <div class="col-sm-3">
+                    <div class="form-group text-right">
+                        <button id="search-options-toggle" type="button" class="btn btn-block btn-default"
+                                data-toggle="collapse" data-target="#search-options">
+                            <span class="fa fa-cog"></span>
+                            <span class="title">高级查询</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--高级查询收缩栏功能 start-->
+            <div id="search-options" class="row collapse">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">参考选项</div>
+                            <div class="panel-body">
+                                <div class="text-center center-block">
+
+                                        <div class="form-group">
+                                            <label for="inp_title" class="col-sm-2 control-label">标题</label>
+                                            <div class="col-sm-10">
+                                                <input type="search" class="form-control" id="inp_title" name="title"
+                                                       placeholder="请输入标题">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" id="search-inp">
+
+                                            <label for="inp_start_date" class="col-sm-2 control-label">起始年份</label>
+                                            <div class="col-sm-4" >
+                                                <input onchange="isValidatetime(this)"
+                                                        onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                   onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+                                                        type="search" class="form-control" id="inp_start_date"
+                                                       placeholder="请输入年份如：2015" name="inp_start_date" >
+                                            </div>
+
+                                            <label for="inp_end_date" class="col-sm-2 control-label">结束年份</label>
+                                            <div class="col-sm-4" style="display: inline">
+                                                <input onchange="isValidatetime(this)"
+                                                        onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                   onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+                                                        type="search" class="form-control" id="inp_end_date" name="inp_end_date"
+                                                       placeholder="请输入年份如：2016" >
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="inp_keywords" class="col-sm-2 control-label">关键字</label>
+                                            <div class="col-sm-4">
+                                                <input type="search" class="form-control" id="inp_keywords"
+                                                       placeholder="请输入关键字" name="keywords">
+                                            </div>
+
+                                            <label for="inp_author" class="col-sm-2 control-label">作者</label>
+                                            <div class="col-sm-4">
+                                                <input type="search" class="form-control" id="inp_author" name="creator"
+                                                       placeholder="请输入作者">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label for="inp_lang" class="col-sm-2 control-label">语言类型</label>
+                                            <div class="col-sm-4">
+                                                <input type="text" class="form-control" id="inp_lang" name="language"
+                                                       placeholder="请输入语言类型">
+
+                                            </div>
+
+                                            <label for="inp_file_type" class="col-sm-2 control-label">文件类型</label>
+                                            <div class="col-sm-4">
+                                                <input type="text" class="form-control" id="inp_file_type"
+                                                       name="fileType"
+                                                       placeholder="请输入文件类型">
+                                            </div>
+                                        </div>
+
+{#                                           <input  type="hidden" runat="server" name="page" value="">#}
+
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-8">
+                                                <button type="submit" class="btn btn-default"  name="search" value="advance" id="search-btn" >
+
+                                                    高级搜索
+                                                </button>
+                                            </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--高级查询收缩栏功能 end-->
+            <!--高级查询功能 end-->
+
+        </div>
+         </form>
+    </div>
+
+
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-6">
+                <span id="result-label">
+                     基础文献库中检索共有  {{ num }}  篇文献
+                </span>
+        </div>
+
+          <!--三个圆形功能按钮 start-->
+        <div id="view-mode-toggle">
+            <div class="wel-grids">
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <a href="/base_search/?q={{ query }}">
+                    <label class="btn btn-block">
+                        <figure class="icon ">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                            <input type="hidden" name="view-mode" value="list">
+                        </figure>
+                        <p>列表展示</p>
+                    </label>
+                    </a>
+                </div>
+
+
+                <a href="/base_statisticInfo/?q={{ query }}">
+                <div class="col-sm-1 wel-grid text-center">
+                    <label  class="btn btn-block">
+                        <figure class="icon active">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                        </figure>
+                        <p>知识视图</p>
+                    </label>
+                </div>
+                </a>
+
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block" hidden>
+                        <figure class="icon">
+                            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="map">#}
+                        </figure>
+                        <p>文献地图</p></label>
+                </div>
+
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" style="margin-bottom: 80px">
+    <div id="search-results">
+        <div class="aborder"></div>
+        <div class="results list" style="height: 0px!important;margin-bottom: -56px!important;"></div>
+    </div>
+
+   {#     统计内容主体 上两行地图做好后可删     strat#}
+    <!-- Docs page layout -->
+    <div class="container bs-docs-container">
+
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+          <div class="bs-docs-section" >
+            <h2 id="distribution"  class="page-header">文献分布统计分析</h2>
+
+{#              如果该专题还需要统计框，就复制添加这段代码 请注意放在同一个专题div下 start#}
+              <div  class="col-md-12" >
+                <div class="panel panel-default" style="height: 350px">
+                    <div class="panel-body">
+                        {# 注意！！！！把要显示的内容放在这里面，下面类似。可以自行调节框的高度，即控制上面的style="height: 350px#}
+                    </div>
+                </div>
+            </div>
+{#              如果该专题还需要统计框，就复制添加这段代码 end#}
+
+{#              如果该专题还需要统计框，就复制添加这段代码 start#}
+              <div class="col-md-12" >
+{#                   注意！文献分析统计图个数不确定，把<h3>[id]加在最后一个统计框里控制跳转面距。 start#}
+                  <h2 id="tend"></h2>
+{#                   注意！文献分析统计图个数不确定，把<h3>[id]加在这里控制面距。 end#}
+                <div class="panel panel-default" style="height: 350px">
+                    <div class="panel-body">
+                        {# 注意！把要显示的内容放在这里面，下面类似。可以自行调节框的高度，即控制上面的style="height: 350px#}
+                    </div>
+                </div>
+            </div>
+{#              如果该专题还需要统计框，就复制添加这段代码 end#}
+
+         </div>
+
+        <div class="bs-docs-section" >
+
+                    <h2 class="page-header">趋势分析</h2>
+                    <div class="col-md-12">
+                        <div class="panel panel-default" style="height: 350px">
+                            <div class="panel-body">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+            <div class="bs-docs-section">
+
+                    <h2 id="hot_topic" class="page-header">热点分析</h2>
+                    <div  class="col-md-12" >
+                        <div class="panel panel-default" style="height: 350px">
+                            <div class="panel-body">
+                            </div>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="bs-docs-section">
+                    <h2 id="keyword" class="page-header">关键词分析</h2>
+                    <div class="col-md-12" >
+                        <div class="panel panel-default" style="height: 350px">
+                            <div class="panel-body">
+                            </div>
+                        </div>
+                     </div>
+            </div>
+            </div>
+
+<div class="col-md-3" >
+          <div class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" role="complementary">
+            <ul class="nav bs-docs-sidenav">
+                <li>
+                    <a href="#distribution">文献分布统计分析</a>
+                </li>
+                <li>
+                  <a href="#tend">趋势分析</a>
+                </li>
+                <li>
+                  <a href="#hot_topic">热点分析</a>
+                </li>
+                 <li>
+                  <a href="#keyword">关键词分析</a>
+                </li>
+            </ul>
+
+            <a class="back-to-top" href="#top">
+              返回顶部
+            </a>
+
+          </div>
+</div>
+
+      </div>
+    </div>
+
+
+    {#     统计内容主体  end#}
+
+</div>
+
+<!--导航条底部 start-->
+<div class="posit">
+{% include "himalaya/base/navButtomBase.html" %}
+</div>
+<!--导航条底部 end-->
+
+
+
+{#地图显示样式 以后做好地图可删 start#}
+
+<!--[if ! lte IE 6]><!-->
+
+<script>
+    var STATIC_URL = '/static/',
+            MEDIA_URL = 'https://content.wdl.org/',
+            LANGUAGE_CODE = 'zh',
+            RAVEN_PUBLIC_DSN = 'https://5099c16f0f4442e1a0afcc131fccca91@sentry.ops.wdl.org/8';
+</script>
+
+<script>
+
+    (function (globals) {
+
+        var django = globals.django || (globals.django = {});
+
+
+        django.pluralidx = function (n) {
+            var v = 0;
+            if (typeof(v) == 'boolean') {
+                return v ? 1 : 0;
+            } else {
+                return v;
+            }
+        };
+
+
+        /* gettext library */
+
+        django.catalog = {
+            "%s item without map coordinates is not visible": [
+                "%s\u6761\u76ee\u6ca1\u6709\u5730\u56fe\u5750\u6807\uff0c\u65e0\u6cd5\u68c0\u89c6"
+            ],
+            "BCE": "\u516c\u5143\u524d",
+            "CE": "\u516c\u5143",
+            "Center map on your current location": "\u5c06\u60a8\u7684\u76ee\u524d\u4f4d\u7f6e\u653e\u5728\u5730\u56fe\u4e2d\u592e",
+            "Full Screen": "\u5168\u5c4f",
+            "Go Home": "\u8fd4\u56de\u9996\u9875",
+            "Grid": "\u7f51\u683c",
+            "Help": "\u5e2e\u52a9",
+            "Items": "\u6761\u76ee",
+            "Nearby Items": "\u9644\u8fd1\u6761\u76ee",
+            "Next": "\u4e0b\u4e00",
+            "Places": "\u5730\u65b9",
+            "Points": "\u70b9",
+            "Previous": "\u4e0a\u4e00",
+            "Read": "\u9605\u8bfb",
+            "Rotate Left": "\u5411\u5de6\u65cb\u8f6c",
+            "Rotate Right": "\u5411\u53f3\u65cb\u8f6c",
+            "Search": "\u641c\u7d22",
+            "Search inside this item in %(language)s:": "\u4ee5%(language)s\u641c\u7d22\u672c\u6761\u76ee\u5185\u5bb9",
+            "View All": "\u68c0\u89c6\u5168\u90e8",
+            "Zoom": "\u53d8\u7126",
+            "Zoom In": "\u653e\u5927",
+            "Zoom Out": "\u7f29\u5c0f",
+            "Zoom to fit all visible points": "\u7f29\u653e\u4ee5\u653e\u5165\u6240\u6709\u53ef\u89c1\u7684\u70b9"
+        };
+
+        django.gettext = function (msgid) {
+            var value = django.catalog[msgid];
+            if (typeof(value) == 'undefined') {
+                return msgid;
+            } else {
+                return (typeof(value) == 'string') ? value : value[0];
+            }
+        };
+
+        django.ngettext = function (singular, plural, count) {
+            var value = django.catalog[singular];
+            if (typeof(value) == 'undefined') {
+                return (count == 1) ? singular : plural;
+            } else {
+                return value[django.pluralidx(count)];
+            }
+        };
+
+        django.gettext_noop = function (msgid) {
+            return msgid;
+        };
+
+        django.pgettext = function (context, msgid) {
+            var value = django.gettext(context + '\x04' + msgid);
+            if (value.indexOf('\x04') != -1) {
+                value = msgid;
+            }
+            return value;
+        };
+
+        django.npgettext = function (context, singular, plural, count) {
+            var value = django.ngettext(context + '\x04' + singular, context + '\x04' + plural, count);
+            if (value.indexOf('\x04') != -1) {
+                value = django.ngettext(singular, plural, count);
+            }
+            return value;
+        };
+
+
+        django.interpolate = function (fmt, obj, named) {
+            if (named) {
+                return fmt.replace(/%\(\w+\)s/g, function (match) {
+                    return String(obj[match.slice(2, -2)])
+                });
+            } else {
+                return fmt.replace(/%s/g, function (match) {
+                    return String(obj.shift())
+                });
+            }
+        };
+
+
+        /* formatting library */
+
+        django.formats = {
+            "DATETIME_FORMAT": "N j, Y, P",
+            "DATETIME_INPUT_FORMATS": [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M:%S.%f",
+                "%Y-%m-%d %H:%M",
+                "%Y-%m-%d",
+                "%m/%d/%Y %H:%M:%S",
+                "%m/%d/%Y %H:%M:%S.%f",
+                "%m/%d/%Y %H:%M",
+                "%m/%d/%Y",
+                "%m/%d/%y %H:%M:%S",
+                "%m/%d/%y %H:%M:%S.%f",
+                "%m/%d/%y %H:%M",
+                "%m/%d/%y"
+            ],
+            "DATE_FORMAT": "Y\u5e74n\u6708j\u65e5",
+            "DATE_INPUT_FORMATS": [
+                "%Y-%m-%d",
+                "%m/%d/%Y",
+                "%m/%d/%y",
+                "%b %d %Y",
+                "%b %d, %Y",
+                "%d %b %Y",
+                "%d %b, %Y",
+                "%B %d %Y",
+                "%B %d, %Y",
+                "%d %B %Y",
+                "%d %B, %Y"
+            ],
+            "DECIMAL_SEPARATOR": ".",
+            "FIRST_DAY_OF_WEEK": "0",
+            "MONTH_DAY_FORMAT": "F j",
+            "NUMBER_GROUPING": "0",
+            "SHORT_DATETIME_FORMAT": "m/d/Y P",
+            "SHORT_DATE_FORMAT": "m/d/Y",
+            "THOUSAND_SEPARATOR": ",",
+            "TIME_FORMAT": "P",
+            "TIME_INPUT_FORMATS": [
+                "%H:%M:%S",
+                "%H:%M:%S.%f",
+                "%H:%M"
+            ],
+            "YEAR_MONTH_FORMAT": "F Y"
+        };
+
+        django.get_format = function (format_type) {
+            var value = django.formats[format_type];
+            if (typeof(value) == 'undefined') {
+                return format_type;
+            } else {
+                return value;
+            }
+        };
+
+        /* add to global namespace */
+        globals.pluralidx = django.pluralidx;
+        globals.gettext = django.gettext;
+        globals.ngettext = django.ngettext;
+        globals.gettext_noop = django.gettext_noop;
+        globals.pgettext = django.pgettext;
+        globals.npgettext = django.npgettext;
+        globals.interpolate = django.interpolate;
+        globals.get_format = django.get_format;
+
+    }(this));
+
+</script>
+
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/external-bundle.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+<script defer src="{% static 'himadatabase/my_js/sidebar.min.js' %}"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/map-bundle.min.js' %}"></script>
+
+<script type="text/javascript">
+    var customOmnitureProperties = {prop3: 'wdl'};
+
+    var Site = {
+        Plugins: {
+            sc: {
+                getAccount: function () {
+                    return location.href.indexOf('www.wdl.org') >= 0 ? 'locgovprod' : 'locgovdev';
+                },
+                setProperties: function (props) {
+                    for (var prop in window.customOmnitureProperties) {
+                        if (customOmnitureProperties.hasOwnProperty(prop)) {
+                            props[prop] = customOmnitureProperties[prop];
+                        }
+                    }
+                }
+            }
+        }
+    };
+</script>
+<script async crossorigin="anonymous" src="{% static 'himadatabase/my_js/s_code.js' %}" charset="utf-8"
+        onerror="Raven.captureMessage('Unable to load Omniture')"></script>
+{#地图显示样式 以后做好地图可删 end#}
+
+
+<script language="javascript">
+function check(){
+var a = /^(\d{4})$/
+if (!a.test(document.getElementById("inp_start_date").value)) {
+alert("日期格式不正确!")
+return false
+}
+else
+return true
+}
+</script>
+<script>
+     function isValidatetime(obj) {
+         if (obj.value>=10000 || obj.value==0) {
+                alert("请输入正确的日期");
+                obj.value = null;
+                return false;
+            }
+
+        return true;
+    }
+</script>
+
+
+{#    内容滑动菜单栏样式#}
+{#<script crossorigin="anonymous" src="{% static 'himadatabase/test/jquery.min.js' %}" charset="utf-8"></script>#}
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/bootstrap.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/docs.min.js' %}" charset="utf-8"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
+{#    内容滑动菜单栏样式#}
+
+</body>
+</html>

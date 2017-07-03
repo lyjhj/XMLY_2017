@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<tour start="node2">
+  <panorama id="node1">
+    <input width="1848" leveltilesize="510" leveltileurl="tiles/A200Panorama/cf_%c/l_%l/c_%x/tile_%y.jpg" height="1848" levelbias="0.400" levelingpitch="0" levelingroll="0" overlap="1">
+      <level width="1848" preload="0" height="1848"/>
+      <level width="924" preload="0" height="924"/>
+      <level width="462" preload="1" height="462"/>
+      <preview color="0x808080" strip="1"/>
+    </input>
+    <view fovmode="0" pannorth="0">
+      <start fov="77.9" pan="-127.8" tilt="-10.8"/>
+      <min fov="5" pan="0" tilt="-90"/>
+      <max fov="120" pan="360" tilt="90"/>
+    </view>
+    <userdata description="" copyright="" tags="Tour" latitude="" title="" author="Himalaya" datetime="2015.12.18" info="" source="" comment="" longitude=""/>
+    <hotspots wordwrap="1" width="180" height="20">
+      <label wordwrap="1" background="1" textalpha="1" width="180" borderradius="1" bordercolor="0x000000" backgroundalpha="1" textcolor="0x000000" border="1" enabled="1" height="20" backgroundcolor="0xffffff" borderalpha="1"/>
+      <polystyle bordercolor="0x0000ff" backgroundalpha="0.2509803921568627" mode="0" backgroundcolor="0x0000ff" borderalpha="1"/>
+      <polyhotspot description="" url="http://note.youdao.com/share/web/file.html?id=dc956aa5a7ac2c9eb191718952d2ec36&amp;type=note" id="A200_01" target="_blank" title="阎学通教授">
+        <vertex pan="12.0677" tilt="2.08932"/>
+        <vertex pan="12.2249" tilt="-0.482069"/>
+        <vertex pan="9.36981" tilt="-0.648885"/>
+        <vertex pan="9.20972" tilt="2.27104"/>
+        <vertex pan="9.52982" tilt="1.7831"/>
+      </polyhotspot>
+      <hotspot description="" url="http://cwf.scu.edu.cn/index.htm" id="A200_gate" target="" skinid="ht_url" pan="-122.96" title="西部边疆与发展" tilt="11.62"/>
+      <hotspot description="" url="{node3}" id="A200_02" target="-27.9326/1.08662/77.9" skinid="ht_node" pan="-41.9899" title="文科楼" tilt="3.34011"/>
+    </hotspots>
+    <media/>
+    <transition zoomin="0" zoomoutpause="1" zoomout="0" enabled="0" type="crossdissolve" blendtime="1" blendcolor="0x000000" zoomfov="20" zoomspeed="2"/>
+    <control sensitivity="8" hideabout="0" speedwheel="1" simulatemass="1" lockedkeyboard="0" invertcontrol="1" lockedmouse="0" invertwheel="0" contextfullscreen="0" lockedwheel="0" lockedkeyboardzoom="0" dblclickfullscreen="0"/>
+  </panorama>
+  <panorama id="node2">
+    <input width="3458" leveltilesize="510" leveltileurl="tiles/SHPanorama/cf_%c/l_%l/c_%x/tile_%y.jpg" height="3458" levelbias="0.400" levelingpitch="0" levelingroll="0" overlap="1">
+      <level width="3458" preload="0" height="3458"/>
+      <level width="1729" preload="0" height="1729"/>
+      <level width="864" preload="0" height="864"/>
+      <level width="432" preload="1" height="432"/>
+      <preview color="0x808080" strip="1"/>
+    </input>
+    <view fovmode="0" pannorth="0">
+      <start fov="70" pan="-24.4" tilt="-2"/>
+      <min fov="5" pan="0" tilt="-90"/>
+      <max fov="120" pan="360" tilt="90"/>
+    </view>
+    <userdata description="" copyright="" tags="Tour" latitude="" title="" author="" datetime="2015" info="" source="" comment="" longitude=""/>
+    <hotspots wordwrap="1" width="180" height="20">
+      <label wordwrap="1" background="1" textalpha="1" width="180" borderradius="1" bordercolor="0x000000" backgroundalpha="1" textcolor="0x000000" border="1" enabled="1" height="20" backgroundcolor="0xffffff" borderalpha="1"/>
+      <polystyle bordercolor="0x0000ff" backgroundalpha="0.2509803921568627" mode="0" backgroundcolor="0x0000ff" borderalpha="1"/>
+      <hotspot description="" url="{node3}" id="SH01" target="-29.1229/2.26094/77.9" skinid="ht_node" pan="-43.07" title="文科楼" tilt="5.03"/>
+    </hotspots>
+    <media/>
+    <transition zoomin="0" zoomoutpause="1" zoomout="0" enabled="0" type="crossdissolve" blendtime="1" blendcolor="0x000000" zoomfov="20" zoomspeed="2"/>
+    <control sensitivity="8" hideabout="0" speedwheel="1" simulatemass="1" lockedkeyboard="0" invertcontrol="1" lockedmouse="0" invertwheel="0" contextfullscreen="0" lockedwheel="0" lockedkeyboardzoom="0" dblclickfullscreen="0"/>
+  </panorama>
+  <panorama id="node3">
+    <input width="1839" leveltilesize="510" leveltileurl="tiles/WenkelouPanorama/cf_%c/l_%l/c_%x/tile_%y.jpg" height="1839" levelbias="0.400" levelingpitch="0" levelingroll="0" overlap="1">
+      <level width="1839" preload="0" height="1839"/>
+      <level width="919" preload="0" height="919"/>
+      <level width="459" preload="1" height="459"/>
+      <preview color="0x808080" strip="1"/>
+    </input>
+    <view fovmode="0" pannorth="0">
+      <start fov="77.9" pan="-28.8" tilt="3.1"/>
+      <min fov="5" pan="0" tilt="-90"/>
+      <max fov="120" pan="360" tilt="90"/>
+    </view>
+    <userdata description="" copyright="" tags="Tour" latitude="" title="" author="" datetime="2015" info="" source="" comment="" longitude=""/>
+    <hotspots wordwrap="1" width="180" height="20">
+      <label wordwrap="1" background="1" textalpha="1" width="180" borderradius="1" bordercolor="0x000000" backgroundalpha="1" textcolor="0x000000" border="1" enabled="1" height="20" backgroundcolor="0xffffff" borderalpha="1"/>
+      <polystyle bordercolor="0x0000ff" backgroundalpha="0.2509803921568627" mode="0" backgroundcolor="0x0000ff" borderalpha="1"/>
+      <hotspot description="" url="{node1}" id="Wenkelou01" target="-122.605/-9.09624/77.9" skinid="ht_node" pan="-46.88" title="A200演播厅" tilt="19.21"/>
+    </hotspots>
+    <media/>
+    <transition zoomin="0" zoomoutpause="1" zoomout="0" enabled="0" type="crossdissolve" blendtime="1" blendcolor="0x000000" zoomfov="20" zoomspeed="2"/>
+    <control sensitivity="8" hideabout="0" speedwheel="1" simulatemass="1" lockedkeyboard="0" invertcontrol="1" lockedmouse="0" invertwheel="0" contextfullscreen="0" lockedwheel="0" lockedkeyboardzoom="0" dblclickfullscreen="0"/>
+  </panorama>
+</tour>

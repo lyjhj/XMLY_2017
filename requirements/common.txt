@@ -1,0 +1,7 @@
+# requirements/common.txt
+Python==2.7
+Django==1.9.6
+Django-haystack==2.5.0
+pysolr==3.5.0
+Jieba==0.38
+Textract==1.4.0

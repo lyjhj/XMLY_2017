@@ -1,0 +1,2 @@
+{{ object.bNameCH }}
+{{ object.bNameEN }}

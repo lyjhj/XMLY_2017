@@ -1,0 +1,309 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>关键词聚类分析</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+    <script src="{% static 'statistic/jquery-3.1.1.js' %}"></script>
+    <script src="{% static 'statistic/highcharts.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/main.min.css' %}"
+          type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <!--<![endif]-->
+    {#    内容滑动菜单栏样式#}
+    <link rel="stylesheet" href="{% static 'himadatabase/test/docs.min.css' %}" type="text/css">
+    {#    内容滑动菜单栏样式#}
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+</head>
+
+<body class="lang_zh search-results "  >
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+<input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+
+<div id="page-main" class="container-fluid" style="min-height: 10px">
+    <div class="row">
+        <form action="{% url 'himalaya:search' %}" method="get">
+        <div class="col-sm-8 col-sm-offset-3">
+            {#    <form id="site-search" class="form-horizontal" action="/">#}
+            <div class="row" >
+                <div class="col-sm-8">
+                    <div class="form-group">
+                            <div class="input-group">
+                                <input type="search" class="form-control" lang="zh" name="q" aria-label="搜索"
+                                       value="{{ query }}"
+                                       placeholder="搜索喜马拉雅多媒体数据" data-typeahead-url=".js"
+                                       data-suggest-url="/zh/search/suggest/">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" name="search" value="query">
+                                <span class="glyphicon glyphicon-search"></span>
+                                搜索
+                            </button>
+                        </span>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+
+     <div class="row">
+            <div class="col-sm-offset-2 col-sm-6">
+                    <span id="result-label">
+                     {% if advanceb %}
+                           基础库中检索 {% for ad in advanceb %}
+                                          “{{ ad }}”
+                                      {% endfor %}
+                               共有 {{ ret_num }} 篇文献
+                    {% else %}
+                        基础库中共有{{ ret_num }} 篇文献
+                    {% endif %}
+
+
+                    </span>
+            </div>
+
+
+          <!--三个圆形功能按钮 start-->
+      <div id="view-mode-toggle">
+            <div class="wel-grids">
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <a href="/base_search/?q={{ query }}">
+                    <label class="btn btn-block">
+                        <figure class="icon ">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="list">#}
+                        </figure>
+                        <p>列表展示</p>
+                    </label>
+                    </a>
+                </div>
+
+
+                <a href="/base_statisticInfo/?q={{ query }}">
+                <div class="col-sm-1 wel-grid text-center">
+                    <label  class="btn btn-block">
+                        <figure class="icon active">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                        </figure>
+                        <p>知识视图</p>
+                    </label>
+                </div>
+                </a>
+
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block" hidden>
+                        <figure class="icon">
+                            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="map">#}
+                        </figure>
+                        <p>文献地图</p></label>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row" style="margin-bottom: 80px">
+    <div id="search-results">
+        <div class="aborder"></div>
+        <div class="results list" style="height: 0px!important;margin-bottom: -56px!important;"></div>
+    </div>
+    <!-- Docs page layout -->
+{#<div>检索条件：“{{ query }}”</div>#}
+{#<div>过滤条件：“”</div>#}
+ <div class="container bs-docs-container">
+
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+          <div class="bs-docs-section" >
+            <h2 id="distribution"  class="page-header">关键词聚类分析</h2>
+
+{#              如果该专题还需要统计框，就复制添加这段代码 请注意放在同一个专题div下 start#}
+              <div  class="col-md-12" >
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="container" style="min-width:500px;height:500px"></div>
+
+        <script>
+            var chart = null;
+            $(function () {
+                $('#container').highcharts({
+                    chart: {
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false,
+                        spacing : [40, 40 , 40, 0]
+                    },
+                    title: {
+                        floating:true,
+                        text:'KEYWORDS',
+                        align: 'center'
+
+                    },
+                    tooltip: {
+                        pointFormat: '{series.name}: <b>{point.y}</b>',
+
+
+                    },
+
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}</b>',
+                                style: {
+                                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor)
+                                }
+
+                            },
+            {#                showInLegend: true,#}
+
+
+                            point: {
+                                events: {
+                                    mouseOver: function(e) {  // 鼠标滑过时动态更新标题
+                                        // 标题更新函数，API 地址：https://api.hcharts.cn/highcharts#Chart.setTitle
+                                        chart.setTitle({
+                                            text: e.target.name+ '：\t'+ e.target.Keywords
+                                        });
+                                    }
+                                    //,
+                                    // click: function(e) { // 同样的可以在点击事件里处理
+                                    //     chart.setTitle({
+                                    //         text: e.point.name+ '\t'+ e.point.y + ' %'
+                                    //     });
+                                    // }
+                                }
+                            }
+
+                        }
+
+                    },
+                    credits: {
+                        enabled: false
+                     },
+
+                    series: [{
+                        type: 'pie',
+                        innerSize: '80%',
+                        name: 'Keywords',
+                        data: {{listr|safe}}
+                    }]
+                }, function(c) {
+                    // 环形图圆心
+                    var centerY = c.series[0].center[1],
+                        titleHeight = parseInt(c.title.styles.fontSize);
+                    c.setTitle({
+                        y:centerY + titleHeight/2
+                    });
+                    chart = c;
+                });
+            });
+
+        </script>
+
+{% for i in listr2%}
+    <div><font color="red">{{ i.name }}:</font> {{ i.Keywords }}</div>
+
+{% endfor %}
+
+{#######################################}
+
+                  </div>
+                </div>
+            </div>
+          </div>
+
+{############################################}
+
+
+<!--导样式控制div 不能移动和删除 start-->
+            </div>
+<!--导导样式控制div 不能移动和删除 end-->
+            {#            右侧滑动条#}
+{######################################################}
+            <div class="col-md-3" >
+                <div class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" role="complementary">
+                    <ul class="nav bs-docs-sidenav">
+                        <li>
+                            <a href={% url "himalaya:base_statisticInfo" %}>文献分布统计分析</a>
+                        </li>
+                        <li>
+                            <a href={% url "himalaya:base_statisticInfo" %}>趋势分析</a>
+                        </li>
+                        <li>
+                            <a href="#words">词频统计表</a>
+                        </li>
+                        <li>
+                            <a href="#hot_topic">热点分析</a>
+                        </li>
+                        <li>
+                            <a href={% url 'himalaya:base_keywords' %}>关键词共现分析</a>
+                        </li>
+                        <li>
+                            <a href={% url 'himalaya:base_cluster' %}>关键词聚类分析</a>
+                        </li>
+                         <li>
+                            <a href={% url 'himalaya:base_cocreator' %}>著者合作分析</a>
+                        </li>
+                    </ul>
+
+                    <a class="back-to-top" href="#top">返回顶部</a>
+
+                </div>
+            </div>
+            {#            右侧滑动条#}
+
+
+
+      </div>
+ </div>
+</div>
+{###################################################3#}
+    <!--导航条底部 start-->
+<div class="posit">
+{% include "himalaya/base/navButtomBase.html" %}
+</div>
+<!--导航条底部 end-->
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+
+
+{#    内容滑动菜单栏样式#}
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/bootstrap.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/docs.min.js' %}" charset="utf-8"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
+{#    内容滑动菜单栏样式#}
+
+</body>
+</html>
+

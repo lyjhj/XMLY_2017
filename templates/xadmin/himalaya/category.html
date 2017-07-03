@@ -1,0 +1,802 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en-us" >
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="robots" content="NONE,NOARCHIVE" />
+  <title>分类属性列表 | 喜马拉雅数据库</title>
+
+  <link href="/static/xadmin/vendor/bootstrap/css/bootstrap.css" type="text/css" media="screen" rel="stylesheet" />
+
+  <link rel="stylesheet" type="text/css" href="/static/xadmin/css/themes/bootstrap-xadmin.css" />
+
+  <link href="/static/xadmin/vendor/font-awesome/css/font-awesome.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.main.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.plugins.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.responsive.css" type="text/css" media="screen" rel="stylesheet" />
+  <link href="/static/xadmin/css/xadmin.form.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.plugins.css" type="text/css" media="screen" rel="stylesheet" />
+
+<style type="text/css">
+  .btn-toolbar{margin-top: 0;}
+  #content-block.full-content{margin-left: 0;}
+</style>
+
+  <script type="text/javascript" src="{% static 'xadmin/vendor/jquery/jquery.js' %}"></script>
+
+  <script type="text/javascript">
+    window.__admin_media_prefix__ = "/static/xadmin/";
+    window.__admin_path_prefix__ = "/xadmin/";
+    window.__admin_language_code__ = "";
+  </script>
+  <script type="text/javascript" src="/xadmin/jsi18n/"></script>
+  <link  href="{% static 'zTree_v3-master/css/zTreeStyle/zTreeStyle.css' %}" type="text/css" rel="stylesheet"/>
+  <link href="{% static 'artDialog4.1.7/skins/idialog.css' %}" type="text/css" rel="stylesheet"/>
+  <script type="text/javascript" src="/xadmin/jsi18n/"></script>
+<script src="{% static 'zTree_v3-master/js/jquery-1.4.4.min.js' %}"></script>
+	<script src="{% static 'zTree_v3-master/js/jquery.ztree.core.js' %}"></script>
+	<script src="{% static 'zTree_v3-master/js/jquery.ztree.excheck.js' %}"></script>
+    <script src="{% static 'zTree_v3-master/js/jquery.ztree.exedit.js' %}"></script>
+    <script src="{% static 'artDialog4.1.7/jquery.artDialog.js' %}"></script>
+     <script type="text/javascript" src="{% static 'django_ajax/js/jquery.ajax.min.js' %}"></script>
+<SCRIPT  type="text/javascript" >
+		<!--
+        setting = {
+            treeId:"treeDemo",
+            view: {
+                dblClickExpand: false,//双击节点时，是否自动展开父节点的标识
+                showLine: true,//是否显示节点之间的连线
+                fontCss: {'color': 'black', 'font-weight': 'bold'},//字体样式函数
+                selectedMulti: false, //设置是否允许同时选中多个节点
+                addHoverDom: addHoverDom,
+                removeHoverDom: removeHoverDom
+            },
+            edit: {
+                enable: true,
+                editNameSelectAll: true,
+                showRemoveBtn: showRemoveBtn,
+                showRenameBtn: showRenameBtn
+            },
+            data: {
+                key:{
+                    name :"attrName"
+                },
+                simpleData: {//简单数据模式
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pid",
+                    rootPId: null
+                }
+            },
+            callback: {
+                beforeDrag: beforeDrag,
+                beforeEditName: beforeEditName,
+                beforeRemove: beforeRemove,
+                beforeRename: beforeRename,
+                onRemove: onRemove,
+                onRename: onRename
+            }
+        };
+        var log, className = "dark";
+		function beforeDrag(treeId, treeNodes) {
+			return false;
+		}
+		function beforeEditName(treeId, treeNode) {
+			className = (className === "dark" ? "":"dark");
+			showLog("[ "+getTime()+" beforeEditName ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.attrName);
+			var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+			zTree.selectNode(treeNode);
+            setTimeout(function() {
+				if (confirm("进入节点 -- " + treeNode.attrName + " 的编辑状态吗？")) {
+					setTimeout(function() {
+						zTree.editName(treeNode);
+					}, 0);
+				}
+			}, 0);
+			return false;
+{#			return confirm("进入节点 -- " + treeNode.attrName + " 的编辑状态吗？");#}
+		}
+
+		function beforeRemove(treeId, treeNode) {
+            className = (className === "dark" ? "" : "dark");
+            showLog("[ " + getTime() + " beforeRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.attrName);
+            var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            zTree.selectNode(treeNode);
+            var str;
+            ajaxPost('/xadmin/himalaya/Category_data_upload/', {'opt': '4', 'id': treeNode.id},function (content) {
+                data = JSON.parse(content);
+                str = data["data"];
+                if (data["data"] == "-2") {
+                        alert('主题关联，无法删除！');
+                    }
+                else {
+                        flag = confirm("确认删除 节点 -- " + treeNode.attrName + " 吗？");
+                    if(flag==true)
+                    {
+                        ajaxPost('/xadmin/himalaya/Category_data_upload/',{'opt':'1', 'id':treeNode.id},function () {
+                location.reload([true])
+            });
+                    }
+                    }
+            });
+            return false
+        }
+
+		function onRemove(e, treeId, treeNode) {
+            ajaxPost('/xadmin/himalaya/Category_data_upload/',{'opt':'1', 'id':treeNode.id},function () {
+                location.reload([true])
+            });
+			showLog("[ "+getTime()+" onRemove ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.attrName);
+		}
+		function beforeRename(treeId, treeNode, newName, isCancel) {
+			className = (className === "dark" ? "":"dark");
+			showLog((isCancel ? "<span style='color:red'>":"") + "[ "+getTime()+" beforeRename ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.attrName + (isCancel ? "</span>":""));
+			if (newName.length == 0) {
+				alert("节点名称不能为空.");
+				var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+				setTimeout(function(){zTree.editName(treeNode)}, 10);
+				return false;
+			}
+			return true;
+		}
+		function onRename(e, treeId, treeNode, isCancel) {
+                ajaxPost('/xadmin/himalaya/Category_data_upload/',{'opt':'0' ,'name': treeNode.attrName , 'id':treeNode.id});
+			    showLog((isCancel ? "<span style='color:red'>":"") + "[ "+getTime()+" onRename ]&nbsp;&nbsp;&nbsp;&nbsp; " + treeNode.name + (isCancel ? "</span>":""));
+		}
+		function showRemoveBtn(treeId, treeNode) {
+			return treeNode;
+		}
+		function showRenameBtn(treeId, treeNode) {
+			return treeNode;
+		}
+		function showLog(str) {
+			if (!log) log = $("#log");
+			log.append("<li class='"+className+"'>"+str+"</li>");
+			if(log.children("li").length > 8) {
+				log.get(0).removeChild(log.children("li")[0]);
+			}
+		}
+		function getTime() {
+			var now= new Date(),
+			h=now.getHours(),
+			m=now.getMinutes(),
+			s=now.getSeconds(),
+			ms=now.getMilliseconds();
+			return (h+":"+m+":"+s+ " " +ms);
+		}
+
+		function addHoverDom(treeId, treeNode) {
+            var sObj = $("#" + treeNode.tId + "_span");
+            if (treeNode.editNameFlag || $("#addBtn_" + treeNode.tId).length > 0) return;
+            var addStr = "<span class='button add' id='addBtn_" + treeNode.tId + "' title='add node' onfocus='this.blur();'></span>";
+            sObj.after(addStr);
+            var btn = $("#addBtn_" + treeNode.tId);
+            if (btn) btn.bind("click", function () {
+                var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+                art.dialog({
+                    title:'新节点信息:',
+                    content: '节点名称：'+'<input id="attrname" />',
+                    button: [
+                        {
+                            name: '新建同级节点',
+                            callback: function () {
+                                var parentNode = treeNode.getParentNode();
+                                var parent = 0;
+                                if (parentNode != null) {
+                                    parent = parentNode.id;
+                                }
+                                else parent = 0;
+                                var values = $('#attrname').val();
+                                if (values.length == 0) {
+				                      art.dialog({
+                                            content: '节点名称不能为空！',
+                                            ok: function () {
+                                            }
+                                        });
+			                    }
+                                else
+                                {
+                                     ajaxPost("/xadmin/himalaya/Category_data_upload/", {'opt': '2', 'name': values, 'pname': parent}, function (content){
+                                     data = JSON.parse(content);
+                                   if(data["data"] == "-2")
+                                    {
+                                        art.dialog({
+                                            content: '节点已存在！',
+                                            ok: function () {
+                                            }
+                                        });
+                                    }
+                                    else {
+                                        zTree.addNodes(parentNode, {id: data["data"], parent: parent, attrName: values});
+                                    }
+                                });
+                                }
+                            },
+                            focus: true
+                        },
+                        {
+                            name: '新建子节点',
+                            callback: function () {
+                                var values = $('#attrname').val();
+                                if (values.length == 0) {
+				                 art.dialog({
+                                             content: '节点名称不能为空！',
+                                             ok: function () {}
+                                         });
+			                    }
+                                else
+                                {
+                                     ajaxPost('/xadmin/himalaya/Category_data_upload/', {'opt': '3', 'name': values, 'id': treeNode.id},function (content) {
+                                    data = JSON.parse(content);
+                                    if(data["data"]=="-2"){
+                                        art.dialog({
+                                             content: '节点已存在！',
+                                             ok: function () {}
+                                         });
+                                    }
+                                    else
+                                    {
+                                        zTree.addNodes(treeNode, {id: data["data"], parent: treeNode.id, attrName:values});
+                                    }
+                                });
+                                }
+                            },
+                            focus: true
+                        },
+                        {
+                            name: '取消'
+                        }
+                    ]
+                });
+                return false;
+            })
+        }
+
+        function removeHoverDom(treeId, treeNode) {
+			$("#addBtn_"+treeNode.tId).unbind().remove();
+		}
+
+            $(document).ready(function(){
+                    var data = {{ data | safe }};
+                    var treeNodes = JSON.parse(data);
+                     $.fn.zTree.init($("#treeDemo"), setting, treeNodes);
+
+            });
+        //-->
+	</SCRIPT>
+<style type="text/css">
+.ztree li span.button.add {margin-left:2px; margin-right: -1px; background-position:-144px 0; vertical-align:top; *vertical-align:middle}
+	</style>
+
+</head>
+<body class="change-list">
+
+  <!-- Header -->
+
+  <div id="top-nav" class="navbar navbar-xs navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">喜马拉雅数据库</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav pull-right">
+
+
+
+
+<li class="dropdown g-add">
+  <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+  <i class="fa fa-plus"></i> <span class="hide-sm">增加 <i class="caret"></i></span></a>
+  <ul id="g-add-menu" class="dropdown-menu" role="menu">
+
+        <li><a href="/xadmin/himalaya/view/add/"><i class="fa fa-plus"></i> 增加 全景</a></li>
+
+{#        <li><a href="/xadmin/xadmin/userwidget/add/"><i class="fa fa-plus"></i> 增加 用户小组件</a></li>#}
+
+        <li><a href="/xadmin/himalaya/spacescope/add/"><i class="fa fa-plus"></i> 增加 空间范围</a></li>
+
+        <li><a href="/xadmin/himalaya/subject/add/"><i class="fa fa-plus"></i> 增加 文献专题</a></li>
+
+        <li><a href="/xadmin/auth/user/add/"><i class="fa fa-plus"></i> 增加 用户</a></li>
+
+        <li><a href="/xadmin/himalaya/format/add/"><i class="fa fa-plus"></i> 增加 格式类型</a></li>
+
+{#        <li><a href="/xadmin/xadmin/bookmark/add/"><i class="fa fa-plus"></i> 增加 书签</a></li>#}
+
+        <li><a href="/xadmin/himalaya/language/add/"><i class="fa fa-plus"></i> 增加 语言</a></li>
+
+        <li><a href="/xadmin/himalaya/filebaseinfo/add/"><i class="fa fa-plus"></i> 增加 文献基础属性</a></li>
+
+        <li><a href="/xadmin/himalaya/fileextendinfo/add/"><i class="fa fa-plus"></i> 增加 专题文献库</a></li>
+
+{#        <li><a href="/xadmin/xadmin/usersettings/add/"><i class="fa fa-plus"></i> 增加 用户设置</a></li>#}
+
+        <li><a href="/xadmin/himalaya/subjecttheme/add/"><i class="fa fa-plus"></i> 增加 专题文献属性</a></li>
+
+        <li><a href="/xadmin/himalaya/category/add/"><i class="fa fa-plus"></i> 增加 分类属性</a></li>
+
+{#        <li><a href="/xadmin/auth/group/add/"><i class="fa fa-plus"></i> 增加 组</a></li>#}
+
+        <li><a href="/xadmin/himalaya/filetype/add/"><i class="fa fa-plus"></i> 增加 文件类型</a></li>
+
+{#        <li><a href="/xadmin/auth/permission/add/"><i class="fa fa-plus"></i> 增加 权限</a></li>#}
+
+        <li><a href="/xadmin/himalaya/discipline/add/"><i class="fa fa-plus"></i> 增加 学科类型</a></li>
+
+  </ul>
+</li>
+
+
+
+
+          <li class="dropdown">
+            <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+            <strong>欢迎， admin</strong> <span class="caret"></span></a>
+            <ul id="g-account-menu" class="dropdown-menu" role="menu">
+              <li><a href="/xadmin/account/password/"><i class="fa fa-key"></i> 更改密码</a></li>
+            </ul>
+          </li>
+
+        <li><a href="/xadmin/logout/"><i class="show-sm fa fa-sign-out"></i><span class="hide-sm">注销</span></a></li>
+      </ul>
+
+
+
+<form method="get" class="top-search-form navbar-form navbar-left" id="g-search">
+  <div class="input-group">
+    <input name="_q_" class="form-control" type="text">
+    <span class="input-group-btn">
+      <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-search"></i> 搜索 <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+
+          <li><a data-action="/xadmin/himalaya/view/"><i class="fa fa-search"></i> 搜索全景</a></li>
+
+          <li><a data-action="/xadmin/himalaya/spacescope/"><i class="fa fa-search"></i> 搜索空间范围</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subject/"><i class="fa fa-search"></i> 搜索文献专题</a></li>
+
+          <li><a data-action="/xadmin/auth/user/"><i class="fa fa-search"></i> 搜索用户</a></li>
+
+          <li><a data-action="/xadmin/himalaya/format/"><i class="fa fa-search"></i> 搜索格式类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/language/"><i class="fa fa-search"></i> 搜索语言</a></li>
+
+          <li><a data-action="/xadmin/himalaya/filebaseinfo/"><i class="fa fa-search"></i> 搜索文献基础属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/fileextendinfo/"><i class="fa fa-search"></i> 搜索专题文献库</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subjecttheme/"><i class="fa fa-search"></i> 搜索专题文献属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/category/"><i class="fa fa-search"></i> 搜索分类属性</a></li>
+
+{#          <li><a data-action="/xadmin/auth/group/"><i class="fa fa-search"></i> 搜索组</a></li>#}
+
+          <li><a data-action="/xadmin/himalaya/filetype/"><i class="fa fa-search"></i> 搜索文件类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/discipline/"><i class="fa fa-search"></i> 搜索学科类型</a></li>
+
+      </ul>
+    </span>
+  </div>
+</form>
+
+
+
+
+    </div>
+  </div>
+
+  <div id="body-content" class="clearfix row">
+    <div id="left-side" class="col-sm-1 col-md-2">
+
+
+
+<div class="panel-group hide-sm nav-sitemenu col-md-2" id="nav-accordion">
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-1">
+          <a href="/xadmin" class="section">
+          <i class="fa-fw fa fa-laptop"></i>
+
+          首页
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-1" class="list-group panel-collapse collapse in">
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-2">
+          <a href="/xadmin/auth/user/" class="section">
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          用户管理
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-2" class="list-group panel-collapse collapse">
+
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">6</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-3">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          基础数据管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-3" class="list-group panel-collapse collapse in">
+
+      <a href="/xadmin/himalaya/filetype/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/spacescope/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        空间范围设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/language/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        语言类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/discipline/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件学科设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/format/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件格式设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/category/" class="list-group-item active">
+        <i class="fa-fw fa fa-link"></i>
+        专题枚举数据</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">3</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-4">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          游历数据管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-4" class="list-group panel-collapse collapse in">
+
+      <a href="/xadmin/himalaya/booklist/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        书目列表管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/site/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        游历地点管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/route/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        游历线路管理</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">3</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-5">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          其他管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-5" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/himalaya/subject/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        专题项目管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/filebaseinfo/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文献资源管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/view/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        全景资源管理</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">2</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-6">
+
+          <i class="fa-fw fa fa-group"></i>
+
+          Auth
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-6" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/auth/group/" class="list-group-item">
+        <i class="fa-fw fa fa-group"></i>
+        组</span>
+      </a>
+
+      <a href="/xadmin/auth/permission/" class="list-group-item">
+        <i class="fa-fw fa fa-lock"></i>
+        权限</span>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+  <ul class="well nav nav-list nav-sitemenu show-sm">
+    <li class="app_menu">
+      <a href="/xadmin/"><i class="icon fa-fw fa fa-home"></i></a><hr/>
+    </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-laptop"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li class="active">
+            <a href="/xadmin/himalaya/filetype/">
+            <i class="fa-fw fa fa-link"></i>
+            文件类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/spacescope/">
+            <i class="fa-fw fa fa-link"></i>
+            空间范围设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/language/">
+            <i class="fa-fw fa fa-link"></i>
+            语言类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/discipline/">
+            <i class="fa-fw fa fa-link"></i>
+            文件学科设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/format/">
+            <i class="fa-fw fa fa-link"></i>
+            文件格式设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/category/">
+            <i class="fa-fw fa fa-link"></i>
+            专题枚举数据</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/booklist/">
+            <i class="fa-fw fa fa-link"></i>
+            书目列表管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/site/">
+            <i class="fa-fw fa fa-link"></i>
+            游历地点管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/route/">
+            <i class="fa-fw fa fa-link"></i>
+            游历线路管理</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/subject/">
+            <i class="fa-fw fa fa-link"></i>
+            专题项目管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/filebaseinfo/">
+            <i class="fa-fw fa fa-link"></i>
+            文献资源管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/view/">
+            <i class="fa-fw fa fa-link"></i>
+            全景资源管理</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-group"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/auth/group/">
+            <i class="fa-fw fa fa-group"></i>
+            组</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/auth/permission/">
+            <i class="fa-fw fa fa-lock"></i>
+            权限</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+
+  </ul>
+
+
+
+
+
+    </div>
+
+    <div id="content-block" class="col-sm-11 col-md-10" style="min-height: 600px">
+
+      <ul class="breadcrumb">
+
+
+      <li>
+        <a href="/xadmin/">首页</a>
+      </li>
+
+      <li>
+        分类属性
+
+      </li>
+
+
+      </ul>
+
+   <form id="changelist-form" action="" method="post"><input type='hidden' name='csrfmiddlewaretoken' value='9e62tUdBv7hTKpIQCIpqOFOYmSb8WpxY' />
+
+	    <div class=" col-sm-12 ">
+                <div class="zTreeDemoBackground left">
+                    <div class="panel panel-default col-sm-12 ">
+                         <h4>专题枚举数据是为各个专题设置枚举类型的扩展属性，设置的扩展属性可供不同专题共享。</h4>
+                        <h4><span class="zz">操作说明</span>：鼠标移动到树节点时，可以出现对树节点的编辑操作。点击枚举树上的节点可以修改删除树节点，也可以在树节点是上增加同级节点或者子节点。</h4>
+                        <div class="oneborder"></div>
+                        <ul id="treeDemo" class="ztree" ></ul>
+                </div>
+            </div>
+    </div>
+  </form>
+
+
+    </div>
+  </div>
+
+
+  <div id="footer">
+    <hr/>
+    <footer class="text-center">
+        <p>&copy; SiChuan University</p>
+    </footer>
+  </div>
+
+
+
+  <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.mouse.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.sortable.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/bootstrap/js/bootstrap.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.main.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.responsive.js"></script>
+  <script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.details.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.bookmark.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.filters.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.actions.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.page.list.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.page.form.js"></script>
+
+
+</body>
+</html>

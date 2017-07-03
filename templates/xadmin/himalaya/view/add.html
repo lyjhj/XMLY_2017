@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="zh-Hans" >
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="robots" content="NONE,NOARCHIVE" />
+  <title>增加 全景 | 喜马拉雅数据库</title>
+
+  <link href="/static/xadmin/vendor/bootstrap/css/bootstrap.css" type="text/css" media="screen" rel="stylesheet" />
+
+  <link rel="stylesheet" type="text/css" href="/static/xadmin/css/themes/bootstrap-xadmin.css" />
+
+  <link href="/static/xadmin/vendor/font-awesome/css/font-awesome.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.main.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.plugins.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.responsive.css" type="text/css" media="screen" rel="stylesheet" />
+  <link href="/static/xadmin/vendor/bootstrap-image-gallery/css/bootstrap-image-gallery.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/vendor/bootstrap-datepicker/css/datepicker.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.form.css" type="text/css" media="screen" rel="stylesheet" />
+
+  <script type="text/javascript" src="/static/xadmin/vendor/jquery/jquery.js"></script>
+
+  <script type="text/javascript">
+    window.__admin_media_prefix__ = "/static/xadmin/";
+    window.__admin_path_prefix__ = "/xadmin/";
+    window.__admin_language_code__ = "zh-Hans";
+  </script>
+  <script type="text/javascript" src="/xadmin/jsi18n/"></script>
+
+
+</head>
+<body class="himalaya-view change-form">
+
+  <!-- Header -->
+
+  <div id="top-nav" class="navbar navbar-xs navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">喜马拉雅数据库</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav pull-right">
+
+
+
+
+<li class="dropdown g-add">
+  <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+  <i class="fa fa-plus"></i> <span class="hide-sm">增加 <i class="caret"></i></span></a>
+  <ul id="g-add-menu" class="dropdown-menu" role="menu">
+
+        <li><a href="/xadmin/auth/user/add/"><i class="fa fa-plus"></i> 增加 用户</a></li>
+
+        <li><a href="/xadmin/himalaya/spacescope/add/"><i class="fa fa-plus"></i> 增加 空间范围</a></li>
+
+        <li><a href="/xadmin/himalaya/category/add/"><i class="fa fa-plus"></i> 增加 分类属性</a></li>
+
+        <li><a href="/xadmin/xadmin/bookmark/add/"><i class="fa fa-plus"></i> 增加 书签</a></li>
+
+        <li><a href="/xadmin/himalaya/fileextendinfo/add/"><i class="fa fa-plus"></i> 增加 专题文献库</a></li>
+
+        <li><a href="/xadmin/himalaya/language/add/"><i class="fa fa-plus"></i> 增加 语言</a></li>
+
+        <li><a href="/xadmin/himalaya/filetype/add/"><i class="fa fa-plus"></i> 增加 文件类型</a></li>
+
+        <li><a href="/xadmin/himalaya/subject/add/"><i class="fa fa-plus"></i> 增加 文献专题</a></li>
+
+        <li><a href="/xadmin/himalaya/discipline/add/"><i class="fa fa-plus"></i> 增加 学科类型</a></li>
+
+        <li><a href="/xadmin/himalaya/view/add/"><i class="fa fa-plus"></i> 增加 全景</a></li>
+
+        <li><a href="/xadmin/himalaya/format/add/"><i class="fa fa-plus"></i> 增加 格式类型</a></li>
+
+        <li><a href="/xadmin/himalaya/subjecttheme/add/"><i class="fa fa-plus"></i> 增加 专题文献属性</a></li>
+
+        <li><a href="/xadmin/himalaya/filebaseinfo/add/"><i class="fa fa-plus"></i> 增加 文献基础属性</a></li>
+
+  </ul>
+</li>
+
+
+
+
+          <li class="dropdown">
+            <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+            <strong>欢迎， xadmin</strong> <span class="caret"></span></a>
+            <ul id="g-account-menu" class="dropdown-menu" role="menu">
+              <li><a href="/xadmin/account/password/"><i class="fa fa-key"></i> 更改密码</a></li>
+            </ul>
+          </li>
+
+        <li><a href="/xadmin/logout/"><i class="show-sm fa fa-sign-out"></i><span class="hide-sm">注销</span></a></li>
+      </ul>
+
+
+
+<form method="get" class="top-search-form navbar-form navbar-left" id="g-search">
+  <div class="input-group">
+    <input name="_q_" class="form-control" type="text">
+    <span class="input-group-btn">
+      <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-search"></i> 搜索 <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+
+          <li><a data-action="/xadmin/auth/user/"><i class="fa fa-search"></i> 搜索用户</a></li>
+
+          <li><a data-action="/xadmin/himalaya/spacescope/"><i class="fa fa-search"></i> 搜索空间范围</a></li>
+
+          <li><a data-action="/xadmin/himalaya/category/"><i class="fa fa-search"></i> 搜索分类属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/fileextendinfo/"><i class="fa fa-search"></i> 搜索专题文献库</a></li>
+
+          <li><a data-action="/xadmin/himalaya/language/"><i class="fa fa-search"></i> 搜索语言</a></li>
+
+          <li><a data-action="/xadmin/himalaya/filetype/"><i class="fa fa-search"></i> 搜索文件类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subject/"><i class="fa fa-search"></i> 搜索文献专题</a></li>
+
+          <li><a data-action="/xadmin/himalaya/discipline/"><i class="fa fa-search"></i> 搜索学科类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/view/"><i class="fa fa-search"></i> 搜索全景</a></li>
+
+          <li><a data-action="/xadmin/himalaya/format/"><i class="fa fa-search"></i> 搜索格式类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subjecttheme/"><i class="fa fa-search"></i> 搜索专题文献属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/filebaseinfo/"><i class="fa fa-search"></i> 搜索文献基础属性</a></li>
+
+      </ul>
+    </span>
+  </div>
+</form>
+
+
+
+
+    </div>
+  </div>
+
+  <div id="body-content" class="clearfix row">
+    <div id="left-side" class="col-sm-1 col-md-2">
+
+
+
+
+
+
+<div class="panel-group hide-sm nav-sitemenu col-md-2" id="nav-accordion">
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-1">
+          <a href="/xadmin" class="section">
+          <i class="fa-fw fa fa-laptop"></i>
+
+          首页
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-1" class="list-group panel-collapse collapse in">
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-2">
+          <a href="/xadmin/auth/user/" class="section">
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          用户管理
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-2" class="list-group panel-collapse collapse">
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">6</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-3">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          基础数据管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-3" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/himalaya/filetype/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/spacescope/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        空间范围设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/language/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        语言类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/discipline/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件学科设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/format/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件格式设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/category/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        专题枚举数据</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">3</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-4">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          其他管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-4" class="list-group panel-collapse collapse in">
+
+      <a href="/xadmin/himalaya/subject/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        专题项目管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/filebaseinfo/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文献资源管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/view/" class="list-group-item active">
+        <i class="fa-fw fa fa-link"></i>
+        全景资源管理</span>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+  <ul class="well nav nav-list nav-sitemenu show-sm">
+    <li class="app_menu">
+      <a href="/xadmin/"><i class="icon fa-fw fa fa-home"></i></a><hr/>
+    </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-laptop"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/filetype/">
+            <i class="fa-fw fa fa-link"></i>
+            文件类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/spacescope/">
+            <i class="fa-fw fa fa-link"></i>
+            空间范围设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/language/">
+            <i class="fa-fw fa fa-link"></i>
+            语言类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/discipline/">
+            <i class="fa-fw fa fa-link"></i>
+            文件学科设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/format/">
+            <i class="fa-fw fa fa-link"></i>
+            文件格式设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/category/">
+            <i class="fa-fw fa fa-link"></i>
+            专题枚举数据</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/subject/">
+            <i class="fa-fw fa fa-link"></i>
+            专题项目管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/filebaseinfo/">
+            <i class="fa-fw fa fa-link"></i>
+            文献资源管理</span></a>
+          </li>
+
+          <li class="active">
+            <a href="/xadmin/himalaya/view/">
+            <i class="fa-fw fa fa-link"></i>
+            全景资源管理</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+
+  </ul>
+
+
+
+
+
+    </div>
+
+    <div id="content-block" class="col-sm-11 col-md-10" style="min-height: 600px">
+
+        <ul class="breadcrumb">
+
+
+            <li>
+                <a href="/xadmin/">首页</a>
+            </li>
+
+            <li>
+                <a href="/xadmin/himalaya/view/">全景</a>
+            </li>
+
+            <li>
+                增加 全景
+
+            </li>
+
+
+        </ul>
+
+
+        <div class="navbar content-navbar navbar-default navbar-xs" data-toggle="breakpoint"
+             data-class-xs="navbar content-navbar navbar-inverse navbar-xs"
+             data-class-sm="navbar content-navbar navbar-default navbar-xs">
+            <div class="navbar-header">
+
+
+                <button type="button" class="navbar-toggle pull-left" onclick="javascript: history.back();"><i
+                        class="fa fa-arrow-left"></i></button>
+
+
+                <a class="navbar-brand" data-toggle="collapse" data-target="#top-nav .navbar-collapse">
+
+                    增加 全景
+                </a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+
+                </ul>
+
+
+                <div class="navbar-btn pull-right hide-xs">
+
+
+                </div>
+            </div>
+        </div>
+
+
+        {% if form.errors %}
+            <ul>
+                {% for error in form.errors %}
+                    <li><strong>{{ error }}</strong></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <form class="exform" enctype="multipart/form-data" action="" method="post" id="view_form"><input type='hidden'
+                                                                                                         name='csrfmiddlewaretoken'
+                                                                                                         value='iOM352X7DKSmlSdLcOk1RRQSKWrSctaC'/>
+
+            <input type='hidden' id='_portal_key' value='himalaya_view_editform_portal'/>
+
+
+            <div id="gallery" data-toggle="modal-gallery" data-target="#modal-gallery">
+
+
+                <input type='hidden' name='csrfmiddlewaretoken' value='iOM352X7DKSmlSdLcOk1RRQSKWrSctaC'/>
+                <div
+                        class="form-container row clearfix">
+                    <div id="column-0"
+                         class="formColumn column form-column full col col-sm-12 form-horizontal" horizontal="True"
+                         span="12">
+                        <div class="panel panel-default fieldset unsort no_title" id="box-0">
+                            <div class="panel-heading"><i class='icon fa fa-chevron-up chevron'></i>
+                                <h3 class="panel-title"></h3></div>
+                            <div class="panel-body ">
+                                <div id="div_id_viewName" class="form-group"><label for="id_viewName"
+                                                                                    class="control-label  requiredField">
+                                    全景名称<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input class="text-field admintextinputwidget form-control"
+                                                                  id="id_viewName" maxlength="100"
+                                                                  name="{{ form.viewName.name }}"
+                                                                  type="text" required="required" value=""/></div>
+                                </div>
+                                <div id="div_id_createDate" class="form-group"><label for="id_createDate"
+                                                                                      class="control-label  requiredField">
+                                    拍摄日期<span class="asteriskField">*</span> </label>
+                                    <div class="controls " >
+                                        <div  class="input-group date bootstrap-datepicker"><span
+                                                class="input-group-addon"><i class="fa fa-calendar"></i></span><input style="display: inline"
+                                                class="date-field admindatewidget form-control" id="id_createDate"
+                                                name="createDate" size="10" type="text" required="required"/> <span
+                                                class="input-group-btn"><button
+                                                class="btn btn-default" type="button">今天</button></span></div><p id="hint_id_language" class="help-block">输入日期格式：2016/08/02</p>
+                                    </div>
+                                </div>
+                                <div id="div_id_viewIntro" class="form-group"><label for="id_viewIntro"
+                                                                                     class="control-label  requiredField">
+                                    简 介<span class="asteriskField">*</span> </label>
+                                    <div class="controls "> <textarea maxlength="100"
+                                                                      class="textarea-field admintextareawidget form-control"
+                                                                      cols="20"
+                                                                      id="id_viewIntro" name="viewIntro" rows="5"
+                                                                      required="required">
+</textarea>
+                                        <p id="hint_id_keywords" class="help-block">最多输入100字</p></div>
+                                </div>
+                                <div id="div_id_viewPic" class="form-group"><label for="id_viewPic"
+                                                                                   class="control-label  requiredField">
+                                    缩略图<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input onchange="isValidateImage(this)"
+                                                                  class="adminimagewidget" id="id_viewPic" label="缩略图"
+                                                                  name="viewPic" type="file" required="required"/><font color="red">图片类型必须是.gif,jpeg,jpg,png,bmp,jpe,tiff,ico中的一种</font></div>
+                                </div>
+                                <div id="div_id_viewAuth" class="form-group"><label for="id_viewAuth"
+                                                                                    class="control-label  requiredField">
+                                    拍 摄<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input class="text-field admintextinputwidget form-control"
+                                                                  id="id_viewAuth" maxlength="100" name="viewAuth"
+                                                                  type="text" required="required"/></div>
+                                </div>
+                                <div id="div_id_viewPlace" class="form-group"><label for="id_viewPlace"
+                                                                                     class="control-label  requiredField">
+                                    地 点<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input class="text-field admintextinputwidget form-control"
+                                                                  id="id_viewPlace" maxlength="100" name="viewPlace"
+                                                                  type="text" required="required"/></div>
+                                </div>
+                                <div id="div_id_viewEqu" class="form-group"><label for="id_viewEqu"
+                                                                                   class="control-label  requiredField">
+                                    制 作<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input class="text-field admintextinputwidget form-control"
+                                                                  id="id_viewEqu" maxlength="200" name="viewEqu"
+                                                                  type="text" required="required"/></div>
+                                </div>
+                                <div id="div_id_viewPath" class="form-group"><label for="id_viewPath"
+                                                                                    class="control-label  requiredField">
+                                    文件路径<span class="asteriskField">*</span> </label>
+                                    <div class="controls "><input onchange="isValidateFile(this);"
+                                                                  class="adminfilewidget" id="id_viewPath"
+                                                                  name="viewPath" type="file" required="required"/>
+                                        <p id="hint_id_keywords" class="help-block"><font color="red">请上传.zip文件</font></p></div>
+                                    <font color="red">{{ form.viewPath.errors }}</font>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="form-actions well well-sm clearfix">
+
+
+                    <div class="btn-group clearfix show-xs save-group col-xs-12">
+                        <button onclick="isValidateFile(form.viewPath)" type="submit"
+                                class="default btn btn-primary col-xs-10" name="_save"
+                                data-loading-text="保存中.."/>
+
+                        <i class="fa fa-save"></i> 保存</button>
+                        <button type="button" class="more btn btn-primary col-xs-2" data-toggle="collapse"
+                                data-target=".nav-collapse.more-btns"><i class="fa fa-ellipsis-vertical"></i></button>
+                    </div>
+                    <button onclick="isValidateFile(form.viewPath)" type="submit"
+                            class="default btn btn-primary hide-xs" name="_save"
+                            data-loading-text="保存中.."/>
+                    <i class="fa fa-save"></i> 保存</button>
+
+
+                </div>
+
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+
+<div id="footer">
+    <hr/>
+    <footer class="text-center">
+        <p>&copy; SiChuan University.</p>
+    </footer>
+</div>
+
+
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.mouse.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.sortable.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/bootstrap/js/bootstrap.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.main.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.responsive.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.effect.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.themes.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/load-image/load-image.js"></script>
+<script type="text/javascript"
+        src="/static/xadmin/vendor/bootstrap-image-gallery/js/bootstrap-image-gallery.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.portal.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.widget.datetime.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.page.form.js"></script>
+
+
+<!-- modal-gallery is the modal dialog used for the image gallery -->
+<div id="modal-gallery" class="modal modal-gallery fade" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-image"><h1 class="loader"><i class="fa-spinner fa-spin fa fa-large loader"></i></h1>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a class="btn btn-info modal-prev"><i class="fa fa-arrow-left"></i> <span>上一个</span></a>
+                <a class="btn btn-primary modal-next"><span>下一个</span> <i class="fa fa-arrow-right"></i></a>
+                <a class="btn btn-success modal-play modal-slideshow" data-slideshow="5000"><i class="fa fa-play"></i>
+                    <span>幻灯片</span></a>
+                <a class="btn btn-default modal-download" target="_blank"><i class="fa fa-download"></i> <span>下载</span></a>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+<script>
+    function isValidateFile(obj) {
+        var extend = obj.value.substring(obj.value.lastIndexOf(".") + 1);
+        if (extend == "") {
+        }
+        else {
+            if (!(extend == "zip")) {
+                obj.value = null
+                alert("请上传后缀名为zip的文件!");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function isValidateImage(obj) {
+        var extend = obj.value.substring(obj.value.lastIndexOf(".") + 1);
+        if (extend == "") {
+        }
+        else {
+            if (!/\.(gif|jpg|jpeg|png|bmp|jpe|tiff|ico|ICO|TIFF|JPE||BMP|GIF|JPG|PNG)$/.test(obj.value)) {
+                alert("图片类型必须是.gif,jpeg,jpg,png,bmp,jpe,tiff,ico中的一种");
+                obj.value = null;
+                return false;
+            }
+        }
+        return true;
+    }
+
+
+</script>
+</body>
+</html>

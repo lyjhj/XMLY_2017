@@ -1,0 +1,262 @@
+h4, h5, h6,
+h1, h2, h3 {margin-top: 0;}
+ul, ol {margin: 0;}
+p {margin: 0;}
+
+ /*--our-products--*/
+
+.products-gallery {
+	/*margin: 0em 0em 2em;*/
+}
+.products-gallery h2 {
+	text-align: center;
+	font-weight: 400;
+	/*font-size: 3em;*/
+	margin: 0px;
+	color: #6588CA;
+	padding: 0.5em 0em;
+	font-family:'Microsoft YaHei','SimHei', 'Quicksand', sans-serif;
+}
+ .caption {
+	text-align: center;
+	padding: 18px 17px 0px;
+	 height: 190px;
+}
+.arr:hover{
+  padding: 0;
+  transform: scale(1.02,1.02);
+  transition: 0.5s all ease-in-out;
+  cursor:pointer;
+}
+.arr {
+	padding: 0!important;
+	margin-bottom: 45px;
+}
+.bg {
+	background-color: rgba(103, 122, 138, 0.31);
+	margin: 0px 8px;
+	border-radius: 5px;
+	position: relative;
+}
+.arr img{
+	width:100%;
+	border-bottom: 6px solid #6588CA;
+	border-radius: 5px 5px 0px 0px;
+	height: 250px;
+}
+span.pst {
+	font-size: 18px;
+	position: absolute;
+	background-color: #6588CA;
+	border-radius: 50%;
+	padding: 19px 19px;
+	top: 48%;
+	left: 41%;
+	text-align: center;
+	color:black;
+}
+span.pst:hover {
+	-o-transform:rotatey(360deg);
+	-moz-transform:rotatey(360deg);
+	-webkit-transform:rotatey(360deg);
+	transform:rotatey(360deg);
+	transition:0.7s;
+	cursor: pointer;
+}
+.traits-technology {
+	padding-bottom: 5em;
+}
+.caption:hover {
+	transform:scale(1,1);
+	transition:0.5s all;
+}
+.caption h3{
+
+	font-weight: bold;
+	 font-size: 14px;
+	padding-bottom: 5px;
+	line-height: 23px;
+}
+.caption p{
+	line-height: 1.5em;
+	font-size: 12px;
+	padding-bottom: 0px;
+	text-align: left;
+	margin-bottom: 0px;
+	color: #676262
+}
+.caption.p.buttonlocation{
+	text-align: center;
+	margin-bottom: 5px;
+}
+.tt {
+	padding: 0;
+}
+ul.traits-text {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+ul.traits-text li h3{
+	font-size: 5em;
+	margin: 0px 0px 25px;
+	font-family: 'Quicksand', sans-serif;
+}
+ul.traits-text li p {
+	font-size: 1.5em;
+	font-weight: 300;
+	margin-bottom: 20px;
+}
+.tt ol{
+	margin:	0;
+	padding: 0px 0px 15px;
+	color: #6588CA;
+}
+.tt ol li a{
+	font-size:1em;
+	color: #6588CA;
+	text-decoration:none;
+	line-height: 1.8em;
+}
+.tt ol li a:hover{
+	color:#196ECF;
+}
+span a.btn.btn-danger.bt {
+	padding: 10px 0px;
+	width: 15%;
+	margin: 0;
+}
+.bgtl {
+	font-size: 100px;
+	margin: 5px;
+	padding: 40px 40px;
+	color: #fff;
+	border-radius:3px;
+	cursor: pointer;
+}
+.bgtl:hover {
+	-moz-transform: scale(1.03);
+	-o-transform: scale(1.03);
+	-webkit-transform: scale(1.03);
+	transform: scale(1.03);
+	transition: 0.5s ease-in-out;
+}
+.glyphicon-leaf.bgtl{
+	background-color: #80A610;
+}
+.glyphicon-grain.bgtl{
+	background-color: #CFBE19;
+}
+.glyphicon-fire.bgtl{
+	background-color: #6588CA;
+}
+.glyphicon-camera.bgtl{
+	background-color: #196ECF;
+}
+/*--our-products--*/
+.carousel-inner>.item>a>img, .carousel-inner>.item>img, .img-responsive, .thumbnail a>img, .thumbnail>img {
+		min-height: 160px;
+	}
+.img-responsive, .thumbnail a>img, .thumbnail>img {
+		min-height: 30px;
+	}
+@media screen and (max-width:768px){
+	span.pst {
+		top: 48%;
+		left: 42%;
+		color:black;
+	}
+}
+@media screen and (max-width:640px){
+	span.pst {
+		top: 48%;
+		left: 39%;
+	}
+}
+@media screen and (max-width:384px){
+	span.pst {
+		top: 48%;
+		left: 42%;
+		color:black;
+	}
+}
+@media screen and (max-width:1024px){
+
+	span.pst {
+		top: 48%;
+		left: 41%;
+		color:black;
+	}
+	ul.traits-text li h3 {
+		font-size: 4em;
+	}
+	ul.traits-text li p {
+		font-size: 1.2em;
+	}
+	.bgtl {
+		font-size: 66px;
+	}
+	span a.btn.btn-danger.bt {
+		padding: 8px 0px;
+	}
+	.caption p {
+		font-size: 1em;
+	}
+	.few-text .flt {
+		width: 61%;
+	}
+	.few-text {
+		padding-bottom: 43px;
+	}
+	.caption {
+		text-align: center;
+		padding: 30px 17px 0px;
+	}
+}
+@media screen and (min-width:1680px){
+
+	span.pst {
+		top: 43%;
+		left: 41%;
+		color:black;
+	}
+	ul.traits-text li h3 {
+		font-size: 4em;
+	}
+	ul.traits-text li p {
+		font-size: 1.2em;
+	}
+	.bgtl {
+		font-size: 66px;
+	}
+	span a.btn.btn-danger.bt {
+		padding: 8px 0px;
+	}
+	.caption p {
+		font-size: 1em;
+	}
+	.few-text .flt {
+		width: 61%;
+	}
+	.few-text {
+		padding-bottom: 43px;
+	}
+	.caption {
+		text-align: center;
+		padding: 30px 17px 0px;
+		height: 260px;
+	}
+}
+
+.titlestyle{
+	width:100%;
+	display:block;
+	line-height:1.5em;
+	overflow:visible;
+	font-size:32px;
+	text-shadow:#f3f3f3 1px 1px 0px, #b2b2b2 1px 2px 0
+}
+.font1{
+	font-weight: bold;
+}
+

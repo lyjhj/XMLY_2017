@@ -1,0 +1,2 @@
+{{ object.sitenameCH }}
+{{ object.sitenameEN }}

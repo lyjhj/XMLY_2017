@@ -1,0 +1,92 @@
+{% load staticfiles %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.css' %}" />
+        <link rel="stylesheet" href="{% static 'font-awesome-4.5.0/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'gis_style/css/L.Control.Locate.min.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'gis_style/css/qgis2web.css' %}">
+        <link rel="stylesheet" href="{% static 'gis_style/css/Control.OSMGeocoder.css' %}" />
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.draw.css' %}" />
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.measurecontrol.css' %}" />
+
+        <script src="{% static 'gis_style/js/qgis2web_expressions.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.js' %}"></script>
+        <script src="{% static 'gis_style/js/L.Control.Locate.min.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet-heat.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet-hash.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.rotatedMarker.js' %}"></script>
+        <script src="{% static 'gis_style/js/OSMBuildings-Leaflet.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet-tilelayer-wmts.js' %}"></script>
+        <script src="{% static 'gis_style/js/Autolinker.min.js' %}"></script>
+        <script src="{% static 'gis_style/js/Control.OSMGeocoder.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.draw.js' %}"></script>
+        {#        标注传递经纬度#}
+        <script src="{% static 'gis_style/js/Leaflet.LocationShare.js' %}"></script>
+
+          <!-- Load Esri Leaflet from CDN -->
+      <script src="https://unpkg.com/esri-leaflet@2.0.7"></script>
+
+        <style>
+        #panel{
+            overflow: hidden;
+            width: 1200px; height: 700px; position: relative; background-color: #F8F8F8; margin: 20px auto;
+        }
+        #map{
+            width: 100%;
+            height: 100%;
+        }
+        .Q-Tooltip{
+            font-size: 9pt;
+        }
+       </style>
+
+        <title>后台地图 - 选取地点</title>
+
+    </head>
+
+    <body>
+
+        <div id="panel">
+            <div id="map"></div>
+        </div>
+
+
+        <script>
+
+        var map = L.map('map', {
+            measureControl:true,
+            zoomControl:true, maxZoom:20, minZoom:1,
+            center: [30.6757, 104.0625],
+            zoom: 5
+        });
+
+        var hash = new L.Hash(map);
+
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+
+        {#地图加角标引用标志#}
+        var basemap0 = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 20
+        });
+        basemap0.addTo(map);
+
+        {#地图search功能#}
+        var osmGeocoder = new L.Control.OSMGeocoder({
+            collapsed: false,
+            position: 'topright',
+            text: 'Search'
+        });
+        osmGeocoder.addTo(map);
+
+        </script>
+
+    </body>
+
+</html>

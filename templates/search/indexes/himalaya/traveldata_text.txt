@@ -1,0 +1,15 @@
+{{ object.RouteName }}
+
+{{ object.toa }}
+{{ object.tol }}
+{{ object.transportation }}
+{{ object.nation }}
+{{ object.police }}
+{{ object.economy }}
+{{ object.agriculture }}
+{{ object.custom }}
+{{ object.religion }}
+{{ object.history }}
+{{ object.education }}
+{{ object.geography }}
+{{ object.other }}

@@ -1,0 +1,833 @@
+{% load staticfiles %}
+{% load highlight %}
+{% load pagination_tags %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>搜索结果 - 喜马拉雅多媒体数据</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+
+    <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}"
+          type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <!--<![endif]-->
+
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+</head>
+<body class="lang_zh search-results " >
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+
+<input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+<div class="sidebar" id="search-filters" role="menu">
+
+    <h2 class="sr-only">专栏选项</h2>
+
+{#zsy 修改1-16#}
+    <section>
+        {% if sqs.fields.fileType.0.1 %}
+            <h4> 文件类型</h4>
+            <ul class="list-unstyled">
+                {% for file_type in sqs.fields.fileType %}
+                    {% if file_type.1 %}
+                        <li role="menuitem">
+                            <form id="{{ file_type.0 }}" action="/subject/" method="get">
+                             <input type="hidden" name="page" value="1">
+                             <input type="hidden" name="addmark" value="{{ file_type.0 }}">
+                                <input type="hidden" name="addtypes" value="fileType">
+                             <a href="#" title="{{ file_type.0 }}" onclick="document.getElementById('{{ file_type.0 }}').submit();return false">
+                                <span class="badge">{{ file_type.1 }}</span>
+                                <span class="title">{{ file_type.0 }}</span>
+                             </a>
+                            </form>
+                        </li>
+
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        {% if sqs.fields.language.0.1 %}
+            <h4>语言</h4>
+            <ul class="list-unstyled">
+                {% for lan in sqs.fields.language %}
+                    {% if lan.1 %}
+                        <li role="menuitem">
+                            <form id="{{ lan.0 }}" action="/subject/" method="get">
+                             <input type="hidden" name="page" value="1">
+                             <input type="hidden" name="addmark" value="{{ lan.0 }}">
+                                <input type="hidden" name="addtypes" value="language">
+                             <a href="#" title="{{ lan.0 }}" onclick="document.getElementById('{{ lan.0 }}').submit();return false">
+                                <span class="badge">{{ lan.1 }}</span>
+                                <span class="title">{{ lan.0 }}</span>
+                            </a>
+                            </form>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+
+    <section>
+        {% if sqs.fields.discipline.0.1 %}
+            <h4>文件学科</h4>
+            <ul class="list-unstyled">
+                {% for dis in sqs.fields.discipline %}
+                    {% if dis.1 %}
+                        <li role="menuitem">
+                            <form id="{{ dis.0  }}" action="/subject/" method="get">
+                                 <input type="hidden" name="page" value="1">
+                                 <input type="hidden" name="addmark" value="{{ dis.0 }}">
+                                 <input type="hidden" name="addtypes" value="discipline">
+                                 <a href="#" title="{{ dis.0 }}" onclick="document.getElementById('{{ dis.0  }}').submit();return false">
+                                    <span class="badge">{{ dis.1 }}</span>
+                                    <span class="title">{{ dis.0 }}</span>
+                                </a>
+                            </form>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+
+    <section>
+        {% if sqs.fields.spatial.0.1 %}
+            <h4>文件空间范围</h4>
+            <ul class="list-unstyled">
+                {% for spa in sqs.fields.spatial %}
+                    {% if spa.1 %}
+                        <li role="menuitem">
+                             <form id="{{ spa.0 }}" action="/subject/" method="get">
+                                 <input type="hidden" name="page" value="1">
+                                 <input type="hidden" name="addmark" value="{{ spa.0 }}">
+                                 <input type="hidden" name="addtypes" value="spatial">
+                                 <a href="#" title="{{ spa.0 }}" onclick="document.getElementById('{{ spa.0 }}').submit();return false">
+                                <span class="badge">{{ spa.1 }}</span>
+                                <span class="title">{{ spa.0 }}</span>
+                                </a>
+                             </form>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    <section>
+        {% if sqs.fields.fileFormat.0.1 %}
+            <h4>格式</h4>
+            <ul class="list-unstyled">
+                {% for file_f in sqs.fields.fileFormat %}
+                    {% if file_f.1 %}
+                        <li role="menuitem">
+                             <form id="{{ file_f.0 }}" action="/subject/" method="get">
+                                 <input type="hidden" name="page" value="1">
+                                 <input type="hidden" name="addmark" value="{{ file_f.0 }}">
+                                  <input type="hidden" name="addtypes" value="fileFormat">
+                                 <a href="#" title="{{ file_f.0 }}" onclick="document.getElementById('{{ file_f.0 }}').submit();return true">
+                                 <span class="badge">{{ file_f.1 }}</span>
+                                 <span class="title" >{{ file_f.0 }}</span>
+                                 </a>
+                             </form>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+{#zsy 修改1-16#}
+
+    <section>
+        <h4 style="text-align: center">扩展查询</h4>
+    </section>
+{% load temp_extras %}
+{% for key,value in sqs.fields.items %}
+{#    {% if ret.1 %}#}
+{#    {{ k }}{{ ret }}#}
+    {% if value|length != 0 and key != 'fileFormat' and key != 'spatial' and key != 'pubDate' and key != 'discipline' and key != 'language' and key != 'fileType'%}
+    <section>
+    <h4>{{ key|transform }}</h4>
+        <ul class="list-unstyled">
+        {% for file_f in value %}
+                {% if file_f.1 %}
+                        <li role="menuitem">
+                        <form id="{{ file_f.0 }}" action="/subject/" method="get">
+                             <input type="hidden" name="page" value="1">
+                             <input type="hidden" name="addmark" value="{{ file_f.0|split:'/' }}">
+                             <input type="hidden" name="addtypes" value="no">
+                             <input type="hidden" name="{{ key }}" value="{{file_f.0}}">
+
+
+{#                            <a href="{{ request.get_full_path }}&{{ key }}={{ file_f.0 |urlencode }}&page=1"#}
+{#                               title="{{ file_f.0 }}">#}
+                                <a href="#" title="{{ file_f.0|split:'/' }}" onclick="document.getElementById('{{ file_f.0 }}').submit();return true">
+                                    <span class="badge">{{ file_f.1 }}</span>
+                                    <span class="titlezz">{{ file_f.0|split:'/' }}</span>
+                            </a>
+                        </form>
+                        </li>
+                    {% endif %}
+        {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+{% endfor %}
+
+
+</div>
+
+<div id="sidebar-toggle-button">
+    <label for="sidebar-toggle-checkbox" class="btn btn-block">
+        <img src="{% static 'img/menu.png' %}" alt=""/>
+    </label>
+</div>
+
+
+<div id="page-main" class="container-fluid" style="min-height: 10px">
+    <div class="row">
+    <form action="{% url 'himalaya:search-sub' %}" method="get">
+        <div class="col-sm-8 col-sm-offset-3">
+            {#    <form id="site-search" class="form-horizontal" action="/">#}
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="form-group">
+                            <div class="col-sm-4" hidden="hidden">
+                                <input type="search" class="form-control" id="inp_author" name="subjectName"
+                                       placeholder="请输入作者" value="{{ request.GET.subjectName }}">
+                            </div>
+                            <div class="input-group">
+                                <input type="search" class="form-control" lang="zh" name="q" aria-label="搜索" value="{{ query }}"
+                                       placeholder="搜索喜马拉雅多媒体数据" data-typeahead-url=".js"
+                                       data-suggest-url="/zh/search/suggest/">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" value="go">
+                                <span class="glyphicon glyphicon-search"></span>
+                                搜索
+                            </button>
+                        </span>
+                            </div>
+                    </div>
+                </div>
+
+                <!--高级查询功能 start-->
+                <div class="col-sm-3">
+                    <div class="form-group text-right">
+                        <button id="search-options-toggle" type="button" class="btn btn-block btn-default"
+                                data-toggle="collapse" data-target="#search-options">
+                            <span class="fa fa-cog"></span>
+                            <span class="title">专题高级查询</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--高级查询收缩栏功能 start-->
+            <div id="search-options" class="row collapse">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">参考选项</div>
+                            <div class="panel-body">
+                                <div class="text-center center-block">
+
+                                        <div class="form-group">
+                                            <label for="inp_title" class="col-sm-2 control-label">标题</label>
+                                            <div class="col-sm-10">
+                                                <input type="search" class="form-control" id="inp_title" name="title"
+                                                       placeholder="请输入标题">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group" id="search-inp">
+
+                                            <label for="inp_start_date" class="col-sm-2 control-label">起始年份</label>
+                                            <div class="col-sm-4">
+                                                <input onchange="isValidatetime(this)"
+                                                        onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                   onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+                                                        type="search" class="form-control" id="inp_start_date"
+                                                       placeholder="请输入年份如：2015" name="inp_start_date" type="number">
+                                            </div>
+
+                                            <label for="inp_end_date" class="col-sm-2 control-label">结束年份</label>
+                                            <div class="col-sm-4" style="display: inline">
+                                                <input onchange="isValidatetime(this)"
+                                                        onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                   onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"
+                                                        type="search" class="form-control" id="inp_end_date"
+                                                       name="inp_end_date"
+                                                       placeholder="请输入年份如：2016" type="number">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="inp_keywords" class="col-sm-2 control-label">关键字</label>
+                                            <div class="col-sm-4">
+                                                <input type="search" class="form-control" id="inp_keywords"
+                                                       placeholder="请输入关键字" name="keywords">
+                                            </div>
+
+                                            <label for="inp_author" class="col-sm-2 control-label">作者</label>
+                                            <div class="col-sm-4">
+                                                <input type="search" class="form-control" id="inp_author" name="creator"
+                                                       placeholder="请输入作者">
+                                            </div>
+                                        </div>
+
+
+                                        <div class="form-group">
+                                            <label for="inp_lang" class="col-sm-2 control-label">语言类型</label>
+                                            <div class="col-sm-4">
+                                                <input type="text" class="form-control" id="inp_lang" name="language"
+                                                       placeholder="请输入语言类型">
+                                            </div>
+
+                                            <label for="inp_file_type" class="col-sm-2 control-label">文件类型</label>
+                                            <div class="col-sm-4">
+                                                <input type="text" class="form-control" id="inp_file_type"
+                                                       name="fileType"
+                                                       placeholder="请输入文件类型">
+                                            </div>
+                                        </div>
+
+					 <div class="form-group">
+                                            <h3  class="col-sm-12 control-label">专题扩展属性</h3>
+                                        </div>
+
+                                        {% for sub_attr in sub_theme %}
+                                            {% if sub_attr %}
+                                                <div class="form-group">
+                                                    <label class="col-sm-4 control-label">{{ sub_attr }}</label>
+                                                    <div class="col-sm-6" style="display: inline">
+                                                        <input type='text' class="form-control" name="{{ sub_attr }}"
+                                                               placeholder="请输入扩展属性值">
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+
+                                        <div class="col-sm-4" hidden="hidden">
+                                            <input type="search" class="form-control" id="inp_author" name="subjectName"
+                                                   placeholder="请输入作者" value="{{ request.GET.subjectName }}">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="col-sm-offset-2 col-sm-8">
+                                                <button type="submit" class="btn btn-default" value="q" id="search-btn">
+                                                    高级搜索
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--高级查询收缩栏功能 end-->
+            <!--高级查询功能 end-->
+    </form>
+        </div>
+    </div>
+
+
+<!--筛选方式 start zsy 修改1-16-->
+     {% if choiceitems %}
+            <div class="row active-filters">
+                <div class="col-sm-8 col-sm-offset-1">
+                    <b>现有筛选方式</b>
+                    <ul class="list-unstyled list-inline">
+
+                        {% for item in choiceitems %}
+                             <li>
+                                 <a href="/subject/?deletemark={{ item.1 }}" class="btn btn-xs btn-default btn-warning remove" >
+                                     <span class="title">{{ item.1}}</span>
+                                     <span class="fa fa-lg fa-trash-o"></span>
+                                 </a>
+                             </li>
+                        {% endfor %}
+
+                              <li>
+                                  <a id="reset-facets" class="btn btn-xs btn-default btn-danger remove" href="/subject/?q=&subjectName={{ request.GET.subjectName }}">
+                                      清除所有筛选方式
+                                  </a>
+                              </li>
+                    </ul>
+                </div>
+            </div>
+    {% endif %}
+<!--筛选方式 end-->
+
+
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-6">
+                <span id="result-label">
+                    <span class="zz">{{ subject_name }}</span>文献库检索有 {{ num }}  篇文献
+                </span>
+        </div>
+
+      <div id="view-mode-toggle">
+            <div class="wel-grids">
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block">
+                        <figure class="icon active">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+                            <input type="hidden" name="view-mode" value="list">
+                        </figure>
+                        <p>列表展示</p>
+                    </label>
+                </div>
+
+
+                <div class="col-sm-1 wel-grid text-center">
+
+                    <a href="/subject_statisticInfo/?q={{ query }}&subjectName={{ request.GET.subjectName }}">
+                        <label  class="btn btn-block">
+
+                        <figure class="icon ">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="gallery">#}
+                        </figure>
+                        <p>知识视图</p>
+                        </label>
+
+                    </a>
+
+                </div>
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block" hidden>
+                        <figure class="icon">
+                            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+                            <input type="hidden" name="view-mode" value="map">
+                        </figure>
+                        <p>文献地图</p></label>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+
+    <!--搜索排序调用js传值 11111111 start-->
+        <div class="col-sm-offset-2 col-sm-6">
+            <div class="control-wrap">
+
+                <form name="rankForm" action="/subject/" method="get">
+                <select id="rankid" type="submit" onchange="rankChange(this.options[this.options.selectedIndex].value)">
+
+                    {% if ordertest %}
+                          <option  selected="selected" name="rank" value="1">按相关性</option>
+                          <option  name="rank" value="2">按时间降序</option>
+                    {% else %}
+                         <option   name="rank" value="1">按相关性</option>
+                         <option  selected="selected" name="rank" value="2">按时间降序</option>
+                    {% endif %}
+
+                </select>
+                </form>
+
+            </div>
+        </div>
+        <!--搜索排序 end-->
+
+        <div class="aborder"></div>
+        <div class="results list" itemprop="mainContentOfPage">
+            <!--分页代码-->
+            {% autopaginate posts 5 %}
+            {% for result in posts %}
+                {{ result.id }}
+                <div id="{{ result.0.object.id }}" class="result" data-wdl-id="{{ result.0.object.id }}">
+                    <div class="thumbnail-col">
+                        <a href="{% url 'himalaya:detail' result.0.object.id %}" target="_blank">
+                            <img class="center-block thumbnail" src="{{ result.0.object.picture.url }}" alt=""/>
+                        </a>
+                        {#                                    <p>{{ result.object.image.url }}</p>#}
+                    </div>
+
+                    <div class="body" style="min-height: 180px">
+                        {#                                    <meta itemprop="url" content="/zh/item/a60014/">#}
+                        <a class="title" href="{% url 'himalaya:detail' result.0.object.id %}" target="_blank">
+                            <strong>{% highlight result.0.object.title with query html_tag 'mark' %}</strong>
+                        </a>
+                        <div class="description">
+                            {% if result.0.object.description %}
+                            <h5>摘要 &nbsp;&nbsp;
+                                <small class="zhaiyao">{% highlight result.0.object.description with query html_tag 'mark' %}</small>
+                            </h5>
+                            {% endif %}
+
+                                        {% if result.2 %}
+                                        <h5>关键字&nbsp;&nbsp;
+
+                                            {% for keywords in result.2 %}
+                                                <a href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&keywords={{ keywords }}">
+                                                    <small>{% highlight keywords with query html_tag 'mark' %}</small>
+                                                </a>
+
+                                            {% endfor %}
+
+
+                                            &nbsp;&nbsp; {% endif %}
+                                        {% if result.0.object.creator %}
+                                            作者 <a
+                                                href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&creator={{ result.0.object.creator|urlencode }}">
+                                            <small>{% highlight result.0.object.creator with query html_tag 'mark' %}       </small>
+                                        </a>&nbsp;&nbsp;</h5>
+                                        {% endif %}
+
+
+                            <table class="tablestyle">
+                                <tr>
+                                    <td>
+                                     {% if result.0.object.spatial.all %}
+                                        <h5>地区
+                                            {% for spa in result.0.object.spatial.all %}
+                                                <a href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&spatial={{ spa|urlencode }}">
+                                                <small>
+                                                    {{ spa }}
+
+                                                </small>
+                                            {% endfor %}
+                                            </a>&nbsp;&nbsp;</h5>
+                                    {% endif %}
+                                    </td>
+                                    {% if result.0.object.pub_date %}
+                                        <td>
+                                            <h5>发表时间 <a
+                                                    href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&inp_start_date={{ result.0.object.pub_date|urlencode }}&inp_end_date={{ result.0.object.pub_date|urlencode }}">
+                                                <small>{{ result.0.object.pub_date }} </small>
+                                            </a>&nbsp;&nbsp;</h5>
+                                        </td>
+                                    {% endif %}
+
+                                    <td>
+                                        {% if result.0.object.fileFormat.all %}
+                                        <h5>文件格式
+                                            {% for file_type in result.0.object.fileFormat.all %}
+                                                <a href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&fileFormat={{ file_type |urlencode }}">
+                                                <small>
+                                                    {#                                                {% highlight file_type with query %}#}
+                                                    {{ file_type }}
+
+                                                </small>
+                                            {% endfor %}
+                                            </a>&nbsp;&nbsp;
+                                        </h5>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                     {% if result.0.object.discipline.all %}
+                                        <h5>文件学科
+                                            {% for dis in result.0.object.discipline.all %}
+                                                <a
+                                                        href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&discipline={{ dis|urlencode }}">
+                                                <small>{{ dis }} </small>
+                                            {% endfor %}
+                                            </a>&nbsp;&nbsp;</h5>
+                                    {% endif %}
+                                    </td>
+                                    <td>
+                                    {% if result.0.object.language.all %}
+                                        <h5>语言
+                                            {% for lan in result.0.object.language.all %}
+                                                <a
+                                                        href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&language={{ lan |urlencode }}">
+                                                <small>{{ lan }} </small>
+                                            {% endfor %}
+                                            </a>&nbsp;&nbsp;</h5>
+                                    {% endif %}
+                                    </td>
+                                    {% if result.0.object.contributor %}
+                                        <td>
+                                            <h5>译者/校订者
+                                                <a href="/subject/?q=go&subjectName={{ request.GET.subjectName }}&contributor={{ result.0.object.contributor |urlencode }}">
+                                                    <small>{{ result.0.object.contributor }} </small>
+                                                </a>&nbsp;&nbsp;</h5>
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="oneborder"></div>
+                </div>
+            {% endfor %}
+            <!--分页代码-->
+            {% paginate %}
+
+
+        </div>
+    </div>
+
+
+<!--导航条底部 start-->
+
+<div class="posit">
+{% include "himalaya/base/navButtomBase.html" %}
+</div>
+
+<!--导航条底部 end-->
+
+
+<!--[if ! lte IE 6]><!-->
+
+{#<script>#}
+{#    var STATIC_URL = '/static/',#}
+{#            MEDIA_URL = 'https://content.wdl.org/',#}
+{#            LANGUAGE_CODE = 'zh',#}
+{#            RAVEN_PUBLIC_DSN = 'https://5099c16f0f4442e1a0afcc131fccca91@sentry.ops.wdl.org/8';#}
+{#</script>#}
+{##}
+{#<script>#}
+{##}
+{#    (function (globals) {#}
+{##}
+{#        var django = globals.django || (globals.django = {});#}
+{##}
+{##}
+{#        django.pluralidx = function (n) {#}
+{#            var v = 0;#}
+{#            if (typeof(v) == 'boolean') {#}
+{#                return v ? 1 : 0;#}
+{#            } else {#}
+{#                return v;#}
+{#            }#}
+{#        };#}
+{##}
+{##}
+{#        /* gettext library */#}
+{##}
+{#        django.catalog = {#}
+{#            "%s item without map coordinates is not visible": [#}
+{#                "%s\u6761\u76ee\u6ca1\u6709\u5730\u56fe\u5750\u6807\uff0c\u65e0\u6cd5\u68c0\u89c6"#}
+{#            ],#}
+{#            "BCE": "\u516c\u5143\u524d",#}
+{#            "CE": "\u516c\u5143",#}
+{#            "Center map on your current location": "\u5c06\u60a8\u7684\u76ee\u524d\u4f4d\u7f6e\u653e\u5728\u5730\u56fe\u4e2d\u592e",#}
+{#            "Full Screen": "\u5168\u5c4f",#}
+{#            "Go Home": "\u8fd4\u56de\u9996\u9875",#}
+{#            "Grid": "\u7f51\u683c",#}
+{#            "Help": "\u5e2e\u52a9",#}
+{#            "Items": "\u6761\u76ee",#}
+{#            "Nearby Items": "\u9644\u8fd1\u6761\u76ee",#}
+{#            "Next": "\u4e0b\u4e00",#}
+{#            "Places": "\u5730\u65b9",#}
+{#            "Points": "\u70b9",#}
+{#            "Previous": "\u4e0a\u4e00",#}
+{#            "Read": "\u9605\u8bfb",#}
+{#            "Rotate Left": "\u5411\u5de6\u65cb\u8f6c",#}
+{#            "Rotate Right": "\u5411\u53f3\u65cb\u8f6c",#}
+{#            "Search": "\u641c\u7d22",#}
+{#            "Search inside this item in %(language)s:": "\u4ee5%(language)s\u641c\u7d22\u672c\u6761\u76ee\u5185\u5bb9",#}
+{#            "View All": "\u68c0\u89c6\u5168\u90e8",#}
+{#            "Zoom": "\u53d8\u7126",#}
+{#            "Zoom In": "\u653e\u5927",#}
+{#            "Zoom Out": "\u7f29\u5c0f",#}
+{#            "Zoom to fit all visible points": "\u7f29\u653e\u4ee5\u653e\u5165\u6240\u6709\u53ef\u89c1\u7684\u70b9"#}
+{#        };#}
+{##}
+{#        django.gettext = function (msgid) {#}
+{#            var value = django.catalog[msgid];#}
+{#            if (typeof(value) == 'undefined') {#}
+{#                return msgid;#}
+{#            } else {#}
+{#                return (typeof(value) == 'string') ? value : value[0];#}
+{#            }#}
+{#        };#}
+{##}
+{#        django.ngettext = function (singular, plural, count) {#}
+{#            var value = django.catalog[singular];#}
+{#            if (typeof(value) == 'undefined') {#}
+{#                return (count == 1) ? singular : plural;#}
+{#            } else {#}
+{#                return value[django.pluralidx(count)];#}
+{#            }#}
+{#        };#}
+{##}
+{#        django.gettext_noop = function (msgid) {#}
+{#            return msgid;#}
+{#        };#}
+{##}
+{#        django.pgettext = function (context, msgid) {#}
+{#            var value = django.gettext(context + '\x04' + msgid);#}
+{#            if (value.indexOf('\x04') != -1) {#}
+{#                value = msgid;#}
+{#            }#}
+{#            return value;#}
+{#        };#}
+{##}
+{#        django.npgettext = function (context, singular, plural, count) {#}
+{#            var value = django.ngettext(context + '\x04' + singular, context + '\x04' + plural, count);#}
+{#            if (value.indexOf('\x04') != -1) {#}
+{#                value = django.ngettext(singular, plural, count);#}
+{#            }#}
+{#            return value;#}
+{#        };#}
+{##}
+{##}
+{#        django.interpolate = function (fmt, obj, named) {#}
+{#            if (named) {#}
+{#                return fmt.replace(/%\(\w+\)s/g, function (match) {#}
+{#                    return String(obj[match.slice(2, -2)])#}
+{#                });#}
+{#            } else {#}
+{#                return fmt.replace(/%s/g, function (match) {#}
+{#                    return String(obj.shift())#}
+{#                });#}
+{#            }#}
+{#        };#}
+{##}
+{##}
+{#        /* formatting library */#}
+{##}
+{#        django.formats = {#}
+{#            "DATETIME_FORMAT": "N j, Y, P",#}
+{#            "DATETIME_INPUT_FORMATS": [#}
+{#                "%Y-%m-%d %H:%M:%S",#}
+{#                "%Y-%m-%d %H:%M:%S.%f",#}
+{#                "%Y-%m-%d %H:%M",#}
+{#                "%Y-%m-%d",#}
+{#                "%m/%d/%Y %H:%M:%S",#}
+{#                "%m/%d/%Y %H:%M:%S.%f",#}
+{#                "%m/%d/%Y %H:%M",#}
+{#                "%m/%d/%Y",#}
+{#                "%m/%d/%y %H:%M:%S",#}
+{#                "%m/%d/%y %H:%M:%S.%f",#}
+{#                "%m/%d/%y %H:%M",#}
+{#                "%m/%d/%y"#}
+{#            ],#}
+{#            "DATE_FORMAT": "Y\u5e74n\u6708j\u65e5",#}
+{#            "DATE_INPUT_FORMATS": [#}
+{#                "%Y-%m-%d",#}
+{#                "%m/%d/%Y",#}
+{#                "%m/%d/%y",#}
+{#                "%b %d %Y",#}
+{#                "%b %d, %Y",#}
+{#                "%d %b %Y",#}
+{#                "%d %b, %Y",#}
+{#                "%B %d %Y",#}
+{#                "%B %d, %Y",#}
+{#                "%d %B %Y",#}
+{#                "%d %B, %Y"#}
+{#            ],#}
+{#            "DECIMAL_SEPARATOR": ".",#}
+{#            "FIRST_DAY_OF_WEEK": "0",#}
+{#            "MONTH_DAY_FORMAT": "F j",#}
+{#            "NUMBER_GROUPING": "0",#}
+{#            "SHORT_DATETIME_FORMAT": "m/d/Y P",#}
+{#            "SHORT_DATE_FORMAT": "m/d/Y",#}
+{#            "THOUSAND_SEPARATOR": ",",#}
+{#            "TIME_FORMAT": "P",#}
+{#            "TIME_INPUT_FORMATS": [#}
+{#                "%H:%M:%S",#}
+{#                "%H:%M:%S.%f",#}
+{#                "%H:%M"#}
+{#            ],#}
+{#            "YEAR_MONTH_FORMAT": "F Y"#}
+{#        };#}
+{##}
+{#        django.get_format = function (format_type) {#}
+{#            var value = django.formats[format_type];#}
+{#            if (typeof(value) == 'undefined') {#}
+{#                return format_type;#}
+{#            } else {#}
+{#                return value;#}
+{#            }#}
+{#        };#}
+{##}
+{#        /* add to global namespace */#}
+{#        globals.pluralidx = django.pluralidx;#}
+{#        globals.gettext = django.gettext;#}
+{#        globals.ngettext = django.ngettext;#}
+{#        globals.gettext_noop = django.gettext_noop;#}
+{#        globals.pgettext = django.pgettext;#}
+{#        globals.npgettext = django.npgettext;#}
+{#        globals.interpolate = django.interpolate;#}
+{#        globals.get_format = django.get_format;#}
+{##}
+{#    }(this));#}
+{##}
+{#</script>#}
+
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/external-bundle.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+<script defer src="{% static 'himadatabase/my_js/sidebar.min.js' %}"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/map-bundle.min.js' %}"></script>
+
+{#<script type="text/javascript">#}
+{#    var customOmnitureProperties = {prop3: 'wdl'};#}
+{##}
+{#    var Site = {#}
+{#        Plugins: {#}
+{#            sc: {#}
+{#                getAccount: function () {#}
+{#                    return location.href.indexOf('www.wdl.org') >= 0 ? 'locgovprod' : 'locgovdev';#}
+{#                },#}
+{#                setProperties: function (props) {#}
+{#                    for (var prop in window.customOmnitureProperties) {#}
+{#                        if (customOmnitureProperties.hasOwnProperty(prop)) {#}
+{#                            props[prop] = customOmnitureProperties[prop];#}
+{#                        }#}
+{#                    }#}
+{#                }#}
+{#            }#}
+{#        }#}
+{#    };#}
+{#</script>#}
+
+<script>
+     function isValidatetime(obj) {
+         if (obj.value>=10000 || obj.value==0) {
+                alert("请输入正确的日期");
+                obj.value = null;
+                return false;
+            }
+
+        return true;
+    }
+</script>
+
+    <!--搜索排序调用js传值 22222222222 start-->
+    <script>
+        function rankChange(v){
+            if(v=='1')
+                window.location.href="/subject/?rank=score";
+            else
+                window.location.href="/subject/?rank=-updateDate";
+        }
+    </script>
+    <!--搜索排序调用js传值 22222222222 end-->
+
+<script async crossorigin="anonymous" src="{% static 'himadatabase/my_js/s_code.js' %}" charset="utf-8" onerror="Raven.captureMessage('Unable to load Omniture')"></script>
+
+</body>
+</html>

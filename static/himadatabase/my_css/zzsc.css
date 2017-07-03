@@ -1,0 +1,15 @@
+@charset "utf-8";
+*{ margin:0; padding:0; list-style:none;}
+body{
+	font-size:22px;
+}
+
+.zzsc{ width:1068px; height:64px; line-height:64px; background:#4573B1; margin:0 auto;}
+.zzsc a{ height:64px; line-height:64px; color:#fff; text-decoration:none; padding:0px 66px; display:block; float:left;}
+.zzsc a:hover{
+	text-decoration:none;
+	background:#b8860b;
+	font-size: 25px;
+	color: #0FF;
+}
+.zzsc a.thisclass{text-decoration:none; background:#d2691e;}

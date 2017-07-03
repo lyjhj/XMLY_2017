@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+{#         <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}" type="text/css">#}
+
+                <!--界面左边伸缩栏功能 start -->
+    <input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+    <div class="sidebar" id="search-filters" role="menu">
+
+        <h2 class="sr-only">专栏选项</h2>
+          {% for specialColumn in specialColumn_list %}
+                <section>
+                    <h4> {{ specialColumn.item }}文件类型</h4>
+                    {% for subColumn in specialColumn.item_list %}
+                    <ul class="list-unstyled">
+                                    <li role="menuitem">
+                                        <a href="" title="{{ subColumn.item}}视频">
+                                            <span class="badge">{{ subColumn.number}}3</span>
+                                            <span class="title" >{{ subColumn.item}}视频</span>
+                                        </a>
+                                    </li>
+                    {% endfor %}
+                    </ul>
+                </section>
+          {% endfor %}
+
+    </div>
+
+    <div id="sidebar-toggle-button">
+        <label for="sidebar-toggle-checkbox" class="btn btn-info">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+            <span class="text hidden-xs hidden-sm">专栏选项</span>
+        </label>
+    </div>
+    <!--界面左边伸缩栏功能 end -->

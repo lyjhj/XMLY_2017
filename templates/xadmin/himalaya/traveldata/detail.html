@@ -1,0 +1,60 @@
+
+<input name="csrfmiddlewaretoken" value="f0GEeOhPBFNXesXhAOuQDwpSU4zuPspH" type="hidden"> <div class="form-container row clearfix">
+    <div id="column-0" class="formColumn column form-column full col col-sm-12 form-horizontal" horizontal="True" span="12"> <div class="panel panel-default fieldset unsort no_title" id="box-0">
+        <div class="panel-heading"><i class="icon fa fa-chevron-up chevron"></i><h3 class="panel-title"></h3></div> <div class="panel-body "> <div id="div_id_siteid" class="value form-group row"> <div class="control-label">地点</div> <div class="controls"> <p class="form-control-static ">{{ form.siteid }}</p> </div>
+</div>
+<div id="div_id_toa" class="value form-group row"> <div class="control-label">到达时间</div> <div class="controls"> <p class="form-control-static ">{{ form.toa }}</p> </div>
+</div>
+<div id="div_id_tol" class="value form-group row"> <div class="control-label">离开时间</div> <div class="controls"> <p class="form-control-static ">{{ form.tol }}</p> </div>
+</div>
+<div id="div_id_transportation" class="value form-group row"> <div class="control-label">交通方式</div> <div class="controls"> <p class="form-control-static ">{{ form.transportation }}</p> </div>
+</div>
+<div id="div_id_nation" class="value form-group row"> <div class="control-label">游历地民族</div> <div class="controls"> <p class="form-control-static ">{{ form.nation }}</p> </div>
+</div>
+<div id="div_id_police" class="value form-group row"> <div class="control-label">游历地治安</div> <div class="controls"> <p class="form-control-static ">{{ form.police }}</p> </div>
+</div>
+<div id="div_id_economy" class="value form-group row"> <div class="control-label">游历地经济</div> <div class="controls"> <p class="form-control-static ">{{ form.economy }}</p> </div>
+</div>
+<div id="div_id_agriculture" class="value form-group row"> <div class="control-label">游历地农业</div> <div class="controls"> <p class="form-control-static ">{{ form.agriculture }}</p> </div>
+</div>
+<div id="div_id_custom" class="value form-group row"> <div class="control-label">风俗文化</div> <div class="controls"> <p class="form-control-static ">{{ form.custom }}</p> </div>
+</div>
+<div id="div_id_religion" class="value form-group row"> <div class="control-label">宗教</div> <div class="controls"> <p class="form-control-static ">{{ form.religion }}</p> </div>
+</div>
+<div id="div_id_history" class="value form-group row"> <div class="control-label">历史</div> <div class="controls"> <p class="form-control-static ">{{ form.history }}</p> </div>
+</div>
+<div id="div_id_education" class="value form-group row"> <div class="control-label">游历地教育</div> <div class="controls"> <p class="form-control-static ">{{ form.education }}</p> </div>
+</div>
+<div id="div_id_geography" class="value form-group row"> <div class="control-label">自然地理</div> <div class="controls"> <p class="form-control-static ">{{ form.geography }}</p> </div>
+</div>
+<div id="div_id_other" class="value form-group row"> <div class="control-label">其他</div> <div class="controls"> <p class="form-control-static ">{{ form.other }}</p> </div>
+</div>
+<div id="div_id_mileage" class="value form-group row"> <div class="control-label">里程</div> <div class="controls"> <p class="form-control-static ">{{ form.mileage }}</p> </div>
+</div>
+    <div id="div_id_picture" class="form-group"><label for="id_picture"
+                                                                                   class="control-label  requiredField">
+                                    图片 </label>
+                                    <div class="controls ">
+                                        {% for picherf in picture %}
+                                        <a href="{{ picherf }}"
+                                            target="_blank"  data-gallery="gallery"><img
+                                            src="{{ picherf }}"
+                                            class="field_img"/> </a>
+                                        {% endfor %}
+               </div>
+                                </div>
+<div id="div_id_inputUser" class="value form-group row"> <div class="control-label">录入人</div> <div class="controls"> <p class="form-control-static ">{{ form.inputUser }}</p> </div>
+</div>
+<div id="div_id_DataPage" class="value form-group row"> <div class="control-label">数据页码</div> <div class="controls"> <p class="form-control-static ">{{ form.DataPage }}</p> </div>
+</div> </div> </div>
+
+</div>
+
+</div>
+
+
+
+
+
+
+

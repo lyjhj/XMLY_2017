@@ -1,0 +1,148 @@
+{% load staticfiles %}
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+        <meta name="mobile-web-app-capable" content="yes">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+
+
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="google-site-verification" content="x4PklNIAhqnDXEZBGXgbdxTTGGbRvEdHATuGeEaA7xg"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.css' %}" />
+        <link rel="stylesheet" href="{% static 'font-awesome-4.5.0/css/font-awesome.min.css' %}">
+        <link rel="stylesheet" href="{% static 'gis_style/css/L.Control.Locate.min.css' %}" />
+        <link rel="stylesheet" type="text/css" href="{% static 'gis_style/css/qgis2web.css' %}">
+        <link rel="stylesheet" href="{% static 'gis_style/css/Control.OSMGeocoder.css' %}" />
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.draw.css' %}" />
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.measurecontrol.css' %}" />
+
+        <script src="{% static 'gis_style/js/qgis2web_expressions.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.js' %}"></script>
+        <script src="{% static 'gis_style/js/L.Control.Locate.min.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet-heat.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.rotatedMarker.js' %}"></script>
+        <script src="{% static 'gis_style/js/OSMBuildings-Leaflet.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet-tilelayer-wmts.js' %}"></script>
+        <script src="{% static 'gis_style/js/Autolinker.min.js' %}"></script>
+        <script src="{% static 'gis_style/js/Control.OSMGeocoder.js' %}"></script>
+        <script src="{% static 'gis_style/js/leaflet.draw.js' %}"></script>
+
+
+
+        <!-- Load Leaflet from CDN-->
+        <link rel="stylesheet" href="/static/esri/leaflet.css" />
+        <script src="/static/esri/leaflet-src.js"></script>
+        <!-- Load Esri Leaflet from CDN -->
+       <script src="/static/esri/esri-leaflet@2.0.8.js"></script>
+
+
+
+        <style>
+        #panel{
+            overflow: hidden;
+            width: 1200px; height: 700px; position: relative; background-color: #F8F8F8; margin: 20px auto;
+        }
+        #map{
+            width: 100%;
+            height: 100%;
+        }
+        .Q-Tooltip{
+            font-size: 9pt;
+        }
+       </style>
+
+        <title>前台leaflet测试页面</title>
+
+    </head>
+
+    <body>
+
+        <div id="panel">
+            <div id="map"></div>
+        </div>
+
+        <script>
+
+        var map = L.map('map', {
+            measureControl:true,
+            zoomControl:true, maxZoom:25, minZoom:1,
+            center: [30.6757, 104.0625],
+            zoom: 5
+        });
+{#        #山地图层加载#}
+{#        L.esri.basemapLayer('Streets').addTo(map);#}
+
+        map.attributionControl.addAttribution('<a href="https://github.com/tomchadwin/qgis2web" target="_blank">qgis2web</a>');
+
+        {#街道地图图层加载#}
+        var basemap0 = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors,<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+            maxZoom: 25
+        });
+        basemap0.addTo(map);
+
+        {#添加叶子状标记#}
+        var LeafIcon = L.Icon.extend({
+                options: {
+                    shadowUrl: '{% static 'gis_style/images/leaf-shadow.png' %}',
+                    iconSize:     [27, 56],
+                    shadowSize:   [25, 32],
+                    iconAnchor:   [15, 54],
+                    shadowAnchor: [5, 34],
+                    popupAnchor:  [0, -40]
+                }
+            });
+        var greenIcon = new LeafIcon({iconUrl: '{% static 'gis_style/images/leaf-green.png' %}'}),
+            redIcon = new LeafIcon({iconUrl: '{% static 'gis_style/images/leaf-red.png' %}'}),
+            orangeIcon = new LeafIcon({iconUrl: '{% static 'gis_style/images/leaf-orange.png' %}'});
+        L.icon = function (options) {
+                    return new L.Icon(options);
+                };
+
+        //  根据传来的坐标添加标注记和对应的content
+        var trip1  = {{ trip1|safe }};
+        var tripitem={{ tripitem|safe }};
+        var index=trip1.length-1;
+    {#        alert(tripitem[0]);#}
+        for (var i=0;i<index+1;i++)
+            {
+                L.marker([trip1 [index-i][1], trip1[index-i][0]], {icon: redIcon}).addTo(map)
+                .bindPopup(
+                    '<div style="width:200px">' +
+                    '<p style="font-size:10px;font-weight:bold;">'+tripitem[index-i]+'</p>' +
+                    '</div>'
+                    )
+                .openPopup();
+            }
+
+
+        //根据传来的坐标 添加连线
+            var myLines = [{
+                "type": "LineString",
+                "coordinates": trip1
+            },
+{#                {#}
+{#                "type": "LineString",#}
+{#                "coordinates": {{ trip2 }}#}
+{#            }#}
+            ];
+            var myStyle = {
+                "color": "#ff7800",
+                "weight": 5,
+                "opacity": 0.65
+            };
+            L.geoJson(myLines, {
+                                 style: myStyle
+                     }).addTo(map);
+
+        </script>
+
+    </body>
+
+</html>

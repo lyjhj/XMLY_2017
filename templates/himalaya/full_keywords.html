@@ -1,0 +1,393 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>关键词共现分析</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+    <script src="{% static 'statistic/jquery-3.1.1.js' %}"></script>
+    <script src="{% static 'statistic/d3.js' %}"></script>
+    <script src="{% static 'statistic/d3.min.js' %}"></script>
+
+
+
+
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/main.min.css' %}"
+          type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <!--<![endif]-->
+    {#    内容滑动菜单栏样式#}
+    <link rel="stylesheet" href="{% static 'himadatabase/test/docs.min.css' %}" type="text/css">
+    {#    内容滑动菜单栏样式#}
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+</head>
+<style>
+.nodetext {
+	font-family: SimSun;
+}
+
+.linetext {
+	font-size: 15px ;
+	font-family: SimSun;
+	fill:#ff003f;
+	fill-opacity:0.0;
+    font-weight:bold;
+}
+
+</style>
+<body class="lang_zh search-results "  onload="load()">
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+<input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+
+<div id="page-main" class="container-fluid" style="min-height: 10px">
+    <div class="row">
+        <form action="{% url 'himalaya:search' %}" method="get">
+        <div class="col-sm-8 col-sm-offset-3">
+            {#    <form id="site-search" class="form-horizontal" action="/">#}
+            <div class="row" >
+                <div class="col-sm-8">
+                    <div class="form-group">
+                            <div class="input-group">
+                                <input type="search" class="form-control" lang="zh" name="q" aria-label="搜索"
+                                       value="{{ query }}"
+                                       placeholder="搜索喜马拉雅多媒体数据" data-typeahead-url=".js"
+                                       data-suggest-url="/zh/search/suggest/">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" name="search" value="query">
+                                <span class="glyphicon glyphicon-search"></span>
+                                搜索
+                            </button>
+                        </span>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+
+     <div class="row">
+            <div class="col-sm-offset-2 col-sm-6">
+                    <span id="result-label">
+                     {% if advanceb %}
+                           基础库中检索 {% for ad in advanceb %}
+                                          “{{ ad }}”
+                                      {% endfor %}
+                               共有 {{ ret_num }} 篇文献
+                    {% else %}
+                        基础库中共有{{ ret_num }} 篇文献
+                    {% endif %}
+
+
+                    </span>
+            </div>
+
+
+          <!--三个圆形功能按钮 start-->
+       <div id="view-mode-toggle">
+            <div class="wel-grids">
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <a href="/search/?q={{ query }}">
+                    <label class="btn btn-block">
+                        <figure class="icon ">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="list">#}
+                        </figure>
+                        <p>列表展示</p>
+                    </label>
+                    </a>
+                </div>
+
+
+                <a href="/statisticInfo/?q={{ query }}" target="_blank">
+                <div class="col-sm-1 wel-grid text-center">
+                    <label  class="btn btn-block">
+                        <figure class="icon active">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                        </figure>
+                        <p>知识视图</p>
+                    </label>
+                </div>
+                </a>
+
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block" hidden>
+                        <figure class="icon">
+                            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="map">#}
+                        </figure>
+                        <p>文献地图</p></label>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row" style="margin-bottom: 80px">
+    <div id="search-results">
+        <div class="aborder"></div>
+        <div class="results list" style="height: 0px!important;margin-bottom: -56px!important;"></div>
+    </div>
+    <!-- Docs page layout -->
+{#<div>检索条件：“{{ query }}”</div>#}
+{#<div>过滤条件：“”</div>#}
+ <div class="container bs-docs-container">
+
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+          <div class="bs-docs-section" >
+            <h2 id="distribution"  class="page-header">关键词共现分析</h2>
+
+{#              如果该专题还需要统计框，就复制添加这段代码 请注意放在同一个专题div下 start#}
+              <div  class="col-md-12" >
+                <div class="panel panel-default">
+                    <div id="d3" class="panel-body">
+                    <script>
+                        var nodes = {{ nodes|safe }};
+
+                        var edges = {{ edges|safe }};
+                        var width =800;
+                        var height =800;
+                        var radin = 15;
+//{#                        var img_w = 77;#}
+//{#                        var img_h = 90;#}
+
+
+                        var svg = d3.select("#d3")
+                                        .append("svg")
+                                        .attr("width",width)
+                                        .attr("height",height);
+
+                        var force = d3.layout.force()
+                                    .nodes(nodes)		//指定节点数组
+                                    .links(edges)		//指定连线数组
+                                    .size([width,height])	//指定范围
+//                    {#				.linkDistance(function(d){#}
+//                    {#                    return d.value*200#}
+//                    {#                })	//指定连线长度#}
+                                    .linkDistance(450)
+                                    .charge(-500);	//相互之间的作用力
+
+                        force.start();	//开始作用
+
+                        console.log(nodes);
+                        console.log(edges);
+
+                            //添加连线
+
+                        var svg_edges = svg.selectAll("line")
+                                                .data(edges)
+                                                .enter()
+                                                .append("line")
+                                                .style("stroke","#ccc")
+                                                .style("stroke-width",function(d){
+                                                   return 3
+                                                });
+                        var edges_text = svg.selectAll(".linetext")
+                                .data(edges)
+                                .enter()
+                                .append("text")
+                                .attr("class","linetext")
+                                .text(function(d){
+                                    return d.value;
+                                });
+
+
+                        var color = d3.scale.category20();
+
+                            //添加节点
+                        var dic = {1:'#ffddee',2:'#eeeeee',3:'#aaaaaa',4:'#00eeff'}
+                        var svg_nodes = svg.selectAll("circle")
+                                                .data(nodes)
+                                                .enter()
+                                                .append("circle")
+
+                    							.attr("r",radin)
+//{#                                                .attr('r', function(d){#}
+//{#                                                    return 15#}
+//                    {#                                if(d.value > 1)#}
+//                    {#                                    return d.value*2;#}
+//                    {#                                else#}
+//                    {#                                    return 0;#}
+//{#                                                })#}
+
+                                                .style("fill",function(d,i){
+
+                                                    return color(i);
+
+
+                                                })
+                                                .on("mouseover",function(d,i){
+                                                    //显示连接线上的文字
+                                                    edges_text.style("fill-opacity",function(edge){
+                                                        if( edge.source === d || edge.target === d ){
+                                                            return 1.0;
+                                                        }
+                                                    });
+                                                })
+                                                .on("mouseout",function(d,i){
+                                                    //隐去连接线上的文字
+                                                    edges_text.style("fill-opacity",function(edge){
+                                                        if( edge.source === d || edge.target === d ){
+                                                            return 0.0;
+                                                        }
+                                                    });
+                                                })
+
+                                                .call(force.drag);	//使得节点能够拖动
+
+                            //添加描述节点的文字
+
+                        var svg_texts = svg.selectAll(".nodetext")
+                                                .data(nodes)
+                                                .enter()
+                                                .append("text")
+                                                .style("fill", "black")
+                                                .attr("dx", 5)
+                                                .attr("dy", 8)
+                                                .text(function(d) {
+                                                    return d.name
+//                    {##}
+//                    {#                                if(d.value >1)#}
+//                    {#                                    return d.name;#}
+//                    {#                                else#}
+//                    {#								    return '';#}
+                                                });
+
+
+
+                        force.on("tick", function(){	//对于每一个时间间隔
+                                  nodes.forEach(function(d,i){
+                                        d.x = d.x - radin < 0     ? radin : d.x ;
+                                        d.x = d.x + radin  > width ? width - radin  : d.x ;
+                                        d.y = d.y - radin < 0      ? radin : d.y ;
+                                        d.y = d.y + radin  > height ? height - radin : d.y ;
+                                    });
+                                 //更新连线坐标
+                                 svg_edges.attr("x1",function(d){ return d.source.x; })
+                                        .attr("y1",function(d){ return d.source.y; })
+                                        .attr("x2",function(d){ return d.target.x; })
+                                        .attr("y2",function(d){ return d.target.y; });
+
+                                 edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; })
+				                           .attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
+
+                                 //更新节点坐标
+                                 svg_nodes
+                                      .attr("cx",function(d){ return d.x; })
+                    			 		.attr("cy",function(d){ return d.y; })
+//{#                                        .attr("cx",function(d){#}
+//{#                                              if( d.x < 0 )#}
+//{#                                                 d.x = 0;#}
+//{#                                              else if( d.x > width )#}
+//{#                                                 d.x = width;#}
+//{#                                              return d.x;#}
+//{#                                            })#}
+//{#                                         .attr("cy",function(d){#}
+//{#                                             if(d.y < 0)#}
+//{#                                                 d.y = 0;#}
+//{#                                             else if(d.y > height)#}
+//{#                                                 d.y = height;#}
+//{#                                             return d.y#}
+//{#                                         });#}
+
+
+                                 //更新文字坐标
+                                 svg_texts.attr("x", function(d){ return d.x; })
+                                    .attr("y", function(d){ return d.y; });
+//                    {#             svg_texts_line.attr("x", function(d){ return d.x; })#}
+//                    {#                    .attr("y", function(d){ return d.y; });#}
+                            });
+
+
+</script>
+{#######################################}
+
+                  </div>
+                </div>
+            </div>
+          </div>
+
+{############################################}
+
+
+<!--导样式控制div 不能移动和删除 start-->
+            </div>
+<!--导导样式控制div 不能移动和删除 end-->
+            {#            右侧滑动条#}
+{######################################################}
+            <div class="col-md-3" >
+                <div class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" role="complementary">
+                    <ul class="nav bs-docs-sidenav">
+                        <li>
+                            <a href={% url "himalaya:base_statisticInfo" %}>文献分布统计分析</a>
+                        </li>
+                        <li>
+                            <a href={% url "himalaya:base_statisticInfo" %}>趋势分析</a>
+                        </li>
+                        <li>
+                            <a href="#words">词频统计表</a>
+                        </li>
+                        <li>
+                            <a href="#hot_topic">热点分析</a>
+                        </li>
+                        <li>
+                            <a href={% url 'himalaya:full_keywords' %}>关键词共现分析</a>
+                        </li>
+
+                    </ul>
+
+                    <a class="back-to-top" href="#top">返回顶部</a>
+
+                </div>
+            </div>
+            {#            右侧滑动条#}
+
+
+
+      </div>
+ </div>
+</div>
+{###################################################3#}
+    <!--导航条底部 start-->
+<div class="posit">
+{% include "himalaya/base/navButtomBase.html" %}
+</div>
+<!--导航条底部 end-->
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+
+
+{#    内容滑动菜单栏样式#}
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/bootstrap.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/docs.min.js' %}" charset="utf-8"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
+{#    内容滑动菜单栏样式#}
+
+</body>
+</html>
+

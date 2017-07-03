@@ -1,0 +1,142 @@
+{% load staticfiles %}
+{% load highlight %}
+{% load pagination_tags %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" >
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>分页test</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+
+    <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+
+	<style type="text/css">
+	body, html,#allmap {width: 100%;height: 90%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=6EXsqxLnjg4iEtVNbOW4XFF0LYHzo6Zd"></script>
+    	<!--加载鼠标绘制工具-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+    	<!--加载检索信息窗口-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
+
+	<title>地图展示</title>
+
+</head>
+<body class="lang_zh search-results " >
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+
+        <!-- 地图画板 -->
+	<div id="allmap"></div>
+   <div>
+       <form action="/position/" method="get">
+        当前选定地点：<input id="dizhi" value="">
+         <input type="hidden" id=“lon” value="longitude">
+         <input type="hidden" id="lat" value=" latitude">
+        <input  type="submit" value="提交" >
+       </form>
+   </div>
+
+
+
+<!--导航条底部 start-->
+{% include "himalaya/base/navButtomBase.html" %}
+<!--导航条底部 end-->
+
+    <script type="text/javascript">
+    var map = new BMap.Map("allmap",{minZoom:4,maxZoom:9});  // 创建Map实例
+{#    var point = new BMap.Point(116.404, 39.915);#}
+    map.centerAndZoom("成都", 5); // 初始化地图,设置中心点坐标和地图级别，可以把“成都”替换为point指定坐标
+
+    map.enableScrollWheelZoom();  //开启鼠标滚轮缩放
+    map.enableInertialDragging();
+    map.enableContinuousZoom();
+
+     //  控件1 添加带有城市列表控件 start
+    var size = new BMap.Size(10, 20);
+    map.addControl(new BMap.CityListControl({
+        anchor: BMAP_ANCHOR_TOP_RIGHT,
+        offset: size,
+    }));
+    //控件1 添加带有城市列表控件 end
+
+     //控件2 添加带有定位的导航控件 start
+      var navigationControl = new BMap.NavigationControl({
+        // 靠左上角位置
+        anchor: BMAP_ANCHOR_TOP_LEFT,
+        // LARGE类型
+        type: BMAP_NAVIGATION_CONTROL_LARGE,
+        // 启用显示定位
+        enableGeolocation: true
+      });
+      map.addControl(navigationControl);
+    //控件2 添加带有定位的导航控件 end
+
+        //控件4 单击获取点击的经纬度 start
+        function showInfo(e){
+            var point = new BMap.Point(e.point.lng,e.point.lat);
+            var gc = new BMap.Geocoder();
+            gc.getLocation(point, function(rs)
+            {
+                var addComp = rs.addressComponents;
+                alert("成功添加地址 " + addComp.province + ", " + addComp.city + ", " + addComp.district );
+                document.getElementById("dizhi").value=addComp.province + ", " + addComp.city + ", " + addComp.district;
+
+{#                map.removeEventListener("click", showInfo);#}
+
+            });}
+           map.addEventListener("click", showInfo);
+        //控件4 单击获取点击的经纬度 end
+
+
+        //控件5 添加鼠标示例——鼠标绘制点线面 start
+            var overlays = [];
+            var overlaycomplete = function(e){
+                overlays.push(e.overlay);
+            };
+            //实例化鼠标绘制工具
+            var drawingManager = new BMapLib.DrawingManager(map, {
+                isOpen: false, //是否开启绘制模式
+                enableDrawingTool: true, //是否显示工具栏
+                drawingToolOptions: {
+                    anchor: BMAP_ANCHOR_BOTTOM_RIGHT, //位置
+                    offset: new BMap.Size(50,50), //偏离值
+                    drawingModes : [BMAP_DRAWING_MARKER],
+                }
+            });
+         //控件5 添加鼠标示例——鼠标绘制点线面 end
+
+
+             //添加鼠标绘制工具监听事件，用于获取绘制结果
+            drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+            function clearAll() {
+                for(var i = 0; i < overlays.length; i++){
+                    map.removeOverlay(overlays[i]);
+                }
+                overlays.length = 0
+            }
+            //添加鼠标绘制工具监听事件，用于获取绘制结果
+
+
+    </script>
+
+
+</body>
+</html>

@@ -1,0 +1,109 @@
+.wel-grids{
+      width: 100%;
+      left: 58%;             /*举例右边3像素*/
+      position:fixed;
+}
+.wel-grids .icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #c55050;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+
+.glyphicon-th-list,  .glyphicon-stats,  .glyphicon-map-marker {
+  z-index: 9999;
+  top: 7px!important;
+  left: 0px;
+  font-size: 10px;
+  color: #fff;
+}
+.wel-grid .icon img {
+  padding: 23px 0 0 0;
+  position: relative;
+  z-index: 100;
+  transition: all 0.3s ease 0s;
+}
+.wel-grids .icon.active {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #020202;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+}
+.wel-grid .icon:before {
+  content: '';
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background:#020202;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  -webkit-transform: scale(0);
+  -moz-transform: scale(0);
+  -ms-transform: scale(0);
+  -o-transform: scale(0);
+  transform: scale(0);
+  transition: all 0.3s ease 0s;
+}
+.wel-grid:hover .icon img {
+  -webkit-transform: scale(0.9);
+  -moz-transform: scale(0.9);
+  -ms-transform: scale(0.9);
+  -o-transform: scale(0.9);
+  transform: scale(0.9);
+}
+.wel-grid:hover .icon:before {
+  -webkit-transform: scale(1);
+  -moz-transform: scale(1);
+  -ms-transform: scale(1);
+  -o-transform: scale(1);
+  transform: scale(1);
+}
+.wel-grid h3{
+margin: 16px 0 9px 0;
+font-size: 18px;
+color:#020202;
+font-family: 'Roboto Slab', serif;
+}
+
+.wel-grid p {
+  font-size: 13px;
+  margin: 7px 0;
+  color:#020202;
+  line-height: 1.8em;
+}
+.wel-grid:nth-child(4),.wel-grid:nth-child(5),.wel-grid:nth-child(6){
+margin-top:50px;
+}
+/*-- //welcome --*/
+.zhaiyao{
+  font-family: sans-serif,'宋体';
+  color:#002b36;
+  font-weight: 400;
+}
+.zz{
+  font-weight: bold;
+  color: red;
+}
+
+.posit{
+     bottom: 0px;
+    position: fixed;
+    width: 100%;
+    z-index: 99999;
+}
+.subpos{
+  margin-bottom: 10px;
+}
+
+/*select*/
+.dropdownlist{
+
+}

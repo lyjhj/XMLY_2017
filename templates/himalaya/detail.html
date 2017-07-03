@@ -1,0 +1,519 @@
+{% load staticfiles %}
+{% load more_like_this %}
+
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <link href="//vjs.zencdn.net/5.4.6/video-js.min.css" rel="stylesheet">
+    <script src="//vjs.zencdn.net/5.4.6/video.min.js"></script>
+    <!-- 引入video.js的样式文件 -->
+    <link rel="stylesheet" type="text/css" href="css/video-js.css" />
+
+    <!-- 如果没有使用Modernizr，则使用以下代码做shiv -->
+    <script type="text/javascript">
+        document.createElement('video');document.createElement('audio');document.createElement('track');
+    </script>
+
+    <!-- 引入video.js的脚本文件 -->
+    <script src="js/video.js" type="text/javascript" charset="utf-8"></script>
+    <!-- 指定videojs的flash文件 -->
+    <script type="text/javascript">
+        videojs.options.flash.swf = "js/video-js.swf";
+    </script>
+    <title>详情页面 - 喜马拉雅多媒体数据</title>
+
+    <!--map css 整理时可删 start-->
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <!--map css 整理时可删 end-->
+    <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleofdetail.css' %}" type="text/css">
+</head>
+
+<body class="lang_zh item-detail viewer-image large-reference-image">
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+<!--文献标题 start-->
+<div class="page-header">
+    <h3 style="padding: 0px 150px">{{ post.title }}</h3>
+</div>
+<!--文献标题 end-->
+
+<main style="margin:0 auto;">
+    <!--内容右部主体 start-->
+    <div id="content-top" class="row detaip2">
+        <div class="col-md-7 col-md-push-5" >
+            <!--文献摘要 start-->
+            <div>
+                {% if post.description %}简介：{{ post.description }}{% endif %}
+            </div>
+            <!--文献摘要 end-->
+
+            <!--文献下载控件链接等 start-->
+            <ul id="downloads" class="nav nav-pills nav-stacked text-right" style="height: 60px">
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                        <span class="glyphicon glyphicon-eye-open"></span>
+                        打开查看文献
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu" role="menu">
+                        {% if post_pdf %}
+
+                            {#                        <a href="/static/pdf-js/web/viewer.html?file=/media/{{ post.attachment }}">查看文献</a>#}
+                            {#                        <li role="menuitem"><a download itemprop="image" href="/">{{ post.attachment}}</a></li>#}
+                            <li role="menuitem">
+                                <a href="/static/pdf-js/web/viewer.html?file=/media/{{ post.attachment }}" target="_blank">
+                                    <span class="badge pull-right flip">{{ post.attachment.size|filesizeformat }}</span>
+                                    {{ post.title|truncatewords:10 }}
+                                </a>
+                            </li>
+                        {% elif post_mp4 %}
+{#                            {{ post.attachment.path }}#}
+{#                            {{ post.attachment.url }}#}
+                            <li>
+{#                                <video id="player"  controls preload="auto"#}
+{#                                       poster="{{ post.attachment.url }}">#}
+{#                                    <source type="video/mp4" src="{{ post.attachment.path }}">#}
+
+            <video id="sample_video" controls preload="none"  class="video-js vjs-default-skin vjs-big-play-centered" data-setup='{ "controls": true, "autoplay": false, "preload": "none", "poster": "images/sample_video_poster.png", "width": 852, "height": 480 }'>
+                                <source src="{{ post.attachment.url }}" type='video/mp4' />
+
+                                <!-- 如果浏览器不兼容HTML5则使用flash播放 -->
+                                <object id="sample_video" class="vjs-flash-fallback" width="852"
+                                    height="480" type="application/x-shockwave-flash"
+                                    data="{{ post.attachment.url }}">
+                                    <param name="movie"
+                                        value="http://releases.flowplayer.org/swf/flowplayer-3.2.1.swf" />
+                                    <param name="allowfullscreen" value="true" />
+                                    <param name="flashvars" value='config={"playlist":["images/sample_video_poster.png", {"url": "videos/sample_video.mp4","autoPlay":false,"autoBuffering":true}]}' />
+                                    <!-- 视频图片. -->
+                                    <img src="images/sample_video.png" width="852"
+                                        height="480" alt="Poster Image"
+                                        title="No video playback capabilities." />
+                                </object>
+                            </video>
+
+                            </li>
+                            {% else %}
+                            <li role="menuitem">
+
+                                  无法查看该文件
+
+
+                            </li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
+            <!--文献下载控件链接等 end-->
+
+            <!--右部分栏文献详情展示 start-->
+            <div id="metadata" class="col-md-12" style="height: 755px">
+                <div class="panel panel-default">
+{#                    <div class="panel-heading" style="background-color:#fff;">#}
+{#                        <ul id="tabs">#}
+{#                            <li><a href="#" title="tab1"><span class="fontstyle">基础属性</span></a></li>#}
+{#                            {% if extend_attr %}#}
+{#                                <li><a href="#" title="tab2"><span class="fontstyle">专题属性</span></a></li>#}
+{#                            {% endif %}#}
+{#                        </ul>#}
+{#                    </div>#}
+                    <div class="panel-body">
+                        <div id="content">
+                            <div id="tab1">
+                                                                {% if post.creator %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">作者</span><span class="fontbule">{{ post.creator }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.keywords %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">关键词</span><span class="fontbule">{{ post.keywords }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.publisher %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">来源</span><span class="fontbule">{{ post.publisher }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.fileType.all.0 %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">文件类型</span><span class="fontbule">{% for item in  post.fileType.all %}{{ item }}&nbsp;&nbsp;&nbsp;{% endfor %}</span></span>
+                                                                {% endif %}
+                                                                {% if post.language.all.0 %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">语言</span><span class="fontbule">{% for item in  post.language.all %}{{ item }}&nbsp;&nbsp;&nbsp;{% endfor %}</span></span>
+                                                                {% endif %}
+                                                                {% if post.discipline.all.0 %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">文件学科</span><span class="fontbule">{% for item in  post.discipline.all %}{{ item }}&nbsp;&nbsp;&nbsp;{% endfor %}</span></span>
+                                                                {% endif %}
+                                                                {% if post.spatial.all.0 %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">文件空间范围</span><span class="fontbule">{% for item in  post.spatial.all %}{{ item }}&nbsp;&nbsp;&nbsp;{% endfor %}</span></span>
+                                                                {% endif %}
+
+                                                                {% if post.contributor %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">译者/校订者</span><span class="fontbule">{{ post.contributor }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.fileFormat.all.0 %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">格式</span><span class="fontbule">{% for item in  post.fileFormat.all %}{{ item }}&nbsp;&nbsp;&nbsp;{% endfor %}</span></span>
+                                                                {% endif %}
+                                                                {% if post.size %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">大小</span><span class="fontbule">{{ post.size|filesizeformat }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.pubDate %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">出版时间</span><span class="fontbule">{{ post.pubDate|date:"Y年" }}</span></span>
+                                                                {% endif %}
+                                                                {% if post.contentLength %}
+                                                                    <span class="tabstyle-white"><span class="tabstyle-dq">页数</span><span class="fontbule">{{ post.contentLength }}</span></span>
+                                                                {% endif %}
+
+{#扩展属性#}
+                                {% for attr in  extend_attr %}
+                                    {% if attr.1|length %}
+                                    {% if forloop.counter|divisibleby:'2' %}
+                                    <span class="tabstyle-white"><span class="tabstyle-dq">{{ attr.0 }}</span>
+                                       <span class="fontbule">{% if attr.1 and attr.1 != '-1' %}{{ attr.1 }}{% else %}信息暂无{% endif %}</span></span>
+                                     {% else %}
+                                     <span class="tabstyle-white"><span class="tabstyle-dq">{{ attr.0 }}</span>
+                                         <span class="fontbule">{% if attr.1 and attr.1 != '-1' %}{{ attr.1 }}{% else %}信息暂无{% endif %}</span></span>
+                                     {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--右部分栏文献详情展示 end-->
+        </div>
+    </div>
+    <!--内容右部主体 END-->
+
+    <!--左部分栏展示 start-->
+
+    <!--文献缩略图 start-->
+    <div id="media-container" class="pull-left flip rs_skip skip-search-highlighting"
+         style="position:absolute;top:2px;">
+        <div id="viewer" class="text-center image-viewer">
+            <div class="image-container">
+                <a class="item-view" href="#">
+                    <img class="img-thumbnail" itemprop="image" src="{{ post.picture.url }}"
+                         alt="{{ post.title }}">
+                </a>
+            </div>
+        </div>
+    </div>
+    <!--文献缩略图 end-->
+    {#more like this#}
+ {% more_like_this entry as related_content limit 5  %}
+    <div class="row">
+        <div id="item-navigation" class="col-md-4 skip-search-highlighting detaip1" role="navigation">
+            <!--4篇相关文献展示 start-->
+            <div id="similar-items-panel" class="panel panel-info" style="margin-top: 30px" role="navigation">
+                <div class="panel-heading">
+                    <h3 class="panel-title">相关文献资源 </h3>
+                </div>
+
+                <ul class="list-group media-list-group">
+
+                    {% if mlt %}
+                        {% for related in mlt %}
+                            <li class="list-group-item">
+                                <a href="{% url 'himalaya:detail' related.object.id %}" target="_blank">
+                                    <img src="{{ related.object.picture.url }}" width="64" height="53">
+                                    <p class="title">{{ related.object.title }}</p>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    {% endif %}
+
+                </ul>
+            </div>
+            <!--4篇相关文献展示 end-->
+
+            <!--左部分栏地图缩略图展示 start-->
+            <div id="item-map" class="map-container" hidden data-display-layer-control="true" data-
+                 display-locate-control="false" data-global-variable="ItemMap" data-delay-scroll-capture data-
+                 geojson="[{&quot;geometry&quot;: {&quot;type&quot;: &quot;Point&quot;, &quot;coordinates&quot;: [-74.00597,40.71427]}, &quot;type&quot;: &quot;Feature&quot;, &quot;properties&quot;: {&quot;name&quot;: &quot;\u7ebd\u7ea6&quot;}}]"></div>
+            <!--左部分栏地图缩略图展示 end-->
+        </div>
+    </div>
+    <!--左部分栏展示 end-->
+</main>
+
+<!--导航条底部 start-->
+<div class="detailbuttom">
+    {% include "himalaya/base/navButtomBase.html" %}
+</div>
+<!--导航条底部 end-->
+
+<!--左下地图缩略图控制 整理时可删 start-->
+<script>
+    var ITEM_SEARCH_API_URL = "/zh/search/item/12.json";
+</script>
+
+<script>
+    var STATIC_URL = '/static/',
+            MEDIA_URL = 'https://content.wdl.org/',
+            LANGUAGE_CODE = 'zh',
+            RAVEN_PUBLIC_DSN = 'https://5099c16f0f4442e1a0afcc131fccca91@sentry.ops.wdl.org/8';
+</script>
+
+<script>
+    (function (globals) {
+
+        var django = globals.django || (globals.django = {});
+
+
+        django.pluralidx = function (n) {
+            var v = 0;
+            if (typeof(v) == 'boolean') {
+                return v ? 1 : 0;
+            } else {
+                return v;
+            }
+        };
+        /* gettext library */
+
+        django.catalog = {
+            "%s item without map coordinates is not visible": [
+                "%s\u6761\u76ee\u6ca1\u6709\u5730\u56fe\u5750\u6807\uff0c\u65e0\u6cd5\u68c0\u89c6"
+            ],
+            "BCE": "\u516c\u5143\u524d",
+            "CE": "\u516c\u5143",
+            "Center map on your current location": "\u5c06\u60a8\u7684\u76ee\u524d\u4f4d\u7f6e\u653e\u5728\u5730\u56fe\u4e2d\u592e",
+            "Full Screen": "\u5168\u5c4f",
+            "Go Home": "\u8fd4\u56de\u9996\u9875",
+            "Grid": "\u7f51\u683c",
+            "Help": "\u5e2e\u52a9",
+            "Items": "\u6761\u76ee",
+            "Nearby Items": "\u9644\u8fd1\u6761\u76ee",
+            "Next": "\u4e0b\u4e00",
+            "Places": "\u5730\u65b9",
+            "Points": "\u70b9",
+            "Previous": "\u4e0a\u4e00",
+            "Read": "\u9605\u8bfb",
+            "Rotate Left": "\u5411\u5de6\u65cb\u8f6c",
+            "Rotate Right": "\u5411\u53f3\u65cb\u8f6c",
+            "Search": "\u641c\u7d22",
+            "Search inside this item in %(language)s:": "\u4ee5%(language)s\u641c\u7d22\u672c\u6761\u76ee\u5185\u5bb9",
+            "View All": "\u68c0\u89c6\u5168\u90e8",
+            "Zoom": "\u53d8\u7126",
+            "Zoom In": "\u653e\u5927",
+            "Zoom Out": "\u7f29\u5c0f",
+            "Zoom to fit all visible points": "\u7f29\u653e\u4ee5\u653e\u5165\u6240\u6709\u53ef\u89c1\u7684\u70b9"
+        };
+
+        django.gettext = function (msgid) {
+            var value = django.catalog[msgid];
+            if (typeof(value) == 'undefined') {
+                return msgid;
+            } else {
+                return (typeof(value) == 'string') ? value : value[0];
+            }
+        };
+
+        django.ngettext = function (singular, plural, count) {
+            var value = django.catalog[singular];
+            if (typeof(value) == 'undefined') {
+                return (count == 1) ? singular : plural;
+            } else {
+                return value[django.pluralidx(count)];
+            }
+        };
+
+        django.gettext_noop = function (msgid) {
+            return msgid;
+        };
+
+        django.pgettext = function (context, msgid) {
+            var value = django.gettext(context + '\x04' + msgid);
+            if (value.indexOf('\x04') != -1) {
+                value = msgid;
+            }
+            return value;
+        };
+
+        django.npgettext = function (context, singular, plural, count) {
+            var value = django.ngettext(context + '\x04' + singular, context + '\x04' + plural, count);
+            if (value.indexOf('\x04') != -1) {
+                value = django.ngettext(singular, plural, count);
+            }
+            return value;
+        };
+
+
+        django.interpolate = function (fmt, obj, named) {
+            if (named) {
+                return fmt.replace(/%\(\w+\)s/g, function (match) {
+                    return String(obj[match.slice(2, -2)])
+                });
+            } else {
+                return fmt.replace(/%s/g, function (match) {
+                    return String(obj.shift())
+                });
+            }
+        };
+        /* formatting library */
+
+        django.formats = {
+            "DATETIME_FORMAT": "N j, Y, P",
+            "DATETIME_INPUT_FORMATS": [
+                "%Y-%m-%d %H:%M:%S",
+                "%Y-%m-%d %H:%M:%S.%f",
+                "%Y-%m-%d %H:%M",
+                "%Y-%m-%d",
+                "%m/%d/%Y %H:%M:%S",
+                "%m/%d/%Y %H:%M:%S.%f",
+                "%m/%d/%Y %H:%M",
+                "%m/%d/%Y",
+                "%m/%d/%y %H:%M:%S",
+                "%m/%d/%y %H:%M:%S.%f",
+                "%m/%d/%y %H:%M",
+                "%m/%d/%y"
+            ],
+            "DATE_FORMAT": "Y\u5e74n\u6708j\u65e5",
+            "DATE_INPUT_FORMATS": [
+                "%Y-%m-%d",
+                "%m/%d/%Y",
+                "%m/%d/%y",
+                "%b %d %Y",
+                "%b %d, %Y",
+                "%d %b %Y",
+                "%d %b, %Y",
+                "%B %d %Y",
+                "%B %d, %Y",
+                "%d %B %Y",
+                "%d %B, %Y"
+            ],
+            "DECIMAL_SEPARATOR": ".",
+            "FIRST_DAY_OF_WEEK": "0",
+            "MONTH_DAY_FORMAT": "F j",
+            "NUMBER_GROUPING": "0",
+            "SHORT_DATETIME_FORMAT": "m/d/Y P",
+            "SHORT_DATE_FORMAT": "m/d/Y",
+            "THOUSAND_SEPARATOR": ",",
+            "TIME_FORMAT": "P",
+            "TIME_INPUT_FORMATS": [
+                "%H:%M:%S",
+                "%H:%M:%S.%f",
+                "%H:%M"
+            ],
+            "YEAR_MONTH_FORMAT": "F Y"
+        };
+
+        django.get_format = function (format_type) {
+            var value = django.formats[format_type];
+            if (typeof(value) == 'undefined') {
+                return format_type;
+            } else {
+                return value;
+            }
+        };
+
+        /* add to global namespace */
+        globals.pluralidx = django.pluralidx;
+        globals.gettext = django.gettext;
+        globals.ngettext = django.ngettext;
+        globals.gettext_noop = django.gettext_noop;
+        globals.pgettext = django.pgettext;
+        globals.npgettext = django.npgettext;
+        globals.interpolate = django.interpolate;
+        globals.get_format = django.get_format;
+
+    }(this));
+</script>
+
+<script>
+    rsConf = {general: {cookieLifetime: null}};
+</script>
+<script>
+    if (typeof(ReadSpeaker) == "undefined") {
+        ga('send', {
+            hitType: 'event',
+            eventCategory: 'Errors',
+            eventAction: 'error',
+            eventLabel: 'third-party resource',
+            eventValue: 'ReadSpeaker failed to load',
+            nonInteraction: true,
+            transport: 'beacon'
+        });
+    }
+</script>
+<!--<![endif]-->
+<script type="text/javascript">
+    var customOmnitureProperties = {prop3: 'wdl'};
+
+    var Site = {
+        Plugins: {
+            sc: {
+                getAccount: function () {
+                    return location.href.indexOf('www.wdl.org') >= 0 ? 'locgovprod' : 'locgovdev';
+                },
+                setProperties: function (props) {
+                    for (var prop in window.customOmnitureProperties) {
+                        if (customOmnitureProperties.hasOwnProperty(prop)) {
+                            props[prop] = customOmnitureProperties[prop];
+                        }
+                    }
+                }
+            }
+        }
+    };
+</script>
+
+
+<script type="text/javascript">
+    customOmnitureProperties.prop32 = "Library of Congress";
+    customOmnitureProperties.prop30 = "Prints, Photographs";
+    customOmnitureProperties.prop22 = "eng";
+</script>
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/external-bundle.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+<script defer src="{% static 'himadatabase/my_js/sidebar.min.js' %}"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/map-bundle.min.js' %}"></script>
+<script async crossorigin="anonymous" src="{% static 'himadatabase/my_js/s_code.js' %}" charset="utf-8"
+        onerror="Raven.captureMessage('Unable to load Omniture')"></script>
+<!--左下地图缩略图控制 END-->
+
+<!--TAB控制 不能删 start-->
+{#<script type="text/javascript">#}
+{#    $(document).ready(function () {#}
+{#        $("#content div").hide(); // Initially hide all content#}
+{#        $("#tabs li:first").attr("id", "current"); // Activate first tab#}
+{#        $("#content div:first").fadeIn(); // Show first tab content#}
+{##}
+{#        $('#tabs a').click(function (e) {#}
+{#            e.preventDefault();#}
+{#            $("#content div").hide(); //Hide all content#}
+{#            $("#tabs li").attr("id", ""); //Reset id's#}
+{#            $(this).parent().attr("id", "current"); // Activate this#}
+{#            $('#' + $(this).attr('title')).fadeIn(); // Show content for current tab#}
+{#        });#}
+{#    })();#}
+{#</script>#}
+<!--TAB控制 end-->
+<script type="text/javascript">
+var myPlayer = null;
+$(document).ready(function() {
+
+    if(!myPlayer) {
+        // Using the video's ID or element
+        myPlayer = videojs("video_center_video");
+    }
+    // After you have references to your players you can...(example)
+    myPlayer.play(); // Starts playing the video for this player.
+
+});
+</script>
+</body>
+</html>

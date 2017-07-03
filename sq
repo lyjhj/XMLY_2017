@@ -1,0 +1,4 @@
+update himalaya_filebaseinfo_fileFormat set format_id=19 where format_id=62;
+update himalaya_filebaseinfo_fileFormat set format_id=17 where format_id=48;
+update himalaya_filebaseinfo_fileFormat set format_id=61 where format_id=39;
+update himalaya_filebaseinfo_fileFormat set format_id=21 where format_id=28;

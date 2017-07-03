@@ -1,0 +1,213 @@
+<input name="csrfmiddlewaretoken" value="PEPL3zPVWqgyb4nq4ADMxRpdDV5o1kEB" type="hidden">
+<div class="form-container row clearfix">
+    <div id="column-0" class="formColumn column form-column full col col-sm-12 form-horizontal" horizontal="True"
+         span="12">
+        <div class="panel panel-default fieldset unsort no_title" id="box-0">
+            <div class="panel-heading"><i class="icon fa fa-chevron-up chevron"></i>
+                <h3 class="panel-title"></h3></div>
+            <div class="panel-body ">
+                <table class="col-sm-12">
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_filecode" class="value form-group row">
+                                <div class="control-label" style="text-align: center">文献编号</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.filecode }}</p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_fileType" class="value form-group row">
+                                <div class="control-label" style="text-align: center">文件类型</div>
+                                <div class="controls"><p class="form-control-static ">{{ strfiletype }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <div id="div_id_title" class="value form-group row">
+                    <div class="control-label" style="text-align: center">文献名称</div>
+                    <div class="controls"><p class="form-control-static ">{{ form.title }}</p></div>
+                </div>
+
+                <div id="div_id_creator" class="value form-group row">
+                    <div class="control-label" style="text-align: center">作者/编者</div>
+                    <div class="controls"><p class="form-control-static ">{{ form.creator }}</p></div>
+                </div>
+                <div id="div_id_keywords" class="value form-group row">
+                    <div class="control-label" style="text-align: center">关键词</div>
+                    <div class="controls"><p class="form-control-static ">{{ form.keywords }}</p></div>
+                </div>
+
+                <div id="div_id_description" class="value form-group row">
+                    <div class="control-label" style="text-align: center">内容简介</div>
+                    <div class="controls"><p class="form-control-static "><span
+                            class="text-muted">{{ form.description }}</span></p></div>
+                </div>
+
+                <table class="col-sm-12">
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_publisher" class="value form-group row">
+                                <div class="control-label" style="text-align: center">来源</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.publisher }}</p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_language" class="value form-group row">
+                                <div class="control-label" style="text-align: center">语 言</div>
+                                <div class="controls"><p class="form-control-static ">{{ strlan }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_discipline" class="value form-group row">
+                                <div class="control-label" style="text-align: center">学 科</div>
+                                <div class="controls"><p class="form-control-static ">{{ strdis }}</p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_spatial" class="value form-group row">
+                                <div class="control-label" style="text-align: center">空间范围</div>
+                                <div class="controls"><p class="form-control-static ">{{ strspatial }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_fileFormat" class="value form-group row">
+                                <div class="control-label" style="text-align: center">格式</div>
+                                <div class="controls"><p class="form-control-static ">{{ strformat }}</p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_contributor" class="value form-group row">
+                                <div class="control-label" style="text-align: center">译者/校订者</div>
+                                <div class="controls"><p class="form-control-static "><span
+                                        class="text-muted">{{ form.contributor }}</span></p></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_pubDate" class="value form-group row">
+                                <div class="control-label" style="text-align: center">出版时间</div>
+                                <div class="controls"><p class="form-control-static ">
+                                    {% if lenpub == 0 %}
+                                        空
+                                    {% else %}
+                                        {{ form.pubDate|date:"Y" }}年</p>
+                                    {% endif %}
+
+                                </div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_contentLength" class="value form-group row">
+                                <div class="control-label" style="text-align: center">页数</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.contentLength }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_uploadPeople" class="value form-group row">
+                                <div class="control-label" style="text-align: center">文件上传人</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.uploadPeople }}</p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_uploadDate" class="value form-group row">
+                                <div class="control-label" style="text-align: center">上传时间</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.uploadDate }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_uploadDate" class="value form-group row">
+                                <div class="control-label">更新时间</div>
+                                <div class="controls"><p class="form-control-static ">{{ form.updateDate }}</p></div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width: 50%">
+                            <div id="div_id_check" class="value form-group row">
+                                <div class="control-label" style="text-align: center">是否审核</div>
+                                <div class="controls"><p class="form-control-static "><i
+                                        {% if form.check %}
+                                            class="fa fa-check-circle text-success" alt="False"
+                                        {% else %}
+                                            class="fa fa-times-circle text-error" alt="False"
+                                        {% endif %}
+                                ></i></p></div>
+                            </div>
+                        </td>
+                        <td style="width: 50%">
+                            <div id="div_id_notes" class="value form-group row">
+                                <div class="control-label" style="text-align: center">备注</div>
+                                <div class="controls"><p class="form-control-static "><span
+                                        class="text-muted">{{ form.notes }}</span></p></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+                <div id="div_id_picture" class="value form-group row">
+                    <div class="control-label" style="text-align: center">缩略图</div>
+                    <div class="controls"><p class="form-control-static "><a
+                            href={{ picherf }} target="_blank"
+                            title="缩略图" data-gallery="gallery"><img
+                            src={{ picherf }}
+                                    class="field_img"> </a></p></div>
+                </div>
+                <div id="div_id_attachment" class="value form-group row">
+                    <div class="control-label" style="text-align: center">附 件</div>
+                    <div class="controls"><p class="form-control-static ">
+                        {{ fileherf }}</p></div>
+                </div>
+
+                {% if formextenddetail %}
+                    <div id="div_id_attachment" class="value form-group row">
+                        <div class="control-label" style="color: red;padding-top: 10px!important;text-align: center">
+                            扩展属性
+                        </div>
+
+                    </div>
+                {% endif %}
+
+                <table class="col-sm-12">
+                    {% for key,value in formextenddetail %}
+                        {% if forloop.counter|divisibleby:'2' %}
+                            <td style="width: 50%">
+                                <div id="div_id_notes" class="value form-group row">
+                                    <div class="control-label">{{ key }}</div>
+                                    <div class="controls"><p class="form-control-static "><span class="text-muted"><font
+                                            color="black">{{ value }}</font></span></p></div>
+                                </div>
+                            </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                            <td style="width: 50%">
+                                <div id="div_id_notes" class="value form-group row">
+                                    <div class="control-label">{{ key }}</div>
+                                    <div class="controls"><p class="form-control-static "><span class="text-muted"><font
+                                            color="black">{{ value }}</font></span></p></div>
+                                </div>
+                            </td>
+
+                        {% endif %}
+                    {% endfor %}
+                </table>
+
+
+            </div>
+        </div>
+
+    </div>
+
+</div>

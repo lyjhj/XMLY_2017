@@ -1,0 +1,13 @@
+
+*.background_1{
+width:100%;
+height:800px;
+FILTER:progid DXImageTransform.Microsoft.Gradient(gradientType=0,startColorStr=#011f5b,endColorStr=#fafafa); /*IE*/
+background:-moz-linear-gradient(top,#011f5b,#fafafa);/*火狐*/
+background:-webkit-gradient(linear, 0% 0%, 0% 100%,from(#011f5b), to(#fafafa));/*谷歌*/
+background-image: -webkit-gradient(linear,left bottom,left top,color-start(0,#011f5b),color-stop(1, #fafafa));/* Safari & Chrome*/
+filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#011f5b', endColorstr='#fafafa'); /*IE6 & IE7*/
+-ms-filter: "progid:DXImageTransform.Microsoft.gradient(GradientType=0,startColorstr='#011f5b', endColorstr='#fafafa')"; /* IE8 */
+}
+
+

@@ -1,0 +1,2 @@
+{{ object.disciplineTypeName }}
+{{ object.text }}

@@ -1,0 +1,249 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>地图展示</title>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="google-site-verification" content="x4PklNIAhqnDXEZBGXgbdxTTGGbRvEdHATuGeEaA7xg"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.css' %}" />
+
+    <script src="{% static 'gis_style/js/leaflet.js' %}"></script>
+    <script src="{% static 'gis_style/js/leaflet.ChineseTmsProviders.js' %}"></script>
+
+              <!-- Load Esri Leaflet from CDN -->
+      <script src="{% static 'gis_style/js/esri-leaflet@2.0.7.js' %}"></script>
+        <script src="{% static 'gis_style/js/Control.OSMGeocoder.js' %}"></script>
+
+        <script src="{% static 'gis_style/js/leaflet.polylineDecorator.js' %}"></script>
+
+
+        <style type="text/css">
+        #panel{
+            overflow: hidden;
+            width: 100%; height: 620px; position: relative; background-color: #F8F8F8; margin: 20px auto;
+        }
+        #map{
+            width: 100%;
+            height: 100%;
+        }
+        .Q-Tooltip{
+            font-size: 9pt;
+        }
+       </style>
+</head>
+
+<body>
+
+            {% if check %}
+                <p> 搜索结果：共有 <span style="color: red">{{ count }}条</span> 路线中包含搜索词。</p>
+            {% endif %}
+        <div id="panel">
+            <div id="map"></div>
+        </div>
+
+
+</body>
+
+
+<script>
+
+        var normalMap = L.tileLayer.chinaProvider('Google.Normal.Map', {
+                    maxZoom: 20,
+                    minZoom: 3
+                });
+
+        {# eris 英文 山地图层加载#}
+{#        var normalMap = L.esri.basemapLayer('Streets', {#}
+{#                    maxZoom: 20,#}
+{#                    minZoom: 3#}
+{#                });#}
+        {# eris 英文 山地图层加载#}
+
+
+        var map = L.map("map", {
+            center: [30.6757, 104.0625],
+            zoom: 5,
+            layers: [normalMap],
+            zoomControl: true
+        });
+
+    map.attributionControl.addAttribution('<a href="http://www.scu.edu.cn/" target="_blank">四川大学</a>');
+
+
+    //        {#地图search功能#}
+        var osmGeocoder = new L.Control.OSMGeocoder({
+            collapsed: false,
+            position: 'topright',
+            text: 'Search'
+        });
+        osmGeocoder.addTo(map);
+        L.control.scale().addTo(map);
+
+        var triplist = {{ triplist|safe }};
+        var tripitemlist={{ tripitemlist|safe }};
+        var routenamelist={{ routenamelist|safe }};
+        var linelist={{ linelist|safe }};
+        var index=triplist.length-1;
+
+        var beginColor='#000000';
+
+        for (var i=0;i<index+1;i++){
+
+            var curColor = getRGB(beginColor);
+            var siteindex=triplist[i].length-1;
+
+            for (var j=0;j<siteindex;j++)
+            {
+{#                根据交通方式画线#}
+                var tans=tripitemlist[i][j][3];
+                switch (tans) {
+                    case "飞机":
+                            // --- Example with a rotated marker ---
+                        L.polylineDecorator([linelist[i][j],linelist[i][j+1]],{
+                                    patterns: [
+{#                                        { offset: 0, repeat: 10, symbol: L.Symbol.dash({pixelSize: 5, pathOptions: {color: '#000', weight: 1, opacity: 0.2}}) },#}
+                                        { offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: getColor(curColor), weight: 2}}) },
+                                        { offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}) },
+                                        { offset: '16%', repeat: '60%', symbol: L.Symbol.marker({rotate: true, markerOptions: {
+                                            icon: L.icon({
+                                                iconUrl: '{% static 'gis_style/images/icon_plane24.png' %}',
+                                                iconAnchor: [8, 8]
+                                            })
+                                        }})
+                                        }
+                                    ]
+                                }
+                            ).addTo(map);
+                        break;
+                    case "轮船":
+                        L.polylineDecorator([linelist[i][j],linelist[i][j+1]],{
+                                    patterns: [
+                                        { offset: 0, repeat: 10, symbol: L.Symbol.dash({pixelSize: 5, pathOptions: {color: '#000', weight: 1, opacity: 0.2}}) },
+                                        { offset: '16%', repeat: '60%', symbol: L.Symbol.marker({rotate: true, markerOptions: {
+                                            icon: L.icon({
+                                                iconUrl: '{% static 'gis_style/images/boat.png' %}',
+                                                iconAnchor: [8, 8]
+                                            })
+                                        }})
+                                        }
+                                    ]
+                                }
+                            ).addTo(map);
+                        break;
+                    case "火车":
+                        L.polylineDecorator([linelist[i][j],linelist[i][j+1]],{
+                                    patterns: [
+                                        { offset: 0, repeat: 10, symbol: L.Symbol.dash({pixelSize: 5, pathOptions: {color: '#000', weight: 1, opacity: 0.2}}) },
+                                        { offset: '16%', repeat: '60%', symbol: L.Symbol.marker({rotate: true, markerOptions: {
+                                            icon: L.icon({
+                                                iconUrl: '{% static 'gis_style/images/train.png' %}',
+                                                iconAnchor: [0, 0]
+                                            })
+                                        }})
+                                        }
+                                    ]
+                                }
+                            ).addTo(map);
+                        break;
+{#                    case "汽车":#}
+{#                        L.polylineDecorator([linelist[i][j],linelist[i][j+1]],{#}
+{#                                    patterns: [#}
+{#                                        { offset: 0, repeat: 10, symbol: L.Symbol.dash({pixelSize: 5, pathOptions: {color: '#000', weight: 1, opacity: 0.2}}) },#}
+{#                                        { offset: '16%', repeat: '60%', symbol: L.Symbol.marker({rotate: true, markerOptions: {#}
+{#                                            icon: L.icon({#}
+{#                                                iconUrl: '{% static 'gis_style/images/minibus.png' %}',#}
+{#                                                iconAnchor: [8, 8]#}
+{#                                            })#}
+{#                                        }})#}
+{#                                        }#}
+{#                                    ]#}
+{#                                }#}
+{#                            ).addTo(map);#}
+{#                        break;#}
+                    default:
+                           // --- Multi-pattern without Polyline ---
+                            L.polylineDecorator([linelist[i][j],linelist[i][j+1]],{
+                                    patterns: [
+                                        { offset: 12, repeat: 25, symbol: L.Symbol.dash({pixelSize: 10, pathOptions: {color: getColor(curColor), weight: 2}}) },
+                                        { offset: 0, repeat: 25, symbol: L.Symbol.dash({pixelSize: 0}) },
+                                        {offset: 25, repeat: 75, symbol: L.Symbol.arrowHead({pixelSize: 8,pathOptions: {color: getColor(curColor),fillOpacity: 1, weight: 0}})}
+                                    ]
+                                }
+                            ).addTo(map).bindPopup(
+                                            '<div style="width:90px">' +
+                                            '<p style="font-size:10px;font-weight:bold;">'+routenamelist[i]+'</p>' +
+                                            '</div>'
+                                      );
+                }}
+
+            for (var j=0;j<siteindex+1;j++)
+            {
+                L.circleMarker([triplist[i][siteindex-j][0],triplist[i][siteindex-j][1]], {
+                  color: 'white',//颜色
+                    opacity:1,
+                    weight:1.8,
+{#                  fillColor: '#f03',#}
+                    fillColor: '#f03',
+                    fillOpacity:1,//透明度
+                    radius: 4
+                    }).addTo(map).bindPopup(
+                            '<div style="width:300px;height:220px;border:2px solid #ccc;border-radius:5px;overflow:auto;overflow-x:hidden;">' +
+                            '<label style="font-size:15px;color:#3163b7;font-weight:bold;margin-top:10px">地名：'+tripitemlist[i][siteindex-j][0]+' ('+tripitemlist[i][siteindex-j][1]+')</label>' +
+                            '<label style="font-size:13px;font-weight:100!important">'+tripitemlist[i][siteindex-j][2]+'</label>'+
+                            '</div>'
+                      );
+
+            }
+
+            beginColor=getColor(curColor);
+{#            alert(beginColor);#}
+
+        }
+
+                function getColor(obj)
+                {
+                    obj.r = Math.round(obj.r);
+                    obj.g = Math.round(obj.g);
+                    obj.b = Math.round(obj.b);
+                    var color = '#';
+                    color += (obj.r < 16 ? '0':'') + obj.r.toString(16);
+                    color += (obj.g < 16 ? '0':'') + obj.g.toString(16);
+                    color += (obj.b < 16 ? '0':'') + obj.b.toString(16);
+
+                    return color;
+                }
+
+
+                function getRGB(color)
+
+                {
+                    var obj = new Object();
+{#                    obj.r = parseInt(color.substr(1,2), 16)+96;#}
+{#                    obj.g = parseInt(color.substr(3,2), 16)+32;#}
+{#                    obj.b = parseInt(color.substr(5,2), 16)+16;#}
+                    obj.r = parseInt(color.substr(1,2), 16)+Math.random() * 255;
+                    obj.g = parseInt(color.substr(3,2), 16)+Math.random() * 255;
+                    obj.b = parseInt(color.substr(5,2), 16)+Math.random() * 255;
+
+                    if(obj.r>255){
+                        obj.r=parseInt('1', 16)
+                    }
+                    if(obj.g>255){
+                        obj.g=parseInt('1', 16)
+                    }
+                    if(obj.b>255){
+                        obj.b=parseInt('1', 16)
+                    }
+                    return obj;
+                }
+
+
+        </script>
+
+</html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ul class="list-unstyled">
+{% for item in result %}
+   <li role="menuitem">
+                            <a name="search" href="search/?q={{ item.0 |urlencode }}&page=1" title="{{ item.0 }}">
+                                <span class="badge">{{ item.0 }}</span>
+                                <span class="title">{{ item.1 }}</span>
+                            </a>
+   </li>
+{% endfor %}
+</ul>
+</body>
+</html>

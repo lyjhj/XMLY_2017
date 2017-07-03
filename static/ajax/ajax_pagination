@@ -1,0 +1,225 @@
+$(function(){
+    //显示数据以及分页
+        var page=0;
+        var Npage=0;
+        var pageSize=10;
+        //获取数据
+        function getList(obj_result,obj_page,type,page,pageSize,options){
+            $.ajax({
+
+                // url:'xxxx,    zsy_zhushi
+
+                /*data:{
+                    flowType:type,
+                    psPage:page+1,
+                    psPageSize:pageSize,
+                },*/
+                data:$.extend({
+                    flowType:type,
+                    psPage:page+1,
+                    psPageSize:pageSize,
+                },options),
+                dataType:'json',
+                async:false,
+                success:function(data){
+
+                    var result=data.flowList;
+
+                    switch(type){
+                        case 1:
+                            var total=data.privateFlowTotal;//总的数量
+                            Npage=Math.ceil(total/pageSize);//总的页数
+                            break;
+                        case 2:
+                            var total=data.publicFlowTotal;//总的数量
+                            Npage=Math.ceil(total/pageSize);//总的页数
+                            break;
+                        default:
+                            var total=data.myFlowTotal;//总的数量
+                            Npage=Math.ceil(total/pageSize);//总的页数
+                            break;
+
+                    }
+
+
+
+                    $("#"+obj_page+"").empty();
+                    for(var i=1;i<Npage+1;i++){
+                        var $li=$("<li class="+"page"+">"+i+"</li>");
+                        $("#"+obj_page+"").append($li);
+                    }
+
+                    $("#"+obj_result+"").empty();
+
+                    if(result.length>=pageSize){
+                        for(var i=0;i<pageSize;i++){
+                            var name=result[i].flowname==""?"名称":result[i].flowname;
+                            var state=result[i].state;
+                            switch(state){
+                                case 1:
+                                    state="已发布到私有云";
+                                    break;
+                                case 2:
+                                    state="已发布到共有云";
+                                    break;
+                                default:
+                                    state="未发布";
+                                    break;
+                            }
+                            var time=result[i].sync;
+                            time=UnixToDate(time/1000);
+                            var $li=$("<li class='col-md-2'>" +
+                                    "<div class='front'>" +
+                                            "<p style='width:100%;'><img style='margin-top:30px' src='images/process-icon.png' alt='' class='process-icon'/></p>" +
+                                                    "<span>"+name+"</span><p>状态："+state+"</p><p>时间："+time+"</p>" +
+                                    "</div>" +
+                                    "<div class='behind'>" +
+                                            "<a class='bd-btn edit-process'>编辑流程</a>" +
+                                            "<a class='bd-btn preview-process show-preview-layer'>预览流程</a>" +
+                                            "<div class='operate-list mt46'>" +
+                                                    "<i class='operate-icons set-icon'></i>" +
+                                                    "<i class='operate-icons issue02-icon'></i>" +
+                                                    "<i class='operate-icons copy02-icon'></i>" +
+                                                    "<i class='operate-icons del-icon'></i>" +
+                                            "</div>" +
+                                            "<a ><img src='images/user-pic.png' alt='' class='user-pic mt45'/></a>" +
+                                    "</div>" +
+                                    "</li>");
+                            $("#"+obj_result+"").append($li);
+                        }
+                    }else{
+                        for(var i=0;i<result.length;i++){
+                            var name=result[i].flowname==""?"名称":result[i].flowname;
+                            var state=result[i].state;
+                            switch(state){
+                                case 1:
+                                    state="已发布到私有云";
+                                    break;
+                                case 2:
+                                    state="已发布到共有云";
+                                    break;
+                                default:
+                                    state="未发布";
+                                    break;
+                            }
+                            var time=result[i].sync;
+                            time=UnixToDate(time/1000);
+                            var $li=$("<li class='col-md-2'>" +
+                                    "<div class='front'>" +
+                                            "<p style='width:100%;'><img style='margin-top:30px' src='images/process-icon.png' alt='' class='process-icon'/></p>" +
+                                                    "<span>"+name+"</span><p>状态："+state+"</p><p>时间："+time+"</p>" +
+                                    "</div>" +
+                                    "<div class='behind'>" +
+                                            "<a class='bd-btn edit-process'>编辑流程</a>" +
+                                            "<a class='bd-btn preview-process show-preview-layer'>预览流程</a>" +
+                                            "<div class='operate-list mt46'>" +
+                                                    "<i class='operate-icons set-icon'></i>" +
+                                                    "<i class='operate-icons issue02-icon'></i>" +
+                                                    "<i class='operate-icons copy02-icon'></i>" +
+                                                    "<i class='operate-icons del-icon'></i>" +
+                                            "</div>" +
+                                            "<a ><img src='images/user-pic.png' alt='' class='user-pic mt45'/></a>" +
+                                    "</div>" +
+                                    "</li>");
+                            $("#"+obj_result+"").append($li);
+                            /*var $li=$("<li class="+"col-md-2"+"><div class="+"front"+"><p style="+"width:100%;"+"><img style="+"margin-top:30px"+" src="+"images/process-icon.png"+" alt="+""+" class="+"process-icon"+"/></p><span>"+name+"</span><p>状态："+state+"</p><p>时间："+time+"</p></div" +
+                            ">" +
+                            "<div class="+"behind"+"><a class="+"bd-btn edit-process"+">编辑流程</a><a class="+"bd-btn preview-process show-preview-layer"+">预览流程</a><div class="+"operate-list mt46"+"><i class="+"operate-icons set-icon"+"></i><i class="+"operate-icons issue02-icon"+"></i><i class="+"operate-icons copy02-icon"+"></i><i class="+"operate-icons del-icon"+"></i></div><a href="+"#"+"><img src="+"images/user-pic.png"+" alt="+""+" class="+"user-pic mt45"+"/></a></div></li>");
+                            $("#"+obj_result+"").append($li);*/
+
+                        }
+                    }
+
+                }
+            })
+        };
+        //当前的
+        getList("myState0","Npage0",0,0,pageSize);//
+        clickPage("myState0","Npage0",0,"fa-search0","search0");
+        clickPrev("myState0","Npage0","prev0",0,"fa-search0","search0");
+        clickNext("myState0","Npage0","next0",0,"fa-search0","search0");
+        search("myState0","Npage0",0,0,"fa-search0","search0");
+        //共有的
+        getList("myState1","Npage1",1,0,pageSize);
+        clickPage("myState1","Npage1",1,"fa-search1","search1");
+        clickPrev("myState1","Npage1","prev1",1,"fa-search1","search1");
+        clickNext("myState1","Npage1","next1",1,"fa-search1","search1");
+        search("myState1","Npage1",1,0,"fa-search1","search1");
+        //私有的
+        getList("myState2","Npage2",2,0,pageSize);
+        clickPage("myState2","Npage2",2,"fa-search2","search2");
+        clickPrev("myState2","Npage2","prev2",2,"fa-search2","search2");
+        clickNext("myState2","Npage2","next2",2,"fa-search2","search2");
+        search("myState2","Npage2",2,0,"fa-search2","search2");
+
+        //点击确定的哪一分页
+
+        function clickPage(obj_result,obj_page,type,search_btn,search_text){
+            $("#"+obj_page+"").on("click",".page",function(){
+                page=$(this).text()-1;
+                search_result(obj_result,obj_page,type,page,pageSize,search_text);
+                /*getList(obj_result,obj_page,type,page,4,options);*/
+                $("#"+obj_page+"").find("li").eq($(this).text()-1).css("background","#eee").siblings().css("background","#fff");
+            });
+        };
+        //点击上一个
+        function clickPrev(obj_result,obj_page,obj_btn,type,search_btn,search_text){
+            $("#"+obj_btn+"").click(function(){
+                if(page<=0){
+                    page=1;
+                }
+                page=page-1;
+                search_result(obj_result,obj_page,type,page,pageSize,search_text);
+                $("#"+obj_page+"").find("li").eq(page).css("background","#eee").siblings().css("background","#fff");
+            });
+            return false;
+        };
+        //点击下一个
+        function clickNext(obj_result,obj_page,obj_btn,type,search_btn,search_text){
+            $("#"+obj_btn+"").click(function(){
+                if(page>=Npage-2){
+                    page=Npage-2;
+                }
+                page=page+1;
+
+                search_result(obj_result,obj_page,type,page,pageSize,search_text);
+                $("#"+obj_page+"").find("li").eq(page).css("background","#eee").siblings().css("background","#fff");
+            });
+        };
+
+    //搜索
+    function search(obj_result,obj_page,type,page,search_btn,search_text){
+        $("."+search_btn+"").click(function(){
+            search_result(obj_result,obj_page,type,page,4,search_text);//注意这块有个限制一页显示多少的数字
+        });
+    };
+    //出现搜索的结果
+    function search_result(obj_result,obj_page,type,page,pageSize,search_text){
+        var text=$("#"+search_text+"").val();
+        var options={
+            flowName:text
+        }
+        getList(obj_result,obj_page,type,page,pageSize,options);
+    };
+
+    //时间戳返回成日期
+    function UnixToDate(unixTime, isFull, timeZone) {
+        if (typeof (timeZone) == 'number')
+        {
+            unixTime = parseInt(unixTime) + parseInt(timeZone) * 60 * 60;
+        }
+        var time = new Date(unixTime * 1000);
+        var ymdhis = "";
+        ymdhis += time.getUTCFullYear() + "-";
+        ymdhis += (time.getUTCMonth()+1) + "-";
+        ymdhis += time.getUTCDate();
+        if (isFull === true)
+        {
+            ymdhis += " " + time.getUTCHours() + ":";
+            ymdhis += time.getUTCMinutes() + ":";
+            ymdhis += time.getUTCSeconds();
+        }
+        return ymdhis;
+    }
+
+});

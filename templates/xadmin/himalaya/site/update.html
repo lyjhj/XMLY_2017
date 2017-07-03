@@ -1,0 +1,851 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh-Hans" >
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0">
+
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <meta name="robots" content="NONE,NOARCHIVE" />
+  <title>增加 地点信息 | 喜马拉雅数据库</title>
+
+  <link href="/static/xadmin/vendor/bootstrap/css/bootstrap.css" type="text/css" media="screen" rel="stylesheet" />
+
+  <link rel="stylesheet" type="text/css" href="/static/xadmin/css/themes/bootstrap-xadmin.css" />
+
+  <link href="/static/xadmin/vendor/font-awesome/css/font-awesome.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.main.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.plugins.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.responsive.css" type="text/css" media="screen" rel="stylesheet" />
+  <link href="/static/xadmin/vendor/select2/select2.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/vendor/selectize/selectize.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/vendor/selectize/selectize.bootstrap3.css" type="text/css" media="screen" rel="stylesheet" />
+<link href="/static/xadmin/css/xadmin.form.css" type="text/css" media="screen" rel="stylesheet" />
+
+  <script type="text/javascript" src="/static/xadmin/vendor/jquery/jquery.js"></script>
+
+  <script type="text/javascript">
+    window.__admin_media_prefix__ = "/static/xadmin/";
+    window.__admin_path_prefix__ = "/xadmin/";
+    window.__admin_language_code__ = "zh-Hans";
+  </script>
+  <script type="text/javascript" src="/xadmin/jsi18n/"></script>
+
+
+        <link rel="stylesheet" href="{% static 'gis_style/css/leaflet.css' %}" />
+
+    <script src="{% static 'gis_style/js/leaflet.js' %}"></script>
+    <script src="{% static 'gis_style/js/leaflet.ChineseTmsProviders.js' %}"></script>
+
+              <!-- Load Esri Leaflet from CDN -->
+      <script src="{% static 'gis_style/js/esri-leaflet@2.0.7.js' %}"></script>
+       <!--<script src="/static/gis_style/js/Autolinker.min.js"></script>-->
+        <script src="{% static 'gis_style/js/Control.OSMGeocoder.js' %}"></script>
+        <!--<script src="/static/gis_style/js/leaflet.draw.js"></script>-->
+
+        <!--{#        标注传递经纬度#}-->
+{#        <script src="{% static 'gis_style/js/Leaflet.LocationShare.js' %}"></script>#}
+    <script src="{% static 'gis_style/js/marklocaion.js' %}"></script>
+    <style>
+        #panel{
+            overflow: hidden;
+            width: 100%; height: 500px; position: relative; background-color: #F8F8F8; margin: 20px auto;
+        }
+        #map{
+            width: 100%;
+            height: 100%;
+        }
+        .Q-Tooltip{
+            font-size: 9pt;
+        }
+
+        .w{ width:100%; clear:both; overflow:hidden;}
+        .c{ width:40%; float:left;}
+        .d{ width:58%;float:right; margin-left:2%;}
+       </style>
+
+
+            <style>
+select,button{padding:0.5em;}
+</style>
+
+</head>
+<body class="himalaya-site change-form">
+
+  <!-- Header -->
+
+  <div id="top-nav" class="navbar navbar-xs navbar-inverse navbar-fixed-top">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="#">喜马拉雅数据库</a>
+    </div>
+    <div class="navbar-collapse collapse">
+      <ul class="nav navbar-nav pull-right">
+
+
+
+
+<li class="dropdown g-add">
+  <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+  <i class="fa fa-plus"></i> <span class="hide-sm">增加 <i class="caret"></i></span></a>
+  <ul id="g-add-menu" class="dropdown-menu" role="menu">
+
+        <li><a href="/xadmin/himalaya/format/add/"><i class="fa fa-plus"></i> 增加 格式类型</a></li>
+
+        <li><a href="/xadmin/xadmin/bookmark/add/"><i class="fa fa-plus"></i> 增加 书签</a></li>
+
+        <li><a href="/xadmin/auth/group/add/"><i class="fa fa-plus"></i> 增加 组</a></li>
+
+        <li><a href="/xadmin/himalaya/site/add/"><i class="fa fa-plus"></i> 增加 地点信息</a></li>
+
+        <li><a href="/xadmin/himalaya/fileextendinfo/add/"><i class="fa fa-plus"></i> 增加 专题文献库</a></li>
+
+        <li><a href="/xadmin/himalaya/booklist/add/"><i class="fa fa-plus"></i> 增加 书目列表</a></li>
+
+        <li><a href="/xadmin/auth/user/add/"><i class="fa fa-plus"></i> 增加 用户</a></li>
+
+        <li><a href="/xadmin/himalaya/discipline/add/"><i class="fa fa-plus"></i> 增加 学科类型</a></li>
+
+        <li><a href="/xadmin/himalaya/filebaseinfo/add/"><i class="fa fa-plus"></i> 增加 文献基础属性</a></li>
+
+        <li><a href="/xadmin/himalaya/subjecttheme/add/"><i class="fa fa-plus"></i> 增加 专题文献属性</a></li>
+
+        <li><a href="/xadmin/himalaya/filetype/add/"><i class="fa fa-plus"></i> 增加 文件类型</a></li>
+
+        <li><a href="/xadmin/himalaya/subject/add/"><i class="fa fa-plus"></i> 增加 文献专题</a></li>
+
+        <li><a href="/xadmin/himalaya/route/add/"><i class="fa fa-plus"></i> 增加 游历线路</a></li>
+
+        <li><a href="/xadmin/himalaya/language/add/"><i class="fa fa-plus"></i> 增加 语言</a></li>
+
+        <li><a href="/xadmin/xadmin/usersettings/add/"><i class="fa fa-plus"></i> 增加 用户设置</a></li>
+
+        <li><a href="/xadmin/xadmin/userwidget/add/"><i class="fa fa-plus"></i> 增加 用户小组件</a></li>
+
+        <li><a href="/xadmin/himalaya/spacescope/add/"><i class="fa fa-plus"></i> 增加 空间范围</a></li>
+
+        <li><a href="/xadmin/himalaya/traveldata/add/"><i class="fa fa-plus"></i> 增加 资料条目窗体</a></li>
+
+        <li><a href="/xadmin/auth/permission/add/"><i class="fa fa-plus"></i> 增加 权限</a></li>
+
+        <li><a href="/xadmin/himalaya/view/add/"><i class="fa fa-plus"></i> 增加 全景</a></li>
+
+        <li><a href="/xadmin/himalaya/category/add/"><i class="fa fa-plus"></i> 增加 分类属性</a></li>
+
+  </ul>
+</li>
+
+
+
+
+          <li class="dropdown">
+            <a class="dropdown-toggle" role="button" data-toggle="dropdown" href="#">
+            <strong>欢迎， admin</strong> <span class="caret"></span></a>
+            <ul id="g-account-menu" class="dropdown-menu" role="menu">
+              <li><a href="/xadmin/account/password/"><i class="fa fa-key"></i> 更改密码</a></li>
+            </ul>
+          </li>
+
+        <li><a href="/xadmin/logout/"><i class="show-sm fa fa-sign-out"></i><span class="hide-sm">注销</span></a></li>
+      </ul>
+
+
+
+<form method="get" class="top-search-form navbar-form navbar-left" id="g-search">
+  <div class="input-group">
+    <input name="_q_" class="form-control" type="text">
+    <span class="input-group-btn">
+      <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <i class="fa fa-search"></i> 搜索 <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+
+          <li><a data-action="/xadmin/himalaya/format/"><i class="fa fa-search"></i> 搜索格式类型</a></li>
+
+          <li><a data-action="/xadmin/auth/group/"><i class="fa fa-search"></i> 搜索组</a></li>
+
+          <li><a data-action="/xadmin/himalaya/site/"><i class="fa fa-search"></i> 搜索地点信息</a></li>
+
+          <li><a data-action="/xadmin/himalaya/fileextendinfo/"><i class="fa fa-search"></i> 搜索专题文献库</a></li>
+
+          <li><a data-action="/xadmin/himalaya/booklist/"><i class="fa fa-search"></i> 搜索书目列表</a></li>
+
+          <li><a data-action="/xadmin/auth/user/"><i class="fa fa-search"></i> 搜索用户</a></li>
+
+          <li><a data-action="/xadmin/himalaya/discipline/"><i class="fa fa-search"></i> 搜索学科类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/filebaseinfo/"><i class="fa fa-search"></i> 搜索文献基础属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subjecttheme/"><i class="fa fa-search"></i> 搜索专题文献属性</a></li>
+
+          <li><a data-action="/xadmin/himalaya/filetype/"><i class="fa fa-search"></i> 搜索文件类型</a></li>
+
+          <li><a data-action="/xadmin/himalaya/subject/"><i class="fa fa-search"></i> 搜索文献专题</a></li>
+
+          <li><a data-action="/xadmin/himalaya/route/"><i class="fa fa-search"></i> 搜索游历线路</a></li>
+
+          <li><a data-action="/xadmin/himalaya/language/"><i class="fa fa-search"></i> 搜索语言</a></li>
+
+          <li><a data-action="/xadmin/himalaya/spacescope/"><i class="fa fa-search"></i> 搜索空间范围</a></li>
+
+          <li><a data-action="/xadmin/himalaya/traveldata/"><i class="fa fa-search"></i> 搜索资料条目窗体</a></li>
+
+          <li><a data-action="/xadmin/himalaya/view/"><i class="fa fa-search"></i> 搜索全景</a></li>
+
+      </ul>
+    </span>
+  </div>
+</form>
+
+
+
+
+    </div>
+  </div>
+
+  <div id="body-content" class="clearfix row">
+    <div id="left-side" class="col-sm-1 col-md-2">
+
+
+
+
+
+
+<div class="panel-group hide-sm nav-sitemenu col-md-2" id="nav-accordion">
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-1">
+          <a href="/xadmin" class="section">
+          <i class="fa-fw fa fa-laptop"></i>
+
+          首页
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-1" class="list-group panel-collapse collapse in">
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">0</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-2">
+          <a href="/xadmin/auth/user/" class="section">
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          用户管理
+          </a>
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-2" class="list-group panel-collapse collapse">
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">6</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-3">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          基础数据管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-3" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/himalaya/filetype/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/spacescope/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        空间范围设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/language/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        语言类型设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/discipline/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件学科设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/format/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文件格式设置</span>
+      </a>
+
+      <a href="/xadmin/himalaya/category/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        专题枚举数据</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">3</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-4">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          游历数据管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-4" class="list-group panel-collapse collapse in">
+
+      <a href="/xadmin/himalaya/booklist/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        书目列表管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/site/" class="list-group-item active">
+        <i class="fa-fw fa fa-link"></i>
+        游历地点管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/route/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        游历线路管理</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">3</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-5">
+
+          <i class="fa-fw fa fa-list-ol"></i>
+
+          其他管理
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-5" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/himalaya/subject/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        专题项目管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/filebaseinfo/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        文献资源管理</span>
+      </a>
+
+      <a href="/xadmin/himalaya/view/" class="list-group-item">
+        <i class="fa-fw fa fa-link"></i>
+        全景资源管理</span>
+      </a>
+
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h6 class="panel-title">
+        <span class="badge badge-info">2</span>
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#nav-accordion" href="#nav-panel-6">
+
+          <i class="fa-fw fa fa-group"></i>
+
+          Auth
+
+        </a>
+      </h6>
+    </div>
+    <div id="nav-panel-6" class="list-group panel-collapse collapse">
+
+      <a href="/xadmin/auth/group/" class="list-group-item">
+        <i class="fa-fw fa fa-group"></i>
+        组</span>
+      </a>
+
+      <a href="/xadmin/auth/permission/" class="list-group-item">
+        <i class="fa-fw fa fa-lock"></i>
+        权限</span>
+      </a>
+
+    </div>
+  </div>
+
+</div>
+
+
+
+  <ul class="well nav nav-list nav-sitemenu show-sm">
+    <li class="app_menu">
+      <a href="/xadmin/"><i class="icon fa-fw fa fa-home"></i></a><hr/>
+    </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-laptop"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/filetype/">
+            <i class="fa-fw fa fa-link"></i>
+            文件类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/spacescope/">
+            <i class="fa-fw fa fa-link"></i>
+            空间范围设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/language/">
+            <i class="fa-fw fa fa-link"></i>
+            语言类型设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/discipline/">
+            <i class="fa-fw fa fa-link"></i>
+            文件学科设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/format/">
+            <i class="fa-fw fa fa-link"></i>
+            文件格式设置</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/category/">
+            <i class="fa-fw fa fa-link"></i>
+            专题枚举数据</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu  active">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/booklist/">
+            <i class="fa-fw fa fa-link"></i>
+            书目列表管理</span></a>
+          </li>
+
+          <li class="active">
+            <a href="/xadmin/himalaya/site/">
+            <i class="fa-fw fa fa-link"></i>
+            游历地点管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/route/">
+            <i class="fa-fw fa fa-link"></i>
+            游历线路管理</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-list-ol"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/himalaya/subject/">
+            <i class="fa-fw fa fa-link"></i>
+            专题项目管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/filebaseinfo/">
+            <i class="fa-fw fa fa-link"></i>
+            文献资源管理</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/himalaya/view/">
+            <i class="fa-fw fa fa-link"></i>
+            全景资源管理</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+      <li class="app_menu dropdown-submenu ">
+        <a href="#" class="section">
+          <i class="icon fa-fw fa fa-group"></i>
+
+        </a><hr/>
+        <ul class="dropdown-menu">
+
+          <li>
+            <a href="/xadmin/auth/group/">
+            <i class="fa-fw fa fa-group"></i>
+            组</span></a>
+          </li>
+
+          <li>
+            <a href="/xadmin/auth/permission/">
+            <i class="fa-fw fa fa-lock"></i>
+            权限</span></a>
+          </li>
+
+        </ul>
+      </li>
+
+
+  </ul>
+
+
+
+
+
+    </div>
+
+
+    <div id="content-block" class="col-sm-11 col-md-10" style="min-height: 600px">
+
+      <ul class="breadcrumb">
+
+
+      <li>
+        <a href="/xadmin/">首页</a>
+      </li>
+
+      <li>
+        <a href="/xadmin/himalaya/site/">地点信息</a>
+      </li>
+
+      <li>
+        更新 地点信息
+
+      </li>
+
+
+      </ul>
+
+
+
+      <div class="navbar content-navbar navbar-default navbar-xs" data-toggle="breakpoint"
+        data-class-xs="navbar content-navbar navbar-inverse navbar-xs"
+        data-class-sm="navbar content-navbar navbar-default navbar-xs">
+        <div class="navbar-header">
+
+
+          <button type="button" class="navbar-toggle pull-left" onclick="javascript: history.back();"><i class="fa fa-arrow-left"></i></button>
+
+
+          <a class="navbar-brand" data-toggle="collapse" data-target="#top-nav .navbar-collapse">
+
+更新 地点信息
+          </a>
+        </div>
+
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+
+          </ul>
+
+
+
+          <div class="navbar-btn pull-right hide-xs">
+
+
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+
+
+
+
+
+<form class="exform" enctype="multipart/form-data" action="" method="post" id="site_form"><input type='hidden' name='csrfmiddlewaretoken' value='f0GEeOhPBFNXesXhAOuQDwpSU4zuPspH' />
+
+  <input type='hidden' id='_portal_key' value='himalaya_site_editform_portal' />
+
+<input type='hidden' name='csrfmiddlewaretoken' value='f0GEeOhPBFNXesXhAOuQDwpSU4zuPspH' />
+
+    <div class="form-container row clearfix" >
+        <div id="column-0" class="formColumn column form-column full col col-sm-12 form-horizontal"  horizontal="True" span="12">
+            <div class="panel panel-default fieldset unsort no_title" id="box-0" > <div class="panel-heading">
+                <i class='icon fa fa-chevron-up chevron'></i><h3 class="panel-title"></h3></div>
+                <div class="panel-body " >
+
+                    <div class="w">
+                     <div class="c">
+
+                <div id="div_id_sitenameCH" class="form-group">
+
+                    <label for="id_sitenameCH" class="control-label ">地点<span class="asteriskField">*</span></label>
+                    <div class="controls ">
+                        <input class="text-field admintextinputwidget form-control" id="id_sitenameCH" maxlength="1000" name="sitenameCH" type="text" value="{{ site.sitenameCH }}" required="required"/>
+                    </div>
+                </div>
+                <div id="div_id_sitenameEN" class="form-group">
+                    <label for="id_sitenameEN" class="control-label ">英文/拼音</label>
+                    <div class="controls ">
+                        <input class="text-field admintextinputwidget form-control" id="id_sitenameEN" maxlength="1000" name="sitenameEN" type="text" value="{{ site.sitenameEN }}"/>
+                    </div>
+                </div>
+
+                     </div>
+
+
+
+            <div class="d">
+
+
+                       <div id="div_id_altitude" class="form-group"> <label for="id_altitude" class="control-label ">
+                海拔
+            </label>
+            <div class="controls ">
+                <input class="numberinput form-control" id="id_altitude" name="altitude" step="0.0001" max="100000" type="number" value="{{ site.altitude }}" style="width: 300px"         onkeyup="value=value.replace(/[^\d]/g,'')"
+                                                                  onbeforepaste="clipboardData.setData('text',clipboardData.getData('text').replace(/[^\d]/g,''))"/>
+            </div>
+        </div>
+        <div id="div_id_region" class="form-group">
+            <label for="id_region" class="control-label  requiredField">所属行政区<span class="asteriskField">*</span></label>
+            <div class="controls ">
+                <div class="control-wrap" id="id_region_wrap_container">
+         <div class="col-sm-offset-2 col-sm-12 ">
+
+         <div id="city_china_val">
+        {% for item in level %}
+            <label>
+            {% ifequal  forloop.counter 1 %}
+                <select class="level_{{ forloop.counter0 }}"  name="level_{{ forloop.counter0 }}" id="level_{{ forloop.counter0 }}" required="required">
+                {% ifnotequal  item.1 'None' %}
+                <option value="{{ item.0 }}" >{{ item.1 }}</option>
+                {% endifnotequal %}
+                </select>
+                {% else %}
+                 <select class="level_{{ forloop.counter0 }}"  name="level_{{ forloop.counter0 }}" id="level_{{ forloop.counter0 }}">
+                {% ifnotequal  item.1 'None' %}
+                <option value="{{ item.0 }}" >{{ item.1 }}</option>
+                {% endifnotequal %}
+            </select>
+            {% endifequal %}
+        </label>
+        {% endfor %}
+        <input type="hidden" name="list" id ="list" value="{{ list }}" />
+         </div></div>
+    </div>
+            </div>
+        </div>
+            
+                </div>
+
+
+    </div>
+
+                             <div id="div_id_longitude" class="form-group">
+                 <label for="id_longitude" class="control-label ">经度,纬度<span class="asteriskField">*</span><br><br>
+                    <span class="asteriskField">地图标注使用说明:</span><br>
+                     一.在地图上找到对应的地点;<br>
+                        二.定位：方法1.鼠标左键单击该地点可定位该经纬度<br>
+                        方法2.点击地图左上角第三个图标-弹出标注记号并把标注记号移动到该位置;<br>
+                     <span class="asteriskField">注意:</span>
+                        修改前地点标注是固定的,不可移动.修改地点请弹出新的标记框.<br>
+
+
+
+
+
+                 </label>
+                 <div class="controls ">
+                <input class="text-field admintextinputwidget form-control" id="lnglat1" name="lnglat1" type="text" value="{{ site.latitude }},{{ site.longitude }}" disabled/>
+
+                 <input class="text-field admintextinputwidget form-control" id="lnglat" name="lnglat" value="{{ site.latitude }},{{ site.longitude }}" type="hidden" />
+
+                           <div id="panel">
+                            <div id="map"></div>
+                            </div>
+                </div>
+            </div>
+
+
+                </div>
+
+</div>
+
+</div>
+
+
+
+
+
+
+<div class="form-actions well well-sm clearfix">
+
+
+
+  <div class="btn-group clearfix show-xs save-group col-xs-12">
+  <button type="submit" class="default btn btn-primary col-xs-10" name="_save" data-loading-text="保存中.." /><i class="fa fa-save"></i> 保存</button>
+  <button type="button" class="more btn btn-primary col-xs-2" data-toggle="collapse" data-target=".nav-collapse.more-btns"><i class="fa fa-ellipsis-vertical"></i></button>
+  </div>
+  <button type="submit" class="default btn btn-primary hide-xs" name="_save" data-loading-text="保存中.." /><i class="fa fa-save"></i> 保存</button>
+
+
+<div class="nav-collapse collapse more-btns">
+
+<input type="submit" class="btn btn-default" value="保存并增加另一个" name="_addanother"  />
+<input type="submit" class="btn btn-default" value="保存并继续编辑" name="_continue" />
+
+</div>
+
+
+
+
+</div>
+</form>
+
+    </div>
+  </div>
+
+
+  <div id="footer">
+    <hr/>
+    <footer class="text-center">
+        <p>&copy; SiChuan University</p>
+    </footer>
+  </div>
+
+
+
+<script src="{% static "jQuery.cxSelect-1.4.1/js/jquery.cxselect.js" %}"></script>
+
+<script>
+(function() {
+  // 设置默认值及选项标题
+  $('#city_china_val').cxSelect({
+      selects: {{ list | safe }},
+      emptyStyle: 'none',
+      jsonName:'name',
+      jsonValue:'value',
+      jsonSub:'sub',
+      data: {{ data | safe }}
+  });
+
+})();
+</script>
+
+
+  <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.core.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.widget.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.mouse.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.sortable.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/bootstrap/js/bootstrap.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.main.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.responsive.js"></script>
+  <script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.portal.js"></script>
+{#<script type="text/javascript" src="/static/xadmin/vendor/selectize/selectize.js"></script>#}
+<script type="text/javascript" src="/static/xadmin/vendor/select2/select2.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/select2/select2_locale_zh-Hans.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.widget.select.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.quick-form.js"></script>
+<script type="text/javascript" src="/static/xadmin/js/xadmin.page.form.js"></script>
+
+<script type="text/javascript">
+var normalMap = L.tileLayer.chinaProvider('Google.Normal.Map', {
+        maxZoom: 20,
+        minZoom: 3
+    });
+//    satelliteMap = L.tileLayer.chinaProvider('Google.Satellite.Map', {
+//        maxZoom: 18,
+//        minZoom: 3
+//    });
+
+var baseLayers = {
+    "地图": normalMap
+//    "影像":satelliteMap
+};
+
+var overlayLayers = {
+
+};
+
+var map = L.map("map", {
+    center: [30.6757, 104.0625],
+    zoom: 5,
+    layers: [normalMap],
+    zoomControl: true
+});
+
+L.control.layers(baseLayers, overlayLayers).addTo(map);
+
+//        {#地图search功能#}
+        var osmGeocoder = new L.Control.OSMGeocoder({
+            collapsed: false,
+            position: 'bottomright',
+            text: 'Search'
+        });
+        osmGeocoder.addTo(map);
+L.control.scale().addTo(map);
+        //修改时添加原来标的地点标注
+        L.marker([{{ site.latitude }},{{ site.longitude }}]).addTo(map)
+		.bindPopup("<div style='width:90px'><b>修改前地点</b></div>").openPopup();
+
+        function onMapClick(e) {
+        placeMarker_z(e,map)
+    }
+    map.on('click', onMapClick);
+
+</script>
+</body>
+</html>

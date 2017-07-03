@@ -1,0 +1,162 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="referrer" content="unsafe-url">
+        <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+        <title>专题页面-喜马拉雅多媒体数据</title>
+
+     <!--[if ! lte IE 6]><!-->
+{#        <link rel="stylesheet" crossorigin="anonymous" href="{% static 'himadatabase/my_css/main.min.css' %}" type="text/css">#}
+{#        <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}"  type="text/css" rel="stylesheet"/>#}
+
+        <link href="{% static 'himadatabase/my_css/styleOfPanorama.css' %}"  type="text/css" rel="stylesheet"/>
+        <link href="{% static 'himadatabase/my_css/Mixins.less.css' %}"  type="text/css" rel="stylesheet"/>
+        <!--<![endif]-->
+    </head>
+
+<body >
+                <!--导航条顶部 start-->
+                 {% include "himalaya/base/navTopBase.html" %}
+                <!--导航条顶部 end-->
+
+     <!--界面上面图片部分 start-->
+    <div id="section-promo" class="homepage-promo">
+           <img class="central" src="{% static 'himadatabase/images/zhuanti.png' %}" width="100%" height="240px" >
+
+           <div class="container">
+                       <div class="font_location1">
+                           <h1 >喜马拉雅多媒体数据库</h1>
+                           <h2 style="margin-top: 18px!important;"> Himalaya Multimedia Database</h2>
+                       </div>
+           </div>
+
+            <div class="productbar">
+                <div class="container">
+                  <ul class="nav">
+                    <li >
+                        <a href="/base_search/?q=">
+                            <img src="{% static 'himadatabase/my_css/images/booksearch.png'  %}" alt="">
+                            <div>
+                                <div class="title">基础文献</div>
+                                <div class="desc"> Research Documents </div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a data-target="#product-ajenti" data-toggle="tab">
+                            <img src="{% static 'himadatabase/my_css/images/01.png' %}" >
+                            <div>
+                                <div class="title">专题文献</div>
+                                <div class="desc"> Topic Collection </div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'himalaya:panorama' %}">
+                            <img src="{% static 'himadatabase/my_css/images/jiuzhaigou.png' %}">
+                            <div>
+                                <div class="title">
+                                   全景漫游
+                                </div>
+                                <div class="desc"> Panoramic View</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                      <li>
+                        <a href="{% url 'himalaya:mapview' %}">
+                            <img src="{% static 'himadatabase/my_css/images/gis4.png' %}">
+                            <div>
+                                <div class="title">
+                                     GIS数据库
+                                </div>
+                                <div class="desc">GIS Database</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                  </ul>
+                </div>
+            </div>
+    </div>
+     <!--界面上面图片部分 end-->
+
+      <!--专题展示部分 start-->
+            <!--content-->
+		<div class="our-products">
+			<div class="container">
+				<div class="products-gallery">
+
+{#                    <span class="titleborder"></span>#}
+					<h2 class="titlestyle">专题文献栏</h2>
+{#                    <span class="titleborder"></span>#}
+
+                     <!--专题展示部分django start-->
+                    {% for item in specialist_list %}
+                        {% if item.0.subVisible == True %}
+                            {% if item.0.subParent == None and item.0.hasChild != True %}
+                                <div class="col-lg-4 arr">
+                                    <div class="bg">
+                                        <a href="/subject/?q=&subjectName={{ item.0.subjectName }}" target="_blank">
+                                            <img src="{{ item.0.subjectPic.url }}" alt="pet" class="img-responsive" />
+                                            <span class="glyphicon glyphicon-zoom-in pst" aria-hidden="true"></span>
+                                            <div class="caption"> <!-- 简介要控制在100字内-->
+                                                <a href="/subject/?q=&subjectName={{ item.0.subjectName }}" target="_blank"><h3>{{ item.0.subjectName }}</h3></a>
+                                                <p><span class="font1">简介</span>：{{ item.0.subjectDescribe}}</p>
+        {#                                        <p>拍摄：{{ item.viewAuth }} 制作：{{ item.viewEqu }}</p>#}
+                                                <p ><span class="font1">创建时间</span>：{{ item.0.subjectDate }}</p>
+                                                <p style="padding-bottom: 5px"><span class="font1">文献数目</span>：{{ item.1 }} 篇</p>
+                                             </div>
+                                        </a>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if item.0.subParent == None and item.0.hasChild == True %}
+                                <div class="col-lg-4 arr">
+                                 <div class="bg">
+                                    <a href="/sub_specialist/?q=&id={{ item.0.id }}" target="_blank">
+                                     <img src="{{ item.0.subjectPic.url }}" alt="pet" class="img-responsive" />
+                                      <span class="glyphicon glyphicon-zoom-in pst" aria-hidden="true"></span>
+                                      <div class="caption"> <!-- 简介要控制在100字内-->
+                                        <a href="/subject/?q=&id={{ item.0.id }}" target="_blank"><h3>{{ item.0.subjectName }}</h3></a>
+                                        <p><span class="font1">简介</span>：{{ item.0.subjectDescribe}}</p>
+                                        <p>拍摄：{{ item.viewAuth }} 制作：{{ item.viewEqu }}</p>
+                                        <p ><span class="font1">创建时间</span>：{{ item.0.subjectDate }}</p>
+                                        <p style="padding-bottom: 5px"><span class="font1">文献数目</span>：{{ item.1 }} 篇</p>
+                                      </div>
+                                    </a>
+
+                                  </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                   <!--专题展示部分django end-->
+
+{#                <!--专题展示部分 内容嵌入 整理完可删 start-->#}
+{#                     <!--专题展示部分 内容嵌入 整理完可删 end-->#}
+
+					<div class="clearfix"></div>
+				</div>
+			</div>
+		</div>
+		<!--content-ends-->
+      <!--专题展示部分 end-->
+
+            <!--导航条底部 start-->
+
+                         {% include "himalaya/base/navButtomBase.html" %}
+
+            <!--导航条底部 end-->
+</body>
+
+</html>

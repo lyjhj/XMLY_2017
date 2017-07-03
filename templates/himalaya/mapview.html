@@ -1,0 +1,146 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>游历专栏</title>
+
+    <link href="{% static 'gis_style/css/templatemo-style.css' %}" type="text/css" rel="stylesheet"/>
+{#    <link href="{% static 'gis_style/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>#}
+
+    <link href="{% static 'himadatabase/my_css/Mixins.less.css' %}" type="text/css" rel="stylesheet"/>
+
+
+</head>
+
+<body>
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+    <!--界面上面图片部分 start-->
+    <div id="section-promo" class="homepage-promo">
+        <img class="central" src="{% static 'himadatabase/images/touming.png' %}" width="100%" height="240px">
+
+        <div class="container">
+            <div class="font_location1">
+                <h1>喜马拉雅多媒体数据库</h1>
+                <h2 style="margin-top: 18px!important;"> Himalaya Multimedia Database</h2>
+            </div>
+        </div>
+
+        <div class="productbar">
+            <div class="container">
+                <ul class="nav">
+                    <li>
+                        <a href="/base_search/?q=go">
+                            <img src="{% static 'himadatabase/my_css/images/booksearch.png' %}" alt="">
+                            <div>
+                                <div class="title">基础文献</div>
+                                <div class="desc"> Research Documents</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'himalaya:specialist' %}">
+                            <img src="{% static 'himadatabase/my_css/images/01.png' %}">
+                            <div>
+                                <div class="title">专题文献</div>
+                                <div class="desc"> Topic Collection</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'himalaya:panorama' %}">
+                            <img src="{% static 'himadatabase/my_css/images/jiuzhaigou.png' %}">
+                            <div>
+                                <div class="title">
+                                   全景漫游
+                                </div>
+                                <div class="desc"> Panoramic View</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                    <li class="active">
+                        <a data-target="#product-ajenti" data-toggle="tab">
+                            <img src="{% static 'himadatabase/my_css/images/gis4.png' %}">
+                            <div>
+                                <div class="title">
+                                    GIS数据库
+                                </div>
+                                <div class="desc">GIS Database</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--界面上面图片部分 end-->
+
+
+    <div class="container" style="margin-bottom: 10px;">
+
+
+        <!--地图专题一 start-->
+        <section class="col-md-12 content" id="home">
+           <div class="col-lg-6 col-md-6 content-item" style="height: 380px !important;padding-left: 0;padding-right: 0">
+               <img src="{% static 'gis_style/images/GISback3.jpg' %}" alt="Image" class="tm-image">
+           </div>
+           <div class="col-lg-6 col-md-6 content-item content-item-1 background" style="height: 380px !important">
+               <h2 class="main-title text-center dark-blue-text">近代以来西南边疆游记数据库</h2>
+
+               <p><span class="light-blue-text">简介</span> 近代以来西南边疆游记数据库旨在构建一个集游记信息资料整合、数字化图形展示和数据分析为一体的综合地理信息平台。</p>
+               <div style="text-align:center;">
+               <button type="button" class="btn btn-big dark-blue-btn" onclick="location.href={% url 'himalaya:route_map' %}">进入专题</button>
+                </div>
+           </div>
+       </section>
+        <!--地图专题一 end-->
+
+
+        <!--地图专题二 start-->
+{#       <section class="col-md-12 content" >#}
+{#            <div class="col-lg-6 col-md-6 col-md-push-6 content-item" style="height: 380px !important;padding-left: 0;padding-right: 0">#}
+{#               <img src="{% static 'gis_style/images/2.jpg' %}" alt="Image" class="tm-image">#}
+{#           </div>#}
+{#           <div class="col-lg-6 col-md-6 col-md-pull-6 content-item background " style="height: 380px !important">#}
+{##}
+{#               <h2 class="main-title text-center dark-blue-text">游历专题 2</h2>#}
+{##}
+{#               <p class="section-text"><span class="light-blue-text">简介</span> Morbi auctor tristique mattis. Vestibulum vitae sapien a ligula mollis ullamcorper ac a nisi. Ut a dignissim est, sodales pellentesque purus. Pellentesque porttitor ante at nulla ornare, eget sagittis sapien pulvinar. In semper mi ut enim mollis, ut auctor lectus posuere.</p>#}
+{#               <div style="text-align:center;">#}
+{#                    <button type="button" class="btn btn-big dark-blue-btn">进入专题</button>#}
+{#               </div>#}
+{#           </div>#}
+{#        </section>#}
+        <!--地图专题二 end-->
+
+</div>
+
+
+
+<!--导航条底部 start-->
+{% include "himalaya/base/navButtomBase.html" %}
+<!--导航条底部 end-->
+
+{#<script src="{% static 'gis_style/js/bootstrap.min.js' %}"></script>#}
+{#<script src="{% static 'gis_style/js/jquery.singlePageNav.min.js' %}"></script>#}
+{#<script src="{% static 'gis_style/js/jquery.min.js' %}"></script>#}
+
+
+
+</body>
+
+</html>

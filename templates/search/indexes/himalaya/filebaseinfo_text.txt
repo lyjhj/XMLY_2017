@@ -1,0 +1,7 @@
+{{ object.title }}
+{{ object.creator }}
+{{ object.keywords }}
+{{ object.description }}
+{{ object.publisher}}
+{{ object.contributor }}
+{{ extracted|striptags|safe }}

@@ -1,0 +1,479 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>近代以来西南边疆游记数据库</title>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>游历专栏</title>
+
+    <link href="{% static 'gis_style/css/templatemo-style.css' %}" type="text/css" rel="stylesheet"/>
+{#    <link href="{% static 'gis_style/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>#}
+
+    <link href="{% static 'himadatabase/my_css/Mixins.less.css' %}" type="text/css" rel="stylesheet"/>
+
+    {#    webcss#}
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'himadatabase/my_css/routemapstyle.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'himadatabase/my_css/webRouteMap1.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'himadatabase/my_css/webRouteMap2.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'himadatabase/my_css/webRouteMap3.css' %}" type="text/css" rel="stylesheet"/>
+    <script src="{% static 'himadatabase/my_js/webRouteMapJS1.js' %}"></script>
+{#    <script src="{% static 'himadatabase/my_js/webRouteMapJS2.js' %}"></script>#}
+
+
+{#左侧收缩框用 start#}
+    <script type="text/javascript">
+        ws.context = {
+          instance: {
+          },
+          user: {
+
+          },
+          wiki: {
+
+          },
+          project: {
+          },
+          space: {
+          },
+
+          environment_name: '',
+
+          path: {
+
+          },
+
+          settings: {
+          }
+        }
+    </script>
+{#左侧收缩框用 end#}
+
+
+
+
+
+</head>
+
+<body>
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+  <!--界面上面图片部分 start-->
+    <div id="section-promo" class="homepage-promo">
+        <img class="central" src="{% static 'himadatabase/images/touming.png' %}" width="100%" height="240px">
+
+        <div class="container">
+            <div class="font_location1">
+                <h1>喜马拉雅多媒体数据库</h1>
+                <h2 style="margin-top: 18px!important;"> Himalaya Multimedia Database</h2>
+            </div>
+        </div>
+
+        <div class="productbar">
+            <div class="container">
+                <ul class="nav">
+                    <li>
+                        <a href="/base_search/?q=go">
+                            <img src="{% static 'himadatabase/my_css/images/booksearch.png' %}" alt="">
+                            <div>
+                                <div class="title">基础文献</div>
+                                <div class="desc"> Research Documents</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'himalaya:specialist' %}">
+                            <img src="{% static 'himadatabase/my_css/images/01.png' %}">
+                            <div>
+                                <div class="title">专题文献</div>
+                                <div class="desc"> Topic Collection</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+                    <li >
+                        <a href="{% url 'himalaya:panorama' %}">
+                            <img src="{% static 'himadatabase/my_css/images/jiuzhaigou.png' %}">
+                            <div>
+                                <div class="title">
+                                   全景漫游
+                                </div>
+                                <div class="desc"> Panoramic View</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                    <li class="active">
+                        <a href="{% url 'himalaya:mapview' %}">
+                            <img src="{% static 'himadatabase/my_css/images/gis4.png' %}">
+                            <div>
+                                <div class="title">
+                                    GIS数据库
+                                </div>
+                                <div class="desc">GIS Database</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--界面上面图片部分 end-->
+
+<div id="js-fixed-header-offset">
+
+{#<header class="ws-theme-header" role="banner">#}
+{#  <div class="ws-theme-container">#}
+{#    <div class="ws-theme-header-inner">#}
+{#          <img src="" alt="" />#}
+{#    </div>#}
+{#  </div>#}
+{#</header>#}
+
+<div class="ws-theme-body">
+  <div class="ws-theme-container">
+    <div class="ws-theme-body-inner">
+      <nav class="ws-theme-sidebar" role="navigation">
+        <div class="ws-theme-sidebar-inner">
+          <div class="ws-theme-menu">
+            <div class="ws-theme-menu-inner">
+              <ul class="WikiActions WikiElement WikiControls">
+                <li id="WikiActionHome">
+                    <div>
+                        <span class="WikiActionSupplemental" style="float: right;"></span>
+                        <a href="/">
+                            <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+                            Home
+                        </a>
+                    </div>
+                </li>
+            </ul>
+
+              <form method="post" class="WikiSearch WikiElement" role="search" >
+                  <input type="text" class="form-control WikiSearchInput" id="mapq" name="mapq" value="" placeholder="Search"/>
+                  <input style="float: right;margin: 5px 5px" type="button" id="send" name="send" value="确定" >
+
+            <!--高级查询功能 start-->
+                    <div class="routeserch">
+                            <span class="fa fa-cog"></span>
+                            <span class="title"> 高级查询项</span>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label class="sertitle">游历者:</label>
+                        <input type="search" class="form-control-map" id="people" name="people" value="" placeholder="谢晓忠"/>
+                    </div>
+                   <div class="form-group">
+                        <label class="sertitle">游历路线:</label>
+                        <input type="search" class="form-control-map" id="routename" name="routename" value="" placeholder="黄慕松奉使入藏.."/>
+                    </div>
+                    <div class="form-group">
+                        <label class="sertitle">书名:</label>
+                        <input type="search" class="form-control-map" id="bookname" name="bookname" value="" placeholder="西南旅行杂写"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="sertitle">游历见闻:</label>
+                        <input type="search" class="form-control-map" id="opinion" name="opinion" value="" placeholder="建筑"/>
+                    </div>
+
+
+                  <div class="form-group">
+                        <label class="sertitle">地点:</label>
+                        <input type="search" class="form-control-map" id="routelocation" name="routelocation" value="" placeholder="香港"/>
+                  </div>
+
+
+                  <div class="form-group">
+                        <label class="sertitle">交通方式:</label>
+{#                        <input type="search" class="form-control-map" id="travelway" name="travelway" value="" placeholder="飞机"/>#}
+                         <input list="travelwaylist" type="search" id="travelway" class="form-control-map" name="travelway" value="" placeholder="飞机"/>
+                            <datalist  id="travelwaylist" >
+                            <option value="火车">
+                            <option value="轮船">
+                            <option value="步行">
+                            <option value="骑马">
+                                <option value="飞机">
+                            </datalist>
+                    </div>
+
+                  <div class="form-group">
+                        <label class="sertitle">时间:</label>
+{#                        <input type="search" class="form-control-map" id="routetime" name="routetime" value="" placeholder="1959年"/>#}
+                        <input type="search" class="form-control-map" id="add_date" name="add_date" onclick="choose_date_czw('add_date')" placeholder="请点击选择"/>
+                    </div>
+
+                   <input style="float: right;margin: 5px 5px" type="button" id="send_AdvancedSearch" name="send_AdvancedSearch" value="确定" >
+
+            <!--高级查询能 end-->
+
+              </form>
+
+                    <!--一个下拉框样式 start-->
+{#                <div class="WikiCustomNav WikiElement wiki">#}
+{#                    <div class="WikispacesNavbar" data-navbarurl="/navbar">#}
+{#                        <div id="WikispacesNavbarAllPagesEntry"  class="WikispacesNavbarEntry WikispacesNavbarSortableEntry WikispacesNavbarRemovableEntry">#}
+{##}
+{#                            <div class="WikispacesNavbarEntryHeader">#}
+{#                                <i class="WikispacesNavbarSpinner fa fa-spinner fa-spin pull-right"></i>#}
+{#                                 <span class="WikispacesNavbarHeaderAction WikispacesNavbarRemoveEntry close">#}
+{#                                     <i class="fa fa-times"></i>#}
+{#                                 </span>#}
+{#                                <span class="fa-fw">#}
+{#                                    <i class="WikispacesNavbarToggle WikispacesNavbarPlus fa fa-caret-right"></i>#}
+{#                                    <i class="WikispacesNavbarToggle WikispacesNavbarMinus fa fa-caret-down"></i>#}
+{#                                </span>#}
+{#                                <span>All Items</span>#}
+{#                          </div>#}
+{#                          <div class="WikispacesNavbarEntryItems" id="WikispacesNavbarAllPagesEntryItems">#}
+{#                        <ol>#}
+{#                          <li>#}
+{#                            <a href="">item1</a>#}
+{#                          </li>#}
+{#                          <li>#}
+{#                            <a href="">item2</a>#}
+{#                          </li>#}
+{#                          <li>#}
+{#                            <a href="">item3</a>#}
+{#                          </li>#}
+{#                          <li>#}
+{#                            <a href="">item4</a>#}
+{#                          </li>#}
+{#                          <li>#}
+{#                            <a href="">item5</a>#}
+{#                          </li>#}
+{#                        </ol>#}
+{#                          </div>#}
+{##}
+{#                     </div>#}
+{#                </div>#}
+{#            </div>#}
+
+                <!--一个下拉框样式 end-->
+          </div>
+        </div>
+            </div>
+      </nav>
+
+      <main class="ws-theme-content" role="main">
+        <div class="ws-theme-content-inner">
+          <div class="contentBox">
+              <div class="innerContentBox" >
+                <div class="ws-menu-bar WikiControls WikispacesContent WikispacesBs3">
+                    <h1 class="pageTitle">
+                        近代以来西南边疆游记数据库
+                    </h1>
+
+
+                </div>
+
+                  <div>
+                  简概:<br />
+                      近代以来西南边疆游记数据库旨在构建一个集游记信息资料整合、数字化图形展示和数据分析为一体的综合地理信息平台。<br />
+                      <br />
+                    地图使用说明：<br />
+                      （1）请在页面左侧的搜索栏中选择进行“全库搜索“或“高级搜索”，搜索结果中匹配的路线会在地图上展示;<br />
+                      （2）在地图上点击显示出的路线，会显示该路线的名称;<br />
+                      （3）点击路线上的圆点，会显示路线在该地点的详情（例如所见所闻，交通方式等）。<br />
+
+                      {#         地图模块 start#}
+                       <div id="resMap" class="framestyle"></div>
+                          {#         地图模块 end#}
+                  </div>
+
+            </div>
+          </div>
+
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<script src="https://www.wikischolars.columbia.edu/s/gz/33v01kj0-common.min.js" type="text/javascript"></script>
+
+
+<!--导航条底部 start-->
+{% include "himalaya/base/navButtomBase.html" %}
+<!--导航条底部 end-->
+
+
+{#    <script src="{% static 'ajax/jquery.pjax.js' %}"></script>#}
+{#    <script src="{% static 'ajax/jquery.js' %}"></script>#}
+
+
+{#         地图静态刷新JS模块 start#}
+<script type="text/javascript">
+
+$("#resMap").load("/gis_show/");
+
+$(function(){
+    $("#send").click(function () {
+        $.get("/gis_show/",{
+            mapq:$("#mapq").val(),
+            people:$("#mapq").val(),
+            routename:$("#mapq").val(),
+            bookname:$("#mapq").val(),
+            opinion:$("#mapq").val(),
+            travelway:$("#mapq").val(),
+            routelocation:$("#mapq").val()
+        },function (data,textStatus) {
+            $("#resMap").html(data);
+        });
+        document.getElementById("people").value="";
+        document.getElementById("routename").value="";
+        document.getElementById("bookname").value="";
+        document.getElementById("opinion").value="";
+        document.getElementById("add_date").value="";
+        document.getElementById("travelway").value="";
+        document.getElementById("routelocation").value="";
+    })
+});
+
+$(function(){
+    $("#send_AdvancedSearch").click(function () {
+        $.get("/gis_show/",{
+            people:$("#people").val(),
+            routename:$("#routename").val(),
+            bookname:$("#bookname").val(),
+            opinion:$("#opinion").val(),
+            add_date:$("#add_date").val(),
+            travelway:$("#travelway").val(),
+            routelocation:$("#routelocation").val(),
+            checkthis:1
+        },function (data,textStatus) {
+            $("#resMap").html(data);
+        });
+
+        document.getElementById("mapq").value="";
+    }
+    )
+})
+
+
+</script>
+{#         地图静态刷新JS模块 END#}
+
+
+{# 时间控件JS   start#}
+<script>
+    function choose_date_czw(date_id,objtd){
+if(date_id=="choose_date_czw_close"){
+    document.getElementById("choose_date_czw_id").style.display="none";
+    return;
+}
+
+if(objtd!=undefined){
+    if(objtd=="choose_date_czw_empty"){
+        document.getElementById(date_id).value="";
+    }else{
+        var year1 = document.getElementById("choose_date_czw_year").value;
+        var month1 = document.getElementById("choose_date_czw_month").value;
+        document.getElementById(date_id).value=year1+"-"+month1+"-"+objtd.innerHTML;
+    }
+    document.getElementById("choose_date_czw_id").style.display="none";
+    return;
+}
+var nstr=new Date(); //当前
+if(document.getElementById("choose_date_czw_year")!=null){
+    var year = document.getElementById("choose_date_czw_year").value;
+    var month = document.getElementById("choose_date_czw_month").value;
+    var str=year+"/"+month+"/1";
+    nstr=new Date(str); //当前
+}
+var ynow=nstr.getFullYear(); //年份
+var mnow=nstr.getMonth(); //月份
+var dnow=nstr.getDate(); //今日日期
+
+{#        var ynow=1923; //年份#}
+{#var mnow=9; //月份#}
+{#var dnow=3; //今日日期#}
+
+var n1str=new Date(ynow,mnow,1); //当月第一天
+var firstday=n1str.getDay(); //当月第一天星期几
+function is_leap(year) {
+   return (year%100==0 ? res=(year%400==0 ? 1 : 0) : res=(year%4==0 ? 1: 0));
+}
+var dstr="<select id=\"choose_date_czw_year\" onchange=\"choose_date_czw('"+date_id+"')\">";
+for(var y=1901;y<2050;y++){
+    if(y==ynow){
+        dstr+="<option value='"+y+"' selected>"+y+"</option>"
+    }else{
+        dstr+="<option value='"+y+"' >"+y+"</option>"
+    }
+}
+dstr+="</select>&nbsp;<select id=\"choose_date_czw_month\" onchange=\"choose_date_czw('"+date_id+"')\">";
+for(var m=1;m<13;m++){
+    if(parseInt(mnow+1)==m){
+        dstr+="<option value='"+m+"' selected>"+m+"</option>"
+    }else{
+        dstr+="<option value='"+m+"' >"+m+"</option>"
+    }
+}
+dstr+="</select>&nbsp;<span style='cursor:pointer;' onclick=\"choose_date_czw('choose_date_czw_close')\">关闭</span>|<span style='cursor:pointer;' onclick=\"choose_date_czw('"+date_id+"','choose_date_czw_empty')\">清空</span>";
+//一三五七八十腊(十二月),三十一日永不差;四六九冬(十一月)三十日,唯有二月二十八(闰年二十九).
+var m_days = new Array(31,28+is_leap(ynow),31,30,31,30,31,31,30,31,30,31);
+var tr_str=Math.ceil((m_days[mnow] + firstday)/7);
+dstr+="<table border='1' cellpadding='10' cellspacing='0'><tr><td>日</td><td>一</td><td>二</td><td>三</td><td>四</td><td>五</td><td>六</td></tr>";
+var dqdate=new Date(); //当前
+for(i=0;i<tr_str;i++) { //外层for语句 - tr标签
+   dstr+="<tr>";
+   for(k=0;k<7;k++) { //内层for语句 - td标签
+      idx=i*7+k; //表格单元的自然序号
+      date_str=idx-firstday+1; //计算日期
+     if(date_str<=0 || date_str>m_days[mnow]){
+          dstr+="<td>&nbsp;</td>";
+     }else{
+        if(ynow==dqdate.getFullYear() && mnow==dqdate.getMonth() && dqdate.getDate()==date_str){
+{#          if(ynow==1923 && mnow==9 && dqdate.getDate()==date_str){#}
+            dstr+="<td onmouseover=\"this.style.backgroundColor='#6FF'\" onmouseout=\"this.style.backgroundColor='#fff'\" onclick=\"choose_date_czw('"+date_id+"',this)\" style='cursor:pointer; background-color:#6FF;'>"+date_str+"</td>";
+        }else{
+            dstr+="<td onmouseover=\"this.style.backgroundColor='#6FF'\" onmouseout=\"this.style.backgroundColor='#fff'\" onclick=\"choose_date_czw('"+date_id+"',this)\" style='cursor:pointer;'>"+date_str+"</td>";
+        }
+     }
+   }
+   dstr+="</tr>";
+}
+dstr+="</table>";
+if(document.getElementById("choose_date_czw_id")==null){
+var obj = document.getElementById(date_id);
+var odiv = document.createElement("div");
+odiv.id="choose_date_czw_id";
+odiv.innerHTML=dstr;
+odiv.style.position="absolute";
+odiv.style.border="1px #0CF solid";
+    odiv.style.backgroundColor="#FFFFFF";
+odiv.style.fontSize="12px";
+odiv.style.zIndex=99999;
+{#    odiv.style.padding=1;#}
+odiv.style.top="650px";
+odiv.style.left="26%";
+
+
+document.body.appendChild(odiv);
+}else{
+    document.getElementById("choose_date_czw_id").style.display="block";
+    document.getElementById("choose_date_czw_id").innerHTML=dstr;
+}
+}
+</script>
+{# 时间控件JS   start#}
+
+
+
+</body>
+
+</html>

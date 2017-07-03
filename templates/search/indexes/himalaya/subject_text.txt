@@ -1,0 +1,3 @@
+{{ object.subjectName }}
+{{ object.subjectDescribe }}
+{{ object.subjectDate }}

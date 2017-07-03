@@ -1,0 +1,941 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="zh" dir="ltr" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="referrer" content="unsafe-url">
+    <title>统计图</title>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <!--[if ! lte IE 6]><!-->
+    <script src="{% static 'statistic/jquery-3.1.1.js' %}"></script>
+    <script src="{% static 'statistic/highcharts.js' %}"></script>
+
+
+
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/main.min.css' %}"
+          type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/leafletjs-bundle.min.css' %}" type="text/css">
+    <link rel="stylesheet" href="{% static 'himadatabase/my_css/styleOfShow.css' %}" type="text/css">
+    <link href="{% static 'bootstrap-3.3.5/css/bootstrap.min.css' %}" type="text/css" rel="stylesheet"/>
+    <link href="{% static 'font-awesome-4.5.0/css/font-awesome.css' %}" type="text/css" rel="stylesheet"/>
+    <!--<![endif]-->
+    {#    内容滑动菜单栏样式#}
+    <link rel="stylesheet" href="{% static 'himadatabase/test/docs.min.css' %}" type="text/css">
+    {#    内容滑动菜单栏样式#}
+
+    <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+</head>
+<body class="lang_zh search-results "  onload="load()">
+
+<!--导航条顶部 start-->
+{% include "himalaya/base/navTopBase.html" %}
+<!--导航条顶部 end-->
+
+<input id="sidebar-toggle-checkbox" type="checkbox" hidden>
+
+<div id="page-main" class="container-fluid" style="min-height: 10px">
+    <div class="row">
+        <form action="{% url 'himalaya:search' %}" method="get">
+        <div class="col-sm-8 col-sm-offset-3">
+            {#    <form id="site-search" class="form-horizontal" action="/">#}
+            <div class="row" >
+                <div class="col-sm-8">
+                    <div class="form-group">
+                            <div class="input-group">
+                                <input type="search" class="form-control" lang="zh" name="q" aria-label="搜索"
+                                       value="{{ query }}"
+                                       placeholder="搜索喜马拉雅多媒体数据" data-typeahead-url=".js"
+                                       data-suggest-url="/zh/search/suggest/">
+                        <span class="input-group-btn">
+                            <button class="btn btn-primary" type="submit" name="search" value="query">
+                                <span class="glyphicon glyphicon-search"></span>
+                                搜索
+                            </button>
+                        </span>
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </form>
+    </div>
+
+
+
+     <div class="row">
+            <div class="col-sm-offset-2 col-sm-6">
+                    <span id="result-label">
+                     {% if advances %}
+                               {{ subjectname }}中检索
+                                   {% for ad in advances %}
+                                              “{{ ad }}”
+                                          {% endfor %}
+                                   共有 {{ ret_num }} 篇文献
+                     {% else %}
+                         {{ subjectname }}中共有 {{ ret_num }} 篇文献
+                     {% endif %}
+
+
+                    </span>
+            </div>
+
+
+          <!--三个圆形功能按钮 start-->
+        <div id="view-mode-toggle">
+            <div class="wel-grids">
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <a href="/subject/?q={{ query }}&subjectName={{ request.GET.subjectName }}">
+                    <label class="btn btn-block">
+                        <figure class="icon ">
+                            <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="list">#}
+                        </figure>
+                        <p>列表展示</p>
+                    </label>
+                    </a>
+                </div>
+
+
+                <a href="/subject_statisticInfo/?q={{ query }}&subjectName={{ request.GET.subjectName }}">
+                <div class="col-sm-1 wel-grid text-center">
+                    <label  class="btn btn-block">
+                        <figure class="icon active">
+                            <span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+                        </figure>
+                        <p>知识视图</p>
+                    </label>
+                </div>
+                </a>
+
+
+
+                <div class="col-sm-1 wel-grid text-center">
+                    <label class="btn btn-block" hidden>
+                        <figure class="icon">
+                            <span class="glyphicon glyphicon-map-marker" aria-hidden="true"></span>
+{#                            <input type="hidden" name="view-mode" value="map">#}
+                        </figure>
+                        <p>文献地图</p></label>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row" style="margin-bottom: 80px">
+    <div id="search-results">
+        <div class="aborder"></div>
+        <div class="results list" style="height: 0px!important;margin-bottom: -56px!important;"></div>
+    </div>
+    <!-- Docs page layout -->
+{#<div>检索条件：“{{ query }}”</div>#}
+{#<div>过滤条件：“”</div>#}
+ <div class="container bs-docs-container">
+
+      <div class="row">
+        <div class="col-md-9" role="main">
+
+          <div class="bs-docs-section" >
+            <h2 id="distribution"  class="page-header">文献分布统计分析</h2>
+
+{#              如果该专题还需要统计框，就复制添加这段代码 请注意放在同一个专题div下 start#}
+              <div  class="col-md-12" >
+                <div class="panel panel-default">
+                    <div class="panel-body">
+
+                                <form class="f" name=myform >
+                        <div id="cf"></div>
+
+                         <script type="text/javascript">
+
+                        function full(list0,list1,list2,list3) {
+                            document.getElementById("distribution").innerHTML="基于"+list0+"的文献分布统计分析";
+                            Highcharts.setOptions({
+                                 // 所有语言文字相关配置都设置在 lang 里
+                                 lang: {
+                                     resetZoom: '重置',
+                                 }
+                             });
+                             $('#cf').highcharts({
+                                 chart: {
+                                     zoomType: 'x',
+                                 },
+                                 title: {
+                                     text: ''
+                                 },
+                                 xAxis: {
+                                     categories: list1
+                                 },
+                                 yAxis: {
+                                     title: {
+
+                                         text: '文献数量（篇）'
+
+                                     }
+                                 },
+                                 tooltip: {
+                                     pointFormat: '文献数: <b>{point.y}篇</b>',
+                                 },
+                                 plotOptions: {
+                                     column: {
+                                         colorByPoint: true,
+                                         pointWidth: 45
+                                     },
+                                     pie:
+                                         {
+                                             dataLabels:
+                                             {
+                                                 distance: 15
+                                             }
+                                         }
+                                 },
+                                 credits: {
+                                     enabled: false
+                                 },
+                                 labels: {
+                                     items: [{
+
+                                         style: {
+                                             left: '40px',
+                                             top: '8px',
+                                             color: 'black'
+                                         }
+                                     }]
+                                 },
+                                 series: [{
+                                     type: 'column',
+                                     name: '文献数',
+                                     data: list2
+                                 }, {
+                                     type: 'spline',
+                                     name: '文献数',
+                                     data: list2,
+                                     marker: {
+                                         lineWidth: 2,
+                                         lineColor: Highcharts.getOptions().colors[3],
+                                         fillColor: 'white'
+                                     }
+
+                                 },
+                                     {
+                                         type: 'pie',
+                                         name: '比例',
+                                         allowPointSelect: true,
+                                         center: [530, 60],
+                                         slicedOffset: 20.0,
+                                         size: 100,
+                                         tooltip: {
+                                             pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+                                         },
+                                         data:list3
+                                     },
+                                     {
+
+
+                                         showInLegend: false,
+                                         dataLabels: {
+                                             enabled: false
+                                         }
+                                     }]
+                             });
+                        }
+
+
+                        {# 扩展属性自动 #}
+                         function fun_ext(list0,list1,list2) {
+                              document.getElementById("distribution").innerHTML="基于"+list0+"的文献分布统计分析";
+                              Highcharts.setOptions({
+                                     // 所有语言文字相关配置都设置在 lang 里
+                                     lang: {
+                                         resetZoom: '重置',
+                                     }
+                                 });
+                                 $('#cf').highcharts({
+                                     chart: {
+                                         zoomType: 'x',
+                                     },
+                                     title: {
+                                         text: ''
+                                     },
+                                     xAxis: {
+                                         categories: list1
+                                     },
+                                     yAxis: {
+                                         title: {
+
+                                             text: '文献数量（篇）'
+
+                                         }
+                                     },
+                                     tooltip: {
+                                         pointFormat: '文献数: <b>{point.y}篇</b>',
+                                     },
+                                     plotOptions: {
+                                         column: {
+                                             colorByPoint: true,
+                                             pointWidth: 45
+                                         },
+                                         pie:
+                                         {
+                                             dataLabels:{
+                                                 distance: 15
+
+                                             }
+                                         }
+                                     },
+                                     credits: {
+                                         enabled: false
+                                     },
+                                     labels: {
+                                         items: [{
+
+                                             style: {
+                                                 left: '40px',
+                                                 top: '8px',
+                                                 color: 'black'
+                                             }
+                                         }]
+                                     },
+                                     series: [{
+                                         type: 'column',
+                                         name: '文献数',
+                                         data: list2
+                                     }, {
+                                         type: 'spline',
+                                         name: '文献数',
+                                         data: list2,
+                                         marker: {
+                                             lineWidth: 2,
+                                             lineColor: Highcharts.getOptions().colors[3],
+                                             fillColor: 'white'
+                                         }
+
+                                     },
+                                         {
+                                             type: 'pie',
+                                             name: '比例',
+                                             allowPointSelect: true,
+                                             center: [500, 60],
+                                             slicedOffset: 20.0,
+                                             size: 100,
+                                             tooltip: {
+                                                 pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+                                             },
+                                             data:list2
+                                         },
+                                         {
+
+
+                                             showInLegend: false,
+                                             dataLabels: {
+                                                 enabled: false
+                                             }
+                                         }]
+                                 });
+                              }
+
+
+                        function fun_194()
+                                    {
+                                        document.getElementById("distribution").innerHTML="基于收集时间的文献分布统计分析";
+                                        var time = {{ list_194|safe }};
+                                        for(var i = 0; i < time.length; i++)
+                                       {
+
+                                        time[i][0] = Date.UTC(time[i][0],01,01);
+                                        console.log(time[i][0])
+                                       }
+                                       if (time.length != 1)
+                                       {
+                                           $(function () {
+                                         Highcharts.setOptions({
+                                            // 所有语言文字相关配置都设置在 lang 里
+                                            lang: {
+                                                resetZoom: '重置',
+                                            }
+                                        });
+                                        $('#cf').highcharts({
+                                            chart: {
+                                                zoomType: 'x',
+                                                spacingRight: 20,
+                                                panning: true,
+                                                panKey: 'shift'
+
+                                            },
+                                            title: {
+                                                text: ''
+                                            },
+                                            subtitle: {
+                                                text: document.ontouchstart === undefined ?
+                                                        '鼠标拖动可以进行缩放,按"shift"键拖动可进行移动' : '手势操作进行缩放'
+                                            },
+                                            xAxis: {
+                                    {#            title: {#}
+                                    {#                text: '收集时间（年）'#}
+                                    {#            },#}
+                                                type: 'datetime',
+                                                    dateTimeLabelFormats: {
+                                                        millisecond: '%H:%M:%S.%L',
+                                                        second: '%H:%M:%S',
+                                                        minute: '%H:%M',
+                                                        hour: '%H:%M',
+                                                        day: '%m-%d',
+                                                        week: '%m-%d',
+                                                        month: '%Y-%m',
+                                                        year: '%Y'
+                                                    },
+
+                                    {#            categories:{{ list_194|safe }}#}
+                                            },
+                                            yAxis:{
+                                                title:{
+
+                                                    text:'文献数量（篇）'
+
+                                                }
+                                            },
+                                            tooltip: {
+                                                pointFormat: '文献数: <b>{point.y}篇</b>',
+                                            },
+                                            plotOptions:{
+                                                column:{
+                                                    colorByPoint: true,
+                                                    pointWidth: 25
+                                                }
+                                            },
+                                            credits : {
+                                                enabled: false
+                                            },
+                                            labels: {
+                                                items: [{
+
+                                                    style: {
+                                                        left: '40px',
+                                                        top: '8px',
+                                                        color: 'black'
+                                                    }
+                                                }]
+                                            },
+                                            series: [{
+                                                type: 'column',
+                                                name: '文献数',
+                                                data: time
+                                            }, {
+                                                type: 'spline',
+                                                name: '文献数',
+                                                data: time,
+                                                marker: {
+                                                    lineWidth: 2,
+                                                    lineColor: Highcharts.getOptions().colors[3],
+                                                    fillColor: 'white'
+                                                }
+
+                                            },
+                                            {
+                                                type: 'pie',
+                                                name: '比例',
+                                                allowPointSelect: true,
+                                                center: [150, 60],
+                                                slicedOffset: 20.0,
+                                                size: 100,
+                                                tooltip: {
+                                                    pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+                                                },
+                                                data:{{ pie194|safe }}
+                                            },
+                                                {
+
+
+                                                showInLegend: false,
+                                                dataLabels: {
+                                                    enabled: false
+                                                }
+                                            }]
+                                        });
+                                    });
+
+                                       }
+                                       else
+                                       {
+                                           $(function () {
+                                         Highcharts.setOptions({
+                                            // 所有语言文字相关配置都设置在 lang 里
+                                            lang: {
+                                                resetZoom: '重置',
+                                            }
+                                        });
+                                        $('#cf').highcharts({
+                                            chart: {
+                                                zoomType: 'x',
+                                                spacingRight: 20,
+                                                panning: true,
+                                                panKey: 'shift'
+
+                                            },
+                                            title: {
+                                                text: '收集时间'
+                                            },
+                                            subtitle: {
+                                                text: document.ontouchstart === undefined ?
+                                                        '鼠标拖动可以进行缩放,按"shift"键拖动可进行移动' : '手势操作进行缩放'
+                                            },
+                                            xAxis: {
+                                    {#            title: {#}
+                                    {#                text: '收集时间（年）'#}
+                                    {#            },#}
+                                                type: 'datetime',
+                                                    dateTimeLabelFormats: {
+                                                        year: '%Y'
+                                                    },
+
+                                                categories:{{ name194|safe }}
+                                            },
+                                            yAxis:{
+                                                title:{
+
+                                                    text:'文献数量（篇）'
+
+                                                }
+                                            },
+                                            tooltip: {
+                                                pointFormat: '文献数: <b>{point.y}篇</b>',
+                                            },
+                                            plotOptions:{
+                                                column:{
+                                                    colorByPoint: true,
+                                                    pointWidth: 25
+                                                }
+                                            },
+                                            credits : {
+                                                enabled: false
+                                            },
+                                            labels: {
+                                                items: [{
+
+                                                    style: {
+                                                        left: '40px',
+                                                        top: '8px',
+                                                        color: 'black'
+                                                    }
+                                                }]
+                                            },
+                                            series: [{
+                                                type: 'column',
+                                                name: '文献数',
+                                                data: {{ list194|safe }}
+                                            }, {
+                                                type: 'spline',
+                                                name: '文献数',
+                                                data: {{ list194|safe }},
+                                                marker: {
+                                                    lineWidth: 2,
+                                                    lineColor: Highcharts.getOptions().colors[3],
+                                                    fillColor: 'white'
+                                                }
+
+                                            },
+                                            {
+                                                type: 'pie',
+                                                name: '比例',
+                                                allowPointSelect: true,
+                                                center: [150, 100],
+                                                slicedOffset: 20.0,
+                                                size: 100,
+                                                tooltip: {
+                                                    pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b>'
+                                                },
+                                                data:{{ pie194|safe }}
+                                            },
+                                                {
+
+
+                                                showInLegend: false,
+                                                dataLabels: {
+                                                    enabled: false
+                                                }
+                                            }]
+                                        });
+                                    });
+                                       }
+
+                                    }
+                </script>
+     <p>基础属性</p>
+    {% for l1 in top %}
+
+        {% if l1.2|length > 2 %}
+            <input type="radio" name="myradio"   onclick="full({{ l1.1}},{{ l1.2}},{{l1.3 }},{{ l1.4 }})" >{{ l1.0 }}
+        {% endif %}
+    {% endfor %}
+    <br>
+    <br>
+    <p>扩展属性</p>
+     {% for l in allex %}
+         {% if l.2|length > 2 %}
+             <input type="radio" name="myradio"   onclick="fun_ext({{ l.1}},{{ l.2 }},{{ l.3 }})" >{{ l.0 }}
+         {% endif %}
+    {% endfor %}
+     {% if name194|length > 2 %}
+        <input type="radio" name="myradio"   onclick="fun_194()">收集时间
+    {% endif %}
+
+     </form>
+
+                  </div>
+                </div>
+            </div>
+          </div>
+
+              <div class="bs-docs-section" >
+
+                    <h2 id="tend" class="page-header">趋势分析</h2>
+                    <div class="col-md-12">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="container1"></div>
+
+                                 <script type="text/javascript">
+                                    var date = {{ pubDate|safe }};
+                                    for(var i = 0; i < date.length; i++)
+                                    {
+                                       date[i][0] = Date.UTC(date[i][0],01,01);
+                                       console.log(date[i][0])
+                                   }
+
+                                   if(date.length != 1) {
+
+                                       $(function () {
+                                           Highcharts.setOptions({
+                                               // 所有语言文字相关配置都设置在 lang 里
+                                               lang: {
+                                                   resetZoom: '重置',
+                                               }
+                                           });
+                                           $('#container1').highcharts({
+                                               chart: {
+                                                   zoomType: 'x',
+                                                   spacingRight: 20,
+                                                   panning: true,
+                                                   panKey: 'shift'
+                                               },
+                                               title: {
+                                                   text: ''
+                                               },
+                                               subtitle: {
+                                                   text: document.ontouchstart === undefined ?
+                                                           '鼠标拖动可以进行缩放,按"shift"键拖动可进行移动' : '手势操作进行缩放'
+                                               },
+
+                                               xAxis: {
+
+
+                                                   type: 'datetime',
+                                                   dateTimeLabelFormats: {
+                                                       millisecond: '%H:%M:%S.%L',
+                                                       second: '%H:%M:%S',
+                                                       minute: '%H:%M',
+                                                       hour: '%H:%M',
+                                                       day: '%m-%d',
+                                                       week: '%m-%d',
+                                                       month: '%Y-%m',
+                                                       year: '%Y'
+                                                   },
+                                                   title: {
+                                                       text: '出版时间'
+                                                   },
+                                                   tooltip: {
+                                                       crosshairs: true,
+
+                                                       dateTimeLabelFormats: {
+                                                           millisecond: '%H:%M:%S.%L',
+                                                           second: '%H:%M:%S',
+                                                           minute: '%H:%M',
+                                                           hour: '%H:%M',
+                                                           day: '%Y-%m-%d',
+                                                           week: '%m-%d',
+                                                           month: '%Y-%m',
+                                                           year: '%Y'
+                                                       }
+                                                   },
+
+
+                                                   {#            categories: {{ listd|safe }}#}
+                                               },
+                                               yAxis: {
+                                                   title: {
+                                                       text: '文献数量'
+                                                   }
+                                               },
+
+                                               legend: {
+                                                   enabled: false
+                                               },
+                                               plotOptions: {
+                                                   {#                series: {#}
+                                                   {#                    color: 'yellow'#}
+                                                   {#                },#}
+                                                   area: {
+                                                       fillColor: {
+                                                           linearGradient: {
+                                                               x1: 0,
+                                                               y1: 0,
+                                                               x2: 0,
+                                                               y2: 1
+                                                           },
+                                                           stops: [
+                                                               [0, Highcharts.getOptions().colors[0]],
+                                                               [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                                           ]
+                                                       },
+
+                                                       marker: {
+                                                           radius: 3,
+
+                                                       },
+                                                       lineWidth: 2,
+                                                       states: {
+                                                           hover: {
+                                                               lineWidth: 2
+                                                           }
+                                                       },
+                                                       threshold: null
+                                                   }
+                                               },
+                                               credits: {
+                                                   enabled: false
+                                               },
+
+
+                                               series: [{
+                                                   type: 'area',
+                                                   name: '文献数量',
+                                                   //pointInterval: 24 * 3600 * 1000,
+                                                   //pointStart: Date.UTC(1875, 01, 01),
+                                                   data: date
+                                               }]
+                                           });
+                                       });
+                                   }
+                                   else
+                                   {
+                                          var d = {{ pubDate|safe }};
+
+                                          $(function () {
+                                           Highcharts.setOptions({
+                                               // 所有语言文字相关配置都设置在 lang 里
+                                               lang: {
+                                                   resetZoom: '重置',
+                                               }
+                                           });
+                                           $('#container1').highcharts({
+                                               chart: {
+                                                   zoomType: 'x',
+                                                   spacingRight: 20,
+                                                   panning: true,
+                                                   panKey: 'shift'
+                                               },
+                                               title: {
+                                                   text: ''
+                                               },
+                                               subtitle: {
+                                                   text: document.ontouchstart === undefined ?
+                                                           '鼠标拖动可以进行缩放,按"shift"键拖动可进行移动' : '手势操作进行缩放'
+                                               },
+
+                                               xAxis: {
+
+
+                                                   type: 'datetime',
+                                                   dateTimeLabelFormats: {
+                                                       millisecond: '%H:%M:%S.%L',
+                                                       second: '%H:%M:%S',
+                                                       minute: '%H:%M',
+                                                       hour: '%H:%M',
+                                                       day: '%m-%d',
+                                                       week: '%m-%d',
+                                                       month: '%Y-%m',
+                                                       year: '%Y'
+                                                   },
+                                                   title: {
+                                                       text: '出版时间'
+                                                   },
+                                                   tooltip: {
+                                                       crosshairs: true,
+
+                                                       dateTimeLabelFormats: {
+                                                           millisecond: '%H:%M:%S.%L',
+                                                           second: '%H:%M:%S',
+                                                           minute: '%H:%M',
+                                                           hour: '%H:%M',
+                                                           day: '%Y-%m-%d',
+                                                           week: '%m-%d',
+                                                           month: '%Y-%m',
+                                                           year: '%Y'
+                                                       }
+                                                   },
+
+
+                                                               categories: [d[0][0].toString()]
+                                               },
+                                               yAxis: {
+                                                   title: {
+                                                       text: '文献数量'
+                                                   }
+                                               },
+
+                                               legend: {
+                                                   enabled: false
+                                               },
+                                               plotOptions: {
+                                                   {#                series: {#}
+                                                   {#                    color: 'yellow'#}
+                                                   {#                },#}
+                                                   area: {
+                                                       fillColor: {
+                                                           linearGradient: {
+                                                               x1: 0,
+                                                               y1: 0,
+                                                               x2: 0,
+                                                               y2: 1
+                                                           },
+                                                           stops: [
+                                                               [0, Highcharts.getOptions().colors[0]],
+                                                               [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                                                           ]
+                                                       },
+
+                                                       marker: {
+                                                           radius: 3,
+
+                                                       },
+                                                       lineWidth: 2,
+                                                       states: {
+                                                           hover: {
+                                                               lineWidth: 2
+                                                           }
+                                                       },
+                                                       threshold: null
+                                                   }
+                                               },
+                                               credits: {
+                                                   enabled: false
+                                               },
+
+
+                                               series: [{
+                                                   type: 'area',
+                                                   name: '文献数量',
+                                                   //pointInterval: 24 * 3600 * 1000,
+                                                   //pointStart: Date.UTC(1875, 01, 01),
+                                                   data: [d[0][1]]
+                                               }]
+                                           });
+                                       });
+
+                                   }
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+              </div>
+<!--GKN start-->
+{#            <div class="bs-docs-section">#}
+{#                    <h2 id="words" class="page-header">词频统计表</h2>#}
+{#                    <div class="col-md-12" >#}
+{#                        <div class="panel panel-default" style="height: 350px">#}
+{#                            <div class="panel-body">#}
+{#                                 <table class="table table-bordered word">#}
+{#                                     <tr>#}
+{#                                         <td><h4>词项</h4></td>#}
+{#                                         <td><h4>词频</h4></td>#}
+{#                                         <td><h4>文档频率</h4></td>#}
+{#                                         <td><h4>TF-IDF值</h4></td>#}
+{#                                     </tr>#}
+{##}
+{##}
+{#                                     {% for item in word_analyze %}#}
+{#                                      <tr>#}
+{#                                         <td> <a style="color: #0B61A4">item.word</a> </td>#}
+{#                                          <td>item.词频</td>#}
+{#                                          <td>item.文档频率</td>#}
+{#                                          <td>item.TF-IDF值</td>#}
+{#                                     </tr>#}
+{#                                     {% endfor %}#}
+{##}
+{##}
+{#                                 </table>#}
+{##}
+{##}
+{#                            </div>#}
+{#                        </div>#}
+{#                     </div>#}
+{#            </div>#}
+
+            <!--GKN start-->
+
+<!--导样式控制div 不能移动和删除 start-->
+            </div>
+<!--导导样式控制div 不能移动和删除 end-->
+            {#            右侧滑动条#}
+            <div class="col-md-3" >
+                <div class="bs-docs-sidebar hidden-print hidden-xs hidden-sm" role="complementary">
+                    <ul class="nav bs-docs-sidenav">
+                        <li>
+                            <a href="#distribution">文献分布统计分析</a>
+                        </li>
+                        <li>
+                            <a href="#tend">趋势分析</a>
+                        </li>
+                        <li>
+                            <a href="#words">词频统计表</a>
+                        </li>
+                        <li>
+                            <a href="#hot_topic">热点分析</a>
+                        </li>
+                        <li>
+                            <a href={% url 'himalaya:sub_keywords' %}>关键词共现分析</a>
+                        </li>
+                        <li>
+                            <a href={% url 'himalaya:sub_cluster' %}>关键词聚类分析</a>
+                        </li>
+                    </ul>
+
+                    <a class="back-to-top" href="#top">返回顶部</a>
+
+                </div>
+            </div>
+            {#            右侧滑动条#}
+
+
+
+      </div>
+ </div>
+</div>
+
+    <!--导航条底部 start-->
+<div class="posit">
+{% include "himalaya/base/navButtomBase.html" %}
+</div>
+<!--导航条底部 end-->
+
+<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>
+
+
+{#    内容滑动菜单栏样式#}
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/bootstrap.min.js' %}" charset="utf-8"></script>
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/docs.min.js' %}" charset="utf-8"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
+{#    内容滑动菜单栏样式#}
+
+</body>
+</html>
+
