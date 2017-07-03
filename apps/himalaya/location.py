@@ -1,15 +1,14 @@
 # coding=utf-8
-from django.template import RequestContext
-from django.shortcuts import render_to_response
 import json
-from datetime import datetime
-import haystack.inputs
-import time
-from haystack.query import SQ, SearchQuerySet, EmptySearchQuerySet
-from .models import BookList, Route, Site, TravelData
-import re
 import operator
 from collections import Counter
+from datetime import datetime
+
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from haystack.query import SearchQuerySet
+
+from .models import BookList, Route, Site, TravelData
 
 
 # Create your tests here.
@@ -505,6 +504,7 @@ def routenameitem(final):
 
 def te():
     print 'te'
-
+    print 'test'
+    
 #Map 功能函数 定义 end
 
