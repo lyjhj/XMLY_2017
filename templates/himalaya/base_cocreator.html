@@ -164,154 +164,17 @@
 {#              如果该专题还需要统计框，就复制添加这段代码 请注意放在同一个专题div下 start#}
               <div  class="col-md-12" >
                 <div class="panel panel-default">
-                    <div id="d3" class="panel-body">
-                    <script>
-                        var nodes = {{ nodes|safe }};
+                     <select id="numcb" type="submit" onchange="">
+                        <option >著者发文topN</option>
+                               {% for i in list_cre  %}
+                                   <option  name="numcb" value={{ i }}>top {{ i }}</option>
+                               {% endfor %}
+                     </select>
 
-                        var edges = {{ edges|safe }};
-                        var width =800;
-                        var height = 800;
-                        var radin = 15;
+                        <input style="margin: 5px" type="button" id="send_creator_b" name="send_creator_b" value="确定" >
 
+                        <div id="creatorb"></div>
 
-
-                        var svg = d3.select("#d3")
-                                        .append("svg")
-                                        .attr("width",width)
-                                        .attr("height",height);
-
-                        var force = d3.layout.force()
-                                    .nodes(nodes)		//指定节点数组
-                                    .links(edges)		//指定连线数组
-                                    .size([width,height])	//指定范围
-                    {#				.linkDistance(function(d){#}
-                    {#                    return d.value*200#}
-                    {#                })	//指定连线长度#}
-                                    .linkDistance(450)
-                                    .charge(-500);	//相互之间的作用力
-
-                        force.start();	//开始作用
-
-                        console.log(nodes);
-                        console.log(edges);
-
-                            //添加连线
-
-                        var svg_edges = svg.selectAll("line")
-                                                .data(edges)
-                                                .enter()
-                                                .append("line")
-                                                .style("stroke","#ccc")
-                                                .style("stroke-width",function(d){
-                                                   return 3
-                                                });
-                        var edges_text = svg.selectAll(".linetext")
-                                .data(edges)
-                                .enter()
-                                .append("text")
-                                .attr("class","linetext")
-                                .text(function(d){
-                                    return d.value;
-                                });
-
-
-                        var color = d3.scale.category20();
-
-                            //添加节点
-                        var dic = {1:'#ffddee',2:'#eeeeee',3:'#aaaaaa',4:'#00eeff'}
-                        var svg_nodes = svg.selectAll("circle")
-                                                .data(nodes)
-                                                .enter()
-                                                .append("circle")
-
-                    							.attr("r",radin)
-{#                                                .attr('r', function(d){#}
-{#                                                    return 15#}
-                    {#                                if(d.value > 1)#}
-                    {#                                    return d.value*2;#}
-                    {#                                else#}
-                    {#                                    return 0;#}
-{#                                                })#}
-
-                                                .style("fill",function(d,i){
-
-                                                    return color(i);
-
-
-                                                })
-                                                .on("mouseover",function(d,i){
-                                                    //显示连接线上的文字
-                                                    edges_text.style("fill-opacity",function(edge){
-                                                        if( edge.source === d || edge.target === d ){
-                                                            return 1.0;
-                                                        }
-                                                    });
-                                                })
-                                                .on("mouseout",function(d,i){
-                                                    //隐去连接线上的文字
-                                                    edges_text.style("fill-opacity",function(edge){
-                                                        if( edge.source === d || edge.target === d ){
-                                                            return 0.0;
-                                                        }
-                                                    });
-                                                })
-
-                                                .call(force.drag);	//使得节点能够拖动
-
-                            //添加描述节点的文字
-
-                        var svg_texts = svg.selectAll(".nodetext")
-                                                .data(nodes)
-                                                .enter()
-                                                .append("text")
-                                                .style("fill", "black")
-                                                .attr("dx", 5)
-                                                .attr("dy", 8)
-                                                .text(function(d) {
-                                                    return d.name;
-                    {##}
-                    {#                                if(d.value >1)#}
-                    {#                                    return d.name;#}
-                    {#                                else#}
-                    {#								    return '';#}
-                                                });
-
-
-
-                        force.on("tick", function(){	//对于每一个时间间隔
-                                  nodes.forEach(function(d,i){
-                                        d.x = d.x - radin < 0     ? radin : d.x ;
-                                        d.x = d.x + radin  > width ? width - radin  : d.x ;
-                                        d.y = d.y - radin < 0      ? radin : d.y ;
-                                        d.y = d.y + radin  > height ? height - radin : d.y ;
-                                    });
-                                 //更新连线坐标
-                                 svg_edges.attr("x1",function(d){ return d.source.x; })
-                                        .attr("y1",function(d){ return d.source.y; })
-                                        .attr("x2",function(d){ return d.target.x; })
-                                        .attr("y2",function(d){ return d.target.y; });
-
-                                 edges_text.attr("x",function(d){ return (d.source.x + d.target.x) / 2 ; })
-				                           .attr("y",function(d){ return (d.source.y + d.target.y) / 2 ; });
-
-                                 //更新节点坐标
-                                 svg_nodes
-                                      .attr("cx",function(d){ return d.x; })
-                                      .attr("cy",function(d){ return d.y; })
-
-
-                                 //更新文字坐标
-                                 svg_texts.attr("x", function(d){ return d.x; })
-                                    .attr("y", function(d){ return d.y; });
-                    {#             svg_texts_line.attr("x", function(d){ return d.x; })#}
-                    {#                    .attr("y", function(d){ return d.y; });#}
-                            });
-
-
-</script>
-{#######################################}
-
-                  </div>
                 </div>
             </div>
           </div>
@@ -332,12 +195,6 @@
                         </li>
                         <li>
                             <a href={% url "himalaya:base_statisticInfo" %}>趋势分析</a>
-                        </li>
-                        <li>
-                            <a href="#words">词频统计表</a>
-                        </li>
-                        <li>
-                            <a href="#hot_topic">热点分析</a>
                         </li>
                         <li>
                             <a href={% url 'himalaya:base_keywords' %}>关键词共现分析</a>
@@ -377,7 +234,20 @@
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
 {#    内容滑动菜单栏样式#}
+<script>
+    $("#creatorb").load("/creator_b/");
+    $(function(){
+    $("#send_creator_b").click(function () {
+        $.get("/creator_b/",{
+            numcb:$("#numcb").val()
+        },function (data,textStatus) {
+            $("#creatorb").html(data);
+        });
 
+    }
+    )
+})
+</script>
 </body>
 </html>
 

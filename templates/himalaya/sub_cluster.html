@@ -25,6 +25,7 @@
     {#    内容滑动菜单栏样式#}
 
     <meta name="apple-mobile-web-app-title" content="喜马拉雅多媒体数据">
+    
 </head>
 
 <body class="lang_zh search-results "  >
@@ -149,95 +150,17 @@
               <div  class="col-md-12" >
                 <div class="panel panel-default">
                     <div class="panel-body">
+                        <select id="cs" type="submit" onchange="">
+                        <option >簇个数</option>
+                               {% for i in list_class  %}
+                                   <option  name="cs" value={{ i }}>{{ i }}</option>
+                               {% endfor %}
+                      </select>
+                        <input style="margin: 5px" type="button" id="send_cluster_s" name="send_cluster_s" value="确定" >
 
-                      <div id="sub_container" style="min-width:500px;height:500px"></div>
+                        <div id="clusters"></div>
+                        
 
-                        <script>
-                            var chart = null;
-                            $(function () {
-                                $('#sub_container').highcharts({
-                                    chart: {
-                                        plotBackgroundColor: null,
-                                        plotBorderWidth: null,
-                                        plotShadow: false,
-                                        spacing : [40, 40 , 40, 0]
-                                    },
-                                    title: {
-                                        floating:true,
-                                        text:'KEYWORDS',
-                                        align: 'center'
-
-                                    },
-                                    tooltip: {
-                                        pointFormat: '{series.name}: <b>{point.y}</b>',
-
-
-                                    },
-
-                                    plotOptions: {
-                                        pie: {
-                                            allowPointSelect: true,
-                                            cursor: 'pointer',
-                                            dataLabels: {
-                                                enabled: true,
-                                                format: '<b>{point.name}</b>',
-                                                style: {
-                                                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor)
-                                                }
-
-                                            },
-                            {#                showInLegend: true,#}
-
-
-                                            point: {
-                                                events: {
-                                                    mouseOver: function(e) {  // 鼠标滑过时动态更新标题
-                                                        // 标题更新函数，API 地址：https://api.hcharts.cn/highcharts#Chart.setTitle
-                                                        chart.setTitle({
-                                                            text: e.target.name+ '：\t'+ e.target.Keywords
-                                                        });
-                                                    }
-                                                    //,
-                                                    // click: function(e) { // 同样的可以在点击事件里处理
-                                                    //     chart.setTitle({
-                                                    //         text: e.point.name+ '\t'+ e.point.y + ' %'
-                                                    //     });
-                                                    // }
-                                                }
-                                            }
-
-                                        }
-
-                                    },
-                                    credits: {
-                                        enabled: false
-                                     },
-
-                                    series: [{
-                                        type: 'pie',
-                                        innerSize: '80%',
-                                        name: 'Keywords',
-                                        data: {{listr|safe}}
-                                    }]
-                                }, function(c) {
-                                    // 环形图圆心
-                                    var centerY = c.series[0].center[1],
-                                        titleHeight = parseInt(c.title.styles.fontSize);
-                                    c.setTitle({
-                                        y:centerY + titleHeight/2
-                                    });
-                                    chart = c;
-                                });
-                            });
-
-                        </script>
-
-{% for i in listr2%}
-    <div><font color="red">{{ i.name }}:</font> {{ i.Keywords }}</div>
-
-{% endfor %}
-
-{#######################################}
 
                   </div>
                 </div>
@@ -292,17 +215,31 @@
 {% include "himalaya/base/navButtomBase.html" %}
 </div>
 <!--导航条底部 end-->
-
+{##}
 {#<script crossorigin="anonymous" src="{% static 'himadatabase/my_js/common-bundle.min.js' %}" charset="utf-8"></script>#}
-
-
+{##}
+{##}
 {#    内容滑动菜单栏样式#}
 {#<script crossorigin="anonymous" src="{% static 'himadatabase/test/bootstrap.min.js' %}" charset="utf-8"></script>#}
 {#<script crossorigin="anonymous" src="{% static 'himadatabase/test/docs.min.js' %}" charset="utf-8"></script>#}
-<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+{#<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->#}
 {#<script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>#}
 {#    内容滑动菜单栏样式#}
+<script>
+    $("#clusters").load("/cluster_s/");
+    $(function(){
+    $("#send_cluster_s").click(function () {
+        $.get("/cluster_s/",{
+            cs:$("#cs").val()
+        },function (data,textStatus) {
+            $("#clusters").html(data);
+        });
 
+    }
+    )
+})
+
+</script>
 </body>
 </html>
 

@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 <html lang="zh-Hans" >
 <head>
@@ -571,7 +572,31 @@
                                 <div id="div_id_fileTypeName" class="form-group"><label for="id_fileTypeName"
                                                                                         class="control-label  requiredField">
                                     请输入文献类型 </label>
-                                    <div class="controls ">{{ abc }}</div>
+                                                    <div class="controls ">
+                    <div class="control-wrap" id="id_region_wrap_container">
+                    <div class=" col-sm-12 ">
+
+                     <div id="city_china_val" >
+                    {% for item in level %}
+                        <label>
+                        {% ifequal item "level_0" %}
+                             <select class="{{ item }}" data-first-title="请选择" name="{{ item }}" id="{{ item }}" required="required">
+                            <option value="">请选择</option>
+                        </select>
+                            {% else %}
+                        <select class="{{ item }}" data-first-title="请选择" name="{{ item }}" id="{{ item }}">
+                            <option value="">请选择</option>
+                        </select>
+                        {% endifequal %}
+                    </label>
+                    {% endfor %}
+                    <input type="hidden" name="level" id ="level" value="{{ level | safe }}" />
+                     </div>
+                     </div>
+
+                    </div>
+                </div>
+{#                                    <div class="controls ">{{ abc }}</div>#}
                                 </div>
                             </div>
                         </div>
@@ -613,6 +638,27 @@
 </div>
 
 
+
+    <script src="{% static "jquery-3.1.1/jquery-3.1.1.min.js" %}"></script>
+<script src="{% static "jQuery.cxSelect-1.4.1/js/jquery.cxselect.js" %}"></script>
+
+<script>
+(function() {
+  // 设置默认值及选项标题
+  $('#city_china_val').cxSelect({
+      selects: {{ level | safe }},
+      emptyStyle: 'none',
+      jsonName:'name',
+      required:false,
+      jsonValue:'value',
+      jsonSub:'sub',
+      data: {{ data | safe}}
+  });
+
+})();
+</script>
+
+
 <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.core.js"></script>
 <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.widget.js"></script>
 <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.mouse.js"></script>
@@ -623,12 +669,14 @@
 <script type="text/javascript" src="/static/xadmin/vendor/jquery-ui/jquery.ui.effect.js"></script>
 <script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.themes.js"></script>
 <script type="text/javascript" src="/static/xadmin/vendor/load-image/load-image.js"></script>
-<script type="text/javascript"
-        src="/static/xadmin/vendor/bootstrap-image-gallery/js/bootstrap-image-gallery.js"></script>
+<script type="text/javascript" src="/static/xadmin/vendor/bootstrap-image-gallery/js/bootstrap-image-gallery.js"></script>
 <script type="text/javascript" src="/static/xadmin/js/xadmin.plugin.portal.js"></script>
 <script type="text/javascript" src="/static/xadmin/vendor/bootstrap-datepicker/js/bootstrap-datepicker.js"></script>
 <script type="text/javascript" src="/static/xadmin/js/xadmin.widget.datetime.js"></script>
 <script type="text/javascript" src="/static/xadmin/js/xadmin.page.form.js"></script>
+
+
+
 
 
 <!-- modal-gallery is the modal dialog used for the image gallery -->

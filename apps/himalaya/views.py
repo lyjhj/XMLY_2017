@@ -1,32 +1,24 @@
 # coding=utf-8
-from django.shortcuts import render
-from django.http import HttpResponse, QueryDict
-from haystack.forms import SearchForm
-import sys
-from datetime import datetime
-import haystack.inputs
-import time
-from haystack.query import SQ, SearchQuerySet, EmptySearchQuerySet
-from .models import SubjectTheme, Subject, View, FileBaseInfo, FileExtendInfo, Category
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.template import RequestContext
-from django.shortcuts import render_to_response
-import simplejson
-from urllib2 import *
-import json
 import copy
-import re
+import json
 from collections import defaultdict
-from django.http import HttpResponseRedirect
-import gensim
+from datetime import datetime
+from urllib2 import *
+
+import haystack.inputs
+import simplejson
+from django.http import HttpResponse
+from django.shortcuts import render
+from django.shortcuts import render_to_response
+from django.template import RequestContext
+from haystack.query import SearchQuerySet
+
+from .models import SubjectTheme, Subject, View, FileBaseInfo, FileExtendInfo, Category
+
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
-from haystack.forms import SearchForm
-from collections import Counter
-from numpy import zeros, amax, mean
-import itertools
-import pickle
+
 # from sklearn.cluster import KMeans
 # import spacy
 # from gensim import corpora, models
@@ -943,12 +935,18 @@ def base_search(request):
     ####################################################知识图谱###############
 
     if len(posts) != len(SearchQuerySet().filter(subjecttype='-1')):
-        request.session['listb_keywords'] = [i[0] for i in posts.all().values_list('keywords') if
-                                             i[0] != None and i[0] != u'None' and i[0] != u'']
-        request.session['listb_creator'] = [i[0] for i in posts.all().values_list('creator') if
-                                            i[0] != None and i[0] != u'None' and i[0] != u'']
+        request.session['listb_keywords']  = [i[0] for i in posts.all().values_list('keywords') if i[0] != None and i[0] != u'None' and i[0] != u'']
+        request.session['listb_creator'] = [i[0] for i in posts.all().values_list('creator') if i[0] != None and i[0] != u'None' and i[0] != u'']
+        if len(request.session['listb_keywords']) == 0 or len(request.session['listb_keywords']) < len(posts) / 3:
+            request.session['listb_keywords'] = []
+            request.session['listb_abstract'] = [i.object.description for i in posts if
+                                                 i.object != None and i.object.description != None and i.object.description != u'']
+            # print 'lists_abstract',request.session['lists_abstract']
+        else:
+            request.session['listb_abstract'] = []
     else:
         request.session['listb_keywords'] = [None]
+        request.session['listb_abstract'] = [None]
         request.session['listb_creator'] = [None]
         # print 'bababababa',request.session['listb_creator']
    ###########################################################################
@@ -1109,13 +1107,23 @@ def specialist(request):
     specialist_list = Subject.objects.all()
     # specialist_list = specialist_list.order_by('score')
     count_lst = []
+    subP_list = []
     for e in specialist_list:
         # print 'e.id', e.id
         count = SearchQuerySet().models(FileBaseInfo).filter(subjecttype=e.id).count()
         # print 'counts', count
         count_lst.append(count)
+        subP_list.append(e.subParent)
 
     specialist_list = zip(specialist_list, count_lst)
+
+    sub_count = zip(subP_list, count_lst)
+    result = defaultdict(list)
+    for i, j in sub_count:
+        result[i].append(j)
+    result1 = dict(result)
+    for i, j in result1.items():
+        result1[i] = sum(j)
     # extend_attr = FileExtendInfo.objects.filter(fileId=file_id)
     # #print extend_attr.count()
     # ret = []
@@ -1127,7 +1135,7 @@ def specialist(request):
     # field_value = extend_attr[0]
     # #print ret
     # extend_attr = ret
-    return render(request, 'himalaya/specialist.html', {'specialist_list': specialist_list})
+    return render(request, 'himalaya/specialist.html', {'specialist_list': specialist_list,'result1': result1})
 
 
 def fenye(request):
@@ -1342,9 +1350,7 @@ def base_statistic(request):
     ret_num = request.session.get('ret_num')
     queryb = request.session.get('queryb')
     choiceitems1 = request.session.get('earlychoiceitems1')
-    # print 'qqqqqqq', query
-    # print 'sssssss',queryb
-    #print 'hhhhh',queryb
+   
     advanceb = []
     temp = []
     advanceb.append(query)
@@ -1480,9 +1486,6 @@ def subject_statistic(request):
     extn = request.session.get('extn')
     choiceitems = request.session.get('earlychoiceitems')
     subjectname = request.session.get('subjectname')
-    print 'ccchohooho',choiceitems
-    # print 'qqqqqqq',query
-    print 'sssssss',querys
 
     advances = []
     advances.append(query)
@@ -1491,19 +1494,7 @@ def subject_statistic(request):
     for q in querys:
         if 'ext' not in str(q[0]) and q[1] != [u''] and q[0] != u'subjectName' and q[0] != u'q'and q[0] != u'addmark' and q[0] != u'addtypes' and q[0] != u'page':
             advances.append(q[1][0])
-        # if q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date' \
-        #         or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline' and q[1] != [u'']:
-        #     temp.append(q[1])
 
-    #     elif str(q[0]) in ext:
-    #         temp.append(q[1])
-    # for u in temp:
-    #     for uu in u:
-    #         ss = uu
-    #         ss = ss.split('/', -1)
-    #         ss = ss[-1]
-    #         uu = ss
-    #         advances.append(uu)
     for m in choiceitems:
         advances.append(m[1])
 
@@ -1623,7 +1614,6 @@ def subject_statistic(request):
             list_pubDate = fields[u'pubDate']
         list_pubDate = filter(lambda x: x[1] != 0, list_pubDate)
         list_pubDate.sort()
-        #print 'llll',list_pubDate
         count = 0
         for l in list_pubDate:
             l = list(l)
@@ -1648,12 +1638,10 @@ def subject_statistic(request):
                 ss = ss.split('/',-1)
                 ss = ss[-1]
                 lle[0] = ss
-        # print 'lll',json.dumps(keeplist[1])
         i = 0
         while i < len(keeplist):
             keeplist[i] = json.dumps(keeplist[i])
             i += 1
-        # print 'lll',keeplist[1]
 
         for id in list_id:
             if id in extn:
@@ -1663,20 +1651,14 @@ def subject_statistic(request):
         for c in listcat:
             for cc in c:
                 cc = cc.remove(cc[1])
-
-        # print 'aaaa',listcat
         j = 0
         listcat2 = []
         for k in listcat:
             listcat1 = []
             for kk in k:
                 listcat1.append(kk[0])
-                # print 'kk',k[0]
-                # print 'mm',listcat1
+
             listcat2.append(listcat1)
-
-
-        # print('hhhhhh',listcat2[1])
 
         listcat2 = map(json.dumps, listcat2)
 
@@ -1694,12 +1676,7 @@ def subject_statistic(request):
         top = []
 
     return render(request, 'himalaya/subject_statistic.html',
-                  {
-                   # 'list_178': json.dumps(list_178), 'name178':json.dumps(name178),'pie178':json.dumps(pie178),
-                   # 'list_170': json.dumps(list_170), 'name170': json.dumps(name170), 'pie170': json.dumps(pie170),
-                   # 'list_188': json.dumps(list_188), 'name188': json.dumps(name188), 'pie188': json.dumps(pie188),
-                   'list_194': json.dumps(list_194), 'name194': json.dumps(name194), 'pie194': json.dumps(pie194),'list194':json.dumps(list194),
-                   # 'list_177': json.dumps(list_177), 'name177': json.dumps(name177), 'pie177': json.dumps(pie177),
+                  { 'list_194': json.dumps(list_194), 'name194': json.dumps(name194), 'pie194': json.dumps(pie194),'list194':json.dumps(list194),
                    'query': query,'ret_num':ret_num,'advances':advances,'top':top, 'allex':allex,'subjectname':subjectname,
                    'pubDate': json.dumps(pubDate), 
 
@@ -1707,22 +1684,22 @@ def subject_statistic(request):
                    })
 
 ##################2017-06-26
-def sub_specialist(request):
-    if request.GET['id']:
-        sid = request.GET['id']
-
-    specialist_list = Subject.objects.filter(subParent=sid)
-    count_lst = []
-    for e in specialist_list:
-        count = SearchQuerySet().models(FileBaseInfo).filter(subjecttype=e.id).count()
-        count_lst.append(count)
-
-    specialist_list = zip(specialist_list, count_lst)
-
-    return render(request, 'himalaya/sub_specialist.html', {'specialist_list': specialist_list})
-
-
-##############知识视图
+# def sub_specialist(request):
+#     if request.GET['id']:
+#         sid = request.GET['id']
+#
+#     specialist_list = Subject.objects.filter(subParent=sid)
+#     count_lst = []
+#     for e in specialist_list:
+#         count = SearchQuerySet().models(FileBaseInfo).filter(subjecttype=e.id).count()
+#         count_lst.append(count)
+#
+#     specialist_list = zip(specialist_list, count_lst)
+#
+#     return render(request, 'himalaya/sub_specialist.html', {'specialist_list': specialist_list})
+#
+#
+# ##############知识视图
 # def sub_keywords(request):
 #
 #     query = request.session.get('qq')
@@ -1730,10 +1707,6 @@ def sub_specialist(request):
 #     querys = request.session.get('querys')
 #     choiceitems = request.session.get('earlychoiceitems')
 #     subjectname = request.session.get('subjectname')
-#     lists_abstract = request.session.get('lists_abstract')
-#     lists_keywords = request.session.get('lists_keywords')
-#     subject_idd = request.session.get('subject_idd')
-#
 #
 #     advances = []
 #     advances.append(query)
@@ -1747,27 +1720,48 @@ def sub_specialist(request):
 #     for m in choiceitems:
 #         advances.append(m[1])
 #     advances = filter(lambda x: str(x) != '', advances)
+#     list_coN = range(1, 16)
+#     list_num = range(10, 51)
+#
+#     return render(request, 'himalaya/sub_keywords.html', {'query': query, 'ret_num': ret_num, 'advances': advances,
+#                                                           'subjectname': subjectname, 'list_coN': list_coN,
+#                                                           'list_num': list_num})
+#
+#
+# def keywords_s(request):
+#     lists_abstract = request.session.get('lists_abstract')
+#     lists_keywords = request.session.get('lists_keywords')
+#     subject_idd = request.session.get('subject_idd')
+#     val = 2
+#     val1 = 30
+#     if request.GET.has_key('co'):
+#         if request.GET['co']:
+#             val = request.GET['co']
+#     if request.GET.has_key('nums'):
+#         if request.GET['nums']:
+#             val1 = request.GET['nums']
 #
 #     keyall = []
 #     keylistAll = []
 #     nodedic = {}
 #     nodes = []
 #     edges = []
+#     maxnum = 0
+#     maxco = 0
 #     if lists_abstract == [None] and lists_keywords == [None]:
 #         qk = FileBaseInfo.objects.filter(subjecttype=subject_idd).values_list('keywords')
-#         qk = filter(lambda x: x[0] != None and x[0] != u'None'and x[0] !=u'', qk)
+#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
 #         lists_keywords = [i[0] for i in qk]
 #         if lists_keywords == []:
 #             qa = FileBaseInfo.objects.filter(subjecttype=subject_idd).values_list('description')
-#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] !=u'', qa)
+#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qa)
 #             lists_abstract = [i[0] for i in qa]
-#     # print 'kkkkkkk',lists_keywords
-#     # print 'aaaaaa',lists_abstract
-#     if len(lists_keywords) != 0 :
+#
+#     if len(lists_keywords) != 0:
 #         for keyword in lists_keywords:
 #             keyword = keyword.replace('\xe2\x80\xa2', '\xc2\xb7')
-#             keyword = re.sub(' +','',keyword)
-#             keyword = keyword.replace('；',';')
+#             keyword = re.sub(' +', '', keyword)
+#             keyword = keyword.replace('；', ';')
 #             keylist = keyword.split(';')
 #
 #             for v in range(len(keylist)):
@@ -1777,14 +1771,12 @@ def sub_specialist(request):
 #
 #             keylistAll.append(keylist)
 #
-#
-#
-#         counts = dict(Counter(keyall).most_common(50))
-#
+#         counts = dict(Counter(keyall).most_common(int(val1)))
+#         maxnum = Counter(keyall).most_common(int(val1))[0][1]
 #         num = 0
 #         for k, v in counts.items():
 #             tdict = {}
-#             tdict['name'] = k+':'+str(v)
+#             tdict['name'] = k
 #             tdict['value'] = v
 #             nodes.append(tdict)
 #             nodedic[k] = num
@@ -1806,15 +1798,18 @@ def sub_specialist(request):
 #                     matx[j[0]][j[1]] += 1
 #                 except:
 #                     kk += 1
-#
+#         try:
+#             maxco = amax(matx)
+#         except:
+#             maxco = 0
 #
 #         for i in range(len(nodedic)):
 #             for j in range(len(nodedic)):
 #                 edict = {}
-#                 if matx[i][j] != 0 and matx[i][j] >= 2:
+#                 if matx[i][j] != 0 and matx[i][j] >= int(val):
 #                     edict['source'] = i
 #                     edict['target'] = j
-#                     edict['value'] = str(matx[i][j])+'次'
+#                     edict['value'] = matx[i][j]
 #                     edges.append(edict)
 #
 #     elif len(lists_abstract) != 0:
@@ -1822,8 +1817,8 @@ def sub_specialist(request):
 #         jieba.load_userdict("dict/userdict.txt")
 #         for abstract in lists_abstract:
 #             abstract = abstract.replace('\xe2\x80\xa2', '_')
-#             abstract = abstract.replace('\xc2\xb7','_')
-#             abstract = abstract.replace('-','_')
+#             abstract = abstract.replace('\xc2\xb7', '_')
+#             abstract = abstract.replace('-', '_')
 #             fenci = jieba.cut(abstract)
 #             fenci = list(fenci)
 #             fenci2 = [x for x in fenci if len(x) > 1]
@@ -1871,26 +1866,24 @@ def sub_specialist(request):
 #                 lista.append([x[0] for x in temp])
 #                 listw.extend([x[0] for x in temp])
 #
-#
-#             counts = dict(Counter(listw).most_common(50))
-#
+#             counts = dict(Counter(listw).most_common(int(val1)))
+#             maxnum = Counter(listw).most_common(int(val1))[0][1]
 #             num = 0
 #             for k, v in counts.items():
 #                 tdict = {}
-#                 tdict['name'] = k+':'+str(v)
+#                 tdict['name'] = k
 #                 tdict['value'] = v
 #                 nodes.append(tdict)
 #                 nodedic[k] = num
 #                 num += 1
-#             # print nodedic
+#
 #             matx = zeros((len(nodedic), len(nodedic)))
-#             # print keylistAll
+#
 #             for k, v in nodedic.items():
 #                 for m in lista:
 #                     for mi in range(len(m)):
 #                         if m[mi] == k:
 #                             m[mi] = v
-#
 #
 #             kk = 0
 #             for keyInx in lista:
@@ -1901,32 +1894,23 @@ def sub_specialist(request):
 #                         matx[j[0]][j[1]] += 1
 #                     except:
 #                         kk += 1
+#             try:
+#                 maxco = amax(matx)
+#             except:
+#                 maxco = 0
 #
-#             # max_co = amax(matx)
-#             # if max_co > 10:
-#             #     conum = max_co - max_co % 10
-#             #     list_co = [1, 3, 5, 7, 9]
-#             #     temp = range(10, int(conum + 10), 10)
-#             #     list_co.extend(temp)
-#             # else:
-#             #     conum = max_co
-#             #     list_co = range(1, int(conum) + 1)
-#             # max_co = amax(matx)
-#             # max_mean = mean(matx)
 #             for i in range(len(nodedic)):
 #                 for j in range(len(nodedic)):
 #                     edict = {}
 #
-#                     if matx[i][j] != 0 and matx[i][j] >= 2:
+#                     if matx[i][j] != 0 and matx[i][j] >= int(val):
 #                         edict['source'] = i
 #                         edict['target'] = j
-#                         edict['value'] = str(matx[i][j])+'次'
+#                         edict['value'] = matx[i][j]
 #                         edges.append(edict)
 #
+#     return render_to_response('himalaya/keywords_s.html',{'nodes': json.dumps(nodes), 'edges': json.dumps(edges),'maxco':maxco,'maxnum':maxnum})
 #
-#     return render(request, 'himalaya/sub_keywords.html', {'nodes': json.dumps(nodes), 'edges': json.dumps(edges),
-#                                                           'query': query, 'ret_num': ret_num, 'advances': advances,
-#                                                           'subjectname': subjectname})
 #
 #
 # def sub_cluster(request):
@@ -1935,8 +1919,6 @@ def sub_specialist(request):
 #     querys = request.session.get('querys')
 #     choiceitems = request.session.get('earlychoiceitems')
 #     subjectname = request.session.get('subjectname')
-#     lists_abstract = request.session.get('lists_abstract')
-#     lists_keywords = request.session.get('lists_keywords')
 #     subject_idd = request.session.get('subject_idd')
 #
 #     # print lists_keywords
@@ -1954,29 +1936,37 @@ def sub_specialist(request):
 #         advances.append(m[1])
 #     advances = filter(lambda x: str(x) != '', advances)
 #
+#     list_class = range(1,11)
+#     return render(request, 'himalaya/sub_cluster.html',{'query': query, 'ret_num': ret_num,
+#                                                         'advances': advances, 'subjectname':subjectname,
+#                                                         'list_class':list_class})
+#
+#
+# def cluster_s(request):
+#     lists_abstract = request.session.get('lists_abstract')
+#     lists_keywords = request.session.get('lists_keywords')
+#     subject_idd = request.session.get('subject_idd')
 #     keyall = []
 #     keylistAll = []
 #     nodedic = {}
 #     listr = []
-#     topN_list = []
-#     class_list = []
-#     # val1 = 30
-#     # val2 = 5
-#     # if request.method == 'POST':
-#     #     val1 = request.POST.get('top')
-#     #     val2 = request.POST.get('co')
-#     # print 'dddddhhhhhh', val1, val2
+#
+#     val = 5
+#     if request.GET.has_key('cs'):
+#         if request.GET['cs']:
+#             val = request.GET['cs']
 #
 #     if lists_abstract == [None] and lists_keywords == [None]:
 #         qk = FileBaseInfo.objects.filter(subjecttype=subject_idd).values_list('keywords')
-#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] !=u'', qk)
+#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
 #         lists_keywords = [i[0] for i in qk]
 #         if lists_keywords == []:
 #             qa = FileBaseInfo.objects.filter(subjecttype=subject_idd).values_list('description')
-#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] !=u'', qa)
+#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qa)
 #             lists_abstract = [i[0] for i in qa]
 #     # print len(lists_keywords) != 0,lists_keywords
 #     if len(lists_keywords) != 0:
+#         new_model = gensim.models.KeyedVectors.load_word2vec_format('wiki.zh.text.vector.bin', binary=True)
 #
 #         for keyword in lists_keywords:
 #             keyword = keyword.replace('\xe2\x80\xa2', '\xc2\xb7')
@@ -1996,38 +1986,36 @@ def sub_specialist(request):
 #         alist = []
 #         # listr = []
 #         token_num = len(Counter(keyall))
-#
-#         if token_num < 50:
-#             counts = dict(Counter(keyall))
+#         if token_num > 35:
+#             topN = 35
 #         else:
-#             counts = dict(Counter(keyall).most_common(50))
+#             topN = token_num
 #
-#         num_clusters = 5
-#         if len(counts) > num_clusters:
-#             new_model = gensim.models.KeyedVectors.load_word2vec_format('wiki.zh.text.vector.bin', binary=True)
-#             for word, value in counts.items():
-#                 try:
-#                     vector = new_model[word]
-#                     key.append(word)
-#                     alist.append(vector)
-#                 except:
-#                     error.append(word)
+#         counts = dict(Counter(keyall).most_common(topN))
 #
+#         for word, value in counts.items():
+#             try:
+#                 vector = new_model[word]
+#                 key.append(word)
+#                 alist.append(vector)
+#             except:
+#                 error.append(word)
 #
-#             km_cluster = KMeans(n_clusters=num_clusters, max_iter=500, n_init=40, init='k-means++', n_jobs=1)
-#             km_result = km_cluster.fit_predict(alist)
-#             index = zip(km_result, key)
-#             result = defaultdict(list)
-#             for i, j in index:
-#                 result[i].append(j)
-#             for k, v in result.items():
-#                 dictr = {}
-#                 dictr['name'] = 'class ' + str(k)
-#                 dictr['y'] = len(v)
-#                 dictr['Keywords'] = '; '.join(v)
-#                 listr.append(dictr)
+#         num_clusters = int(val)
+#         km_cluster = KMeans(n_clusters=num_clusters, max_iter=500, n_init=40, init='k-means++', n_jobs=1)
+#         km_result = km_cluster.fit_predict(alist)
+#         index = zip(km_result, key)
+#         result = defaultdict(list)
+#         for i, j in index:
+#             result[i].append(j)
+#         for k, v in result.items():
+#             dictr = {}
+#             dictr['name'] = 'class ' + str(k)
+#             dictr['y'] = len(v)
+#             dictr['Keywords'] = '; '.join(v)
+#             listr.append(dictr)
 #     elif len(lists_abstract) != 0:
-#
+#         new_model = gensim.models.KeyedVectors.load_word2vec_format('wiki.zh.text.vector.bin', binary=True)
 #         list_cut = []
 #         jieba.load_userdict("dict/userdict.txt")
 #         for abstract in lists_abstract:
@@ -2050,44 +2038,41 @@ def sub_specialist(request):
 #                      for document in list_cut]
 #
 #             # 去掉只出现一次的单词
-#         frequency = defaultdict(int)
-#         for text in texts:
-#             for token in text:
-#                 frequency[token] += 1
-#         texts = [[token for token in text if frequency[token] > 1]
-#                  for text in texts]
-#         dictionary = corpora.Dictionary(texts)
-#         diction = dictionary.token2id
-#         corpus = [dictionary.doc2bow(text) for text in texts]
+#             frequency = defaultdict(int)
+#             for text in texts:
+#                 for token in text:
+#                     frequency[token] += 1
+#             texts = [[token for token in text if frequency[token] > 1]
+#                      for text in texts]
+#             dictionary = corpora.Dictionary(texts)
+#             diction = dictionary.token2id
+#             corpus = [dictionary.doc2bow(text) for text in texts]
 #
-#         tfidf_model = models.TfidfModel(corpus)
-#         tfidf = tfidf_model[corpus]
-#         listw = []
-#         for i in tfidf:
-#             temp = []
-#             if len(i) != 0:
-#                 i = sorted(i, key=lambda x: x[1], reverse=True)
-#                 temp = i[0:6]
-#                 for k, v in diction.items():
-#                     for j in range(len(temp)):
-#                         temp[j] = list(temp[j])
-#                         if temp[j][0] == v:
-#                             temp[j][0] = k
+#             tfidf_model = models.TfidfModel(corpus)
+#             tfidf = tfidf_model[corpus]
+#             listw = []
+#             for i in tfidf:
+#                 temp = []
+#                 if len(i) != 0:
+#                     i = sorted(i, key=lambda x: x[1], reverse=True)
+#                     temp = i[0:6]
+#                     for k, v in diction.items():
+#                         for j in range(len(temp)):
+#                             temp[j] = list(temp[j])
+#                             if temp[j][0] == v:
+#                                 temp[j][0] = k
 #
-#             listw.extend([x[0] for x in temp])
+#                 listw.extend([x[0] for x in temp])
 #
-#         token_num = len(Counter(listw))
-#         if token_num < 30:
-#             count = dict(Counter(listw))
-#         else:
-#             count = dict(Counter(listw).most_common(50))
-#
-#         alist = []
-#         wlist = []
-#         error = []
-#         num_clusters = 5
-#         if len(count) > num_clusters:
-#             new_model = gensim.models.KeyedVectors.load_word2vec_format('wiki.zh.text.vector.bin', binary=True)
+#             token_num = len(Counter(listw))
+#             if token_num > 35:
+#                 topN = 35
+#             else:
+#                 topN = token_num
+#             count = dict(Counter(listw).most_common(topN))
+#             alist = []
+#             wlist = []
+#             error = []
 #             for word in count:
 #                 try:
 #                     vector = new_model[word]
@@ -2096,28 +2081,24 @@ def sub_specialist(request):
 #                 except:
 #                     error.append(word)
 #
-#             num_clusters = 5
-#             km_cluster = KMeans(n_clusters=num_clusters, max_iter=800, n_init=40, init='k-means++', n_jobs=1)
-#             km_result = km_cluster.fit_predict(alist)
-#             index = zip(km_result, wlist)
-#             result = defaultdict(list)
-#             for i, j in index:
-#                 result[i].append(j)
-#             # listr = []
-#             for k, v in result.items():
-#                 dictr = {}
-#                 dictr['name'] = 'class ' + str(k)
-#                 dictr['y'] = len(v)
-#                 dictr['Keywords'] = '; '.join(v)
-#                 listr.append(dictr)
-#     # import copy
-#     # listr2 = copy.deepcopy(listr)
-#     #
-#     print 'listr',listr
+#         num_clusters = int(val)
+#         km_cluster = KMeans(n_clusters=num_clusters, max_iter=800, n_init=40, init='k-means++', n_jobs=1)
+#         km_result = km_cluster.fit_predict(alist)
+#         index = zip(km_result, wlist)
+#         result = defaultdict(list)
+#         for i, j in index:
+#             result[i].append(j)
+#         # listr = []
+#         for k, v in result.items():
+#             dictr = {}
+#             dictr['name'] = 'class ' + str(k)
+#             dictr['y'] = len(v)
+#             dictr['Keywords'] = '; '.join(v)
+#             listr.append(dictr)
+#     # print len(listr)
+#     return render_to_response('himalaya/cluster_s.html',{'listr':json.dumps(listr),'listr2':listr})
 #
-#     return render(request, 'himalaya/sub_cluster.html',{'listr':json.dumps(listr),'query': query, 'ret_num': ret_num,
-#                                                         'advances': advances, 'subjectname':subjectname,'listr2':listr,
-#                                                         'topN_list':topN_list, 'class_list':class_list})
+#
 #
 #
 # def base_keywords(request):
@@ -2126,7 +2107,6 @@ def sub_specialist(request):
 #     queryb = request.session.get('queryb')
 #     choiceitems1 = request.session.get('earlychoiceitems1')
 #
-#     listb_keywords = request.session.get('listb_keywords')
 #     advanceb = []
 #     temp = []
 #     advanceb.append(query)
@@ -2142,297 +2122,49 @@ def sub_specialist(request):
 #         advanceb.append(m[1])
 #
 #     advanceb = filter(lambda x: str(x) != '', advanceb)
+#     list_coN = range(1, 21)
+#     list_num = range(10, 51)
+#     return render(request, 'himalaya/base_keywords.html', {'query': query, 'ret_num': ret_num, 'advanceb': advanceb,
+#                                                            'list_coN': list_coN, 'list_num': list_num})
+#
+#
+# def keywords_b(request):
+#     listb_keywords = request.session.get('listb_keywords')
+#     listb_abstract = request.session.get('listb_abstract')
+#     val = 5
+#     if request.GET.has_key('basek'):
+#         if request.GET['basek']:
+#             val = request.GET['basek']
+#
+#     val1 = 50
+#     if request.GET.has_key('numb'):
+#         if request.GET['numb']:
+#             val1 = request.GET['numb']
+#     maxnum = 0
+#     maxco = 0
 #     keyall = []
 #     keylistAll = []
 #     nodedic = {}
 #     nodes = []
 #     edges = []
-#     if listb_keywords == [None]:
+#     if listb_keywords == [None] and listb_abstract == [None]:
 #         qk = FileBaseInfo.objects.filter(subjecttype=-1).values_list('keywords')
 #         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
-#         listb_keywords = [i[0] for i in qk]
-#
-#     if len(listb_keywords) != 0:
-#         for keyword in listb_keywords:
-#             keyword = keyword.replace('HimalayaMountain', 'Himalaya Mountain')
-#             keyword = keyword.replace('\xe2\x80\xa2', '\xc2\xb7')
-#             keyword = keyword.replace('&', ';')
-#             keyword = keyword.replace('--', ';')
-#             keyword = keyword.replace(',',';')
-#             keyword = keyword.replace('；',';')
-#             keylist = keyword.split(';')
-#             for v in range(len(keylist)):
-#                 keylist[v] = keylist[v].strip()
-#                 keylist[v] = re.sub('[0,9]*:', '', keylist[v])
-#                 if keylist[v] != u'':
-#                     keyall.append(keylist[v])
-#
-#             keylistAll.append(keylist)
-#         # print keyall
-#
-#         counts = dict(Counter(keyall).most_common(50))
-#
-#         # print 'ccc',counts
-#         num = 0
-#         for k, v in counts.items():
-#             tdict = {}
-#             tdict['name'] = k+':'+str(v)
-#             tdict['value'] = v
-#             nodes.append(tdict)
-#             nodedic[k] = num
-#             num += 1
-#         # print nodedic
-#         matx = zeros((len(nodedic), len(nodedic)))
-#         # print keylistAll
-#         for k, v in nodedic.items():
-#             for m in keylistAll:
-#                 for mi in range(len(m)):
-#                     if m[mi] == k:
-#                         m[mi] = v
-#         kk = 0
-#         for keyInx in keylistAll:
-#             combine = itertools.combinations(keyInx, 2)
-#             for j in combine:
-#                 j = sorted(j)
-#                 try:
-#                     matx[j[0]][j[1]] += 1
-#                 except:
-#                     kk += 1
-#
-#         for i in range(len(nodedic)):
-#             for j in range(len(nodedic)):
-#                 edict = {}
-#                 if matx[i][j] != 0 and matx[i][j] >=10:
-#                     edict['source'] = i
-#                     edict['target'] = j
-#                     edict['value'] = str(matx[i][j])+'次'
-#                     edges.append(edict)
-#
-#     return render(request, 'himalaya/base_keywords.html', {'nodes': json.dumps(nodes), 'edges': json.dumps(edges),
-#                                                           'query': query, 'ret_num': ret_num, 'advanceb': advanceb,
-#                                                            })
-# def base_cluster(request):
-#     query = request.session.get('qq')
-#     ret_num = request.session.get('ret_num')
-#     queryb = request.session.get('queryb')
-#     choiceitems1 = request.session.get('earlychoiceitems1')
-#
-#     listb_keywords = request.session.get('listb_keywords')
-#     advanceb = []
-#     temp = []
-#     advanceb.append(query)
-#     for q in queryb:
-#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
-#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
-#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
-#             temp.append(q[1])
-#     for u in temp:
-#         for uu in u:
-#             advanceb.append(uu)
-#     for m in choiceitems1:
-#         advanceb.append(m[1])
-#     advanceb = filter(lambda x: str(x) != '', advanceb)
-#
-#
-#     keyall = []
-#     listr = []
-#     if listb_keywords == [None]:
-#         qk = FileBaseInfo.objects.filter(subjecttype=-1).values_list('keywords')
-#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
-#         listb_keywords = [i[0] for i in qk]
-#     if len(listb_keywords) != 0:
-#         for keyword in listb_keywords:
-#             keyword = keyword.replace('HimalayaMountain', 'Himalaya Mountain')
-#             keyword = keyword.replace('&', ';')
-#             keyword = keyword.replace('--', ';')
-#             keyword = keyword.replace('；',';')
-#             keyword = keyword.replace(',',';')
-#             keylist = keyword.split(';')
-#
-#             for v in range(len(keylist)):
-#                 keylist[v] = keylist[v].strip()
-#                 keylist[v] = re.sub('[0,9]*:', '', keylist[v])
-#                 if keylist[v] != u'':
-#                     keyall.append(keylist[v])
-#
-#
-#         counts = dict(Counter(keyall).most_common(30))
-#         num_clusters = 6
-#         if len(counts) > num_clusters:
-#             key = []
-#             for k in counts:
-#                 k = k.lower()
-#                 key.append(k)
-#             nlp = spacy.load('en')
-#             listvec = []
-#             for keyw in key:
-#                 test_doc = nlp(keyw)
-#                 vec = zeros(300)
-#                 for token in test_doc:
-#                     vec += token.vector
-#                 listvec.append(vec)
-#             # print listvec[0]
-#
-#
-#             km_cluster = KMeans(n_clusters=num_clusters, max_iter=800, n_init=40, init='k-means++', n_jobs=1)
-#             km_result = km_cluster.fit_predict(listvec)
-#             index = zip(km_result, key)
-#             result = defaultdict(list)
-#             for i, j in index:
-#                 result[i].append(j)
-#
-#             for k, v in result.items():
-#                 dictr = {}
-#                 dictr['name'] = 'class ' + str(k)
-#                 dictr['y'] = len(v)
-#                 dictr['Keywords'] = '; '.join(v)
-#                 listr.append(dictr)
-#         # print listr
-#
-#     return render(request, 'himalaya/base_cluster.html',{'listr':json.dumps(listr),'query': query, 'ret_num': ret_num, 'advanceb': advanceb, 'listr2':listr})
-#
-#
-# def base_cocreator(request):
-#     query = request.session.get('qq')
-#     ret_num = request.session.get('ret_num')
-#     queryb = request.session.get('queryb')
-#     choiceitems1 = request.session.get('earlychoiceitems1')
-#     listb_creator = request.session.get('listb_creator')
-#     # print 'hthththththth',listb_creator
-#     advanceb = []
-#     temp = []
-#     advanceb.append(query)
-#     for q in queryb:
-#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
-#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
-#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
-#             temp.append(q[1])
-#     for u in temp:
-#         for uu in u:
-#             advanceb.append(uu)
-#     for m in choiceitems1:
-#         advanceb.append(m[1])
-#     advanceb = filter(lambda x: str(x) != '', advanceb)
-#
-#
-#     list = []
-#     listco = []
-#     nodes = []
-#     edges = []
-#     nodedic = {}
-#     if listb_creator == [None]:
-#         qk = FileBaseInfo.objects.filter(subjecttype=-1).values_list('creator')
-#         qk = filter(lambda x: x[0] != None and x[0] != u'None', qk)
-#         listb_creator = [i[0] for i in qk]
-#     if len(listb_creator) != 0:
-#         for creator in listb_creator:
-#                 creators = creator.split(';')
-#                 creators = filter(lambda x: x != None and x != u'Anonymous' and x != u' et al', creators)
-#                 for i in range(len(creators)):
-#                     creators[i] = creators[i].title()
-#                     creators[i] = re.sub('-', ' ', creators[i])
-#                     creators[i] = creators[i].strip()
-#                     if creators[i].__contains__('\n'):
-#                         creators[i] = creators[i].split('\n')[0]
-#                     list.append(creators[i])
-#                 if len(creators) != 0:
-#                     listco.append(creators)
-#
-#         counts = dict(Counter(list).most_common(50))
-#         # print len(dict(Counter(list)))
-#         # SortCounts = sorted(counts.items(), key=lambda a:a[1],reverse=True)
-#
-#         num = 0
-#         for k, v in counts.items():
-#             tdict = {}
-#             tdict['name'] = k + ':' + str(v)
-#             tdict['value'] = v
-#             nodes.append(tdict)
-#             nodedic[k] = num
-#             num += 1
-#
-#
-#         matx = zeros((len(nodedic), len(nodedic)))
-#
-#         for m in listco:
-#             for mi in range(len(m)):
-#                 for k, v in nodedic.items():
-#                     if m[mi] == k:
-#                         m[mi] = v
-#         kk = 0
-#         for keyInx in listco:
-#             combine = itertools.combinations(keyInx, 2)
-#             for j in combine:
-#                 j = sorted(j)
-#                 try:
-#                     matx[j[0]][j[1]] += 1
-#                 except:
-#                     kk += 1
-#
-#         for i in range(len(nodedic)):
-#             for j in range(len(nodedic)):
-#                 edict = {}
-#                 if matx[i][j] > 0:
-#                     edict['source'] = i
-#                     edict['target'] = j
-#                     edict['value'] = str(matx[i][j])+'次'
-#                     edges.append(edict)
-#     # print edges
-#     return render(request, 'himalaya/base_cocreator.html', {'nodes': json.dumps(nodes), 'edges': json.dumps(edges),
-#                                                           'query': query, 'ret_num': ret_num, 'advanceb': advanceb,
-#                                                            })
-#
-#
-# def full_keywords(request):
-#     query = request.session.get('qq')
-#     ret_num = request.session.get('ret_num')
-#     queryf = request.session.get('queryf')
-#     choiceitems2 = request.session.get('earlychoiceitems2')
-#     listf_keywords = request.session.get('listf_keywords')
-#     listf_abstract = request.session.get('listf_abstract')
-#     # print 'qqqqq',queryf
-#     advancef = []
-#     temp = []
-#     advancef.append(query)
-#     for q in queryf:
-#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
-#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
-#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
-#             temp.append(q[1])
-#
-#     for u in temp:
-#         for uu in u:
-#             advancef.append(uu)
-#
-#     for m in choiceitems2:
-#         advancef.append(m[1])
-#
-#     advancef = filter(lambda x: str(x) != '', advancef)
-#
-#     keyall = []
-#     keylistAll = []
-#     nodedic = {}
-#     nodes = []
-#     edges = []
-#     if listf_keywords == [None] and listf_abstract == [None]:
-#         qk = FileBaseInfo.objects.all().values_list('keywords')
-#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
-#         listf_keywords = [i[0] for i in qk]
-#         if listf_keywords == []:
+#         listb_keywords = [i[0] for i in qk if i[0] != None]
+#         if listb_keywords == []:
 #             qa = FileBaseInfo.objects.all().values_list('description')
 #             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] !=u'', qa)
-#             listf_abstract = [i[0] for i in qa]
+#             listb_abstract = [i[0] for i in qa if i[0] != None]
 #
-#     if len(listf_keywords) != 0:
-#         for keyword in listf_keywords:
+#     if len(listb_keywords) != 0:
+#         for keyword in listb_keywords:
 #             keyword = keyword.replace('HimalayaMountain', 'Himalaya Mountain')
 #             keyword = keyword.replace('\xe2\x80\xa2', '\xc2\xb7')
-#             keyword = keyword.replace('--', ';')
-#             keyword = keyword.replace(',',';')
 #             keyword = keyword.replace('&', ';')
-#             keyword = keyword.replace('；',';')
+#             keyword = keyword.replace('--', ';')
+#             keyword = keyword.replace(',', ';')
+#             keyword = keyword.replace('；', ';')
 #             keylist = keyword.split(';')
-#
 #             for v in range(len(keylist)):
 #                 keylist[v] = keylist[v].strip()
 #                 keylist[v] = re.sub('[0,9]*:', '', keylist[v])
@@ -2442,13 +2174,13 @@ def sub_specialist(request):
 #             keylistAll.append(keylist)
 #         # print keyall
 #
-#         counts = dict(Counter(keyall).most_common(50))
-#
+#         counts = dict(Counter(keyall).most_common(int(val1)))
+#         maxnum = Counter(keyall).most_common(int(val1))[0][1]
 #         # print 'ccc',counts
 #         num = 0
 #         for k, v in counts.items():
 #             tdict = {}
-#             tdict['name'] = k+':'+str(v)
+#             tdict['name'] = k
 #             tdict['value'] = v
 #             nodes.append(tdict)
 #             nodedic[k] = num
@@ -2470,27 +2202,32 @@ def sub_specialist(request):
 #                     matx[j[0]][j[1]] += 1
 #                 except:
 #                     kk += 1
+#         try:
+#             maxco = amax(matx)
+#         except:
+#             maxco = 0
 #
 #         for i in range(len(nodedic)):
 #             for j in range(len(nodedic)):
 #                 edict = {}
-#                 if matx[i][j] != 0 and matx[i][j] >=5:
+#                 if matx[i][j] != 0 and matx[i][j] >= int(val):
 #                     edict['source'] = i
 #                     edict['target'] = j
-#                     edict['value'] = str(matx[i][j])+'次'
+#                     edict['value'] = matx[i][j]
 #                     edges.append(edict)
-#     elif len(listf_abstract) != 0:
+#     elif len(listb_abstract) != 0:
 #         list_cut = []
 #         jieba.load_userdict("dict/userdict.txt")
-#         for abstract in listf_abstract:
+#         for abstract in listb_abstract:
 #             abstract = abstract.replace('\xe2\x80\xa2', '_')
 #             abstract = abstract.replace('\xc2\xb7', '_')
 #             abstract = abstract.replace('-', '_')
 #             fenci = jieba.cut(abstract)
-#             fenci = ' '.join(fenci)
-#             # print fenci
-#             fenci = re.sub("_", "\xc2\xb7".decode('utf-8'), fenci)
-#             list_cut.append(fenci)
+#             fenci = list(fenci)
+#             fenci2 = [x for x in fenci if len(x) > 1]
+#             fencis = ' '.join(fenci2)
+#             fencis = re.sub("_", "\xc2\xb7".decode('utf-8'), fencis)
+#             list_cut.append(fencis)
 #
 #         stoplist = []
 #         with open('dict/ch_stopword.txt', 'r') as fr:
@@ -2532,12 +2269,12 @@ def sub_specialist(request):
 #                 lista.append([x[0] for x in temp])
 #                 listw.extend([x[0] for x in temp])
 #
-#             counts = dict(Counter(listw).most_common(50))
-#
+#             counts = dict(Counter(listw).most_common(int(val1)))
+#             maxnum = Counter(listw).most_common(int(val1))[0][1]
 #             num = 0
 #             for k, v in counts.items():
 #                 tdict = {}
-#                 tdict['name'] = k + ':' + str(v)
+#                 tdict['name'] = k
 #                 tdict['value'] = v
 #                 nodes.append(tdict)
 #                 nodedic[k] = num
@@ -2561,18 +2298,513 @@ def sub_specialist(request):
 #                     except:
 #                         kk += 1
 #
-#             max_co = amax(matx)
-#             max_mean = mean(matx)
+#             try:
+#                 maxco = amax(matx)
+#             except:
+#                 maxco = 0
+#
 #             for i in range(len(nodedic)):
 #                 for j in range(len(nodedic)):
 #                     edict = {}
 #
-#                     if matx[i][j] != 0 and matx[i][j] >= max_co * 0.2:
+#                     if matx[i][j] != 0 and matx[i][j] >= int(val):
 #                         edict['source'] = i
 #                         edict['target'] = j
-#                         edict['value'] = str(matx[i][j]) + '次'
+#                         edict['value'] = matx[i][j]
 #                         edges.append(edict)
 #
-#     return render(request, 'himalaya/full_keywords.html', {'nodes': json.dumps(nodes), 'edges': json.dumps(edges),
-#                                                           'query': query, 'ret_num': ret_num, 'advancef': advancef,
+#     return render_to_response('himalaya/keywords_b.html',{'nodes': json.dumps(nodes), 'edges': json.dumps(edges),'maxnum': maxnum,'maxco':maxco})
+#
+#
+# def base_cluster(request):
+#     query = request.session.get('qq')
+#     ret_num = request.session.get('ret_num')
+#     queryb = request.session.get('queryb')
+#     choiceitems1 = request.session.get('earlychoiceitems1')
+#
+#     advanceb = []
+#     temp = []
+#     advanceb.append(query)
+#     for q in queryb:
+#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
+#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
+#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
+#             temp.append(q[1])
+#     for u in temp:
+#         for uu in u:
+#             advanceb.append(uu)
+#     for m in choiceitems1:
+#         advanceb.append(m[1])
+#     advanceb = filter(lambda x: str(x) != '', advanceb)
+#
+#     list_class = range(1, 11)
+#
+#     return render(request, 'himalaya/base_cluster.html',{'list_class':list_class,'query': query, 'ret_num': ret_num, 'advanceb': advanceb})
+#
+# def cluster_b(request):
+#     keyall = []
+#     listr = []
+#     listb_keywords = request.session.get('listb_keywords')
+#     listb_abstract = request.session.get('listb_abstract')
+#     val = 5
+#     if request.GET.has_key('cb'):
+#         if request.GET['cb']:
+#             val = request.GET['cb']
+#
+#     if listb_keywords == [None] and listb_abstract == [None]:
+#         qk = FileBaseInfo.objects.filter(subjecttype=-1).values_list('keywords')
+#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
+#         listb_keywords = [i[0] for i in qk]
+#         if listb_keywords == []:
+#             qa = FileBaseInfo.objects.all().values_list('description')
+#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qa)
+#             listb_abstract = [i[0] for i in qa]
+#
+#     if len(listb_keywords) != 0:
+#         for keyword in listb_keywords:
+#             keyword = keyword.replace('HimalayaMountain', 'Himalaya Mountain')
+#             keyword = keyword.replace('&', ';')
+#             keyword = keyword.replace('--', ';')
+#             keyword = keyword.replace('；', ';')
+#             keyword = keyword.replace(',', ';')
+#             keylist = keyword.split(';')
+#
+#             for v in range(len(keylist)):
+#                 keylist[v] = keylist[v].strip()
+#                 keylist[v] = re.sub('[0,9]*:', '', keylist[v])
+#                 if keylist[v] != u'':
+#                     keyall.append(keylist[v])
+#         token_num = len(Counter(keyall))
+#         if token_num > 35:
+#             topN = 35
+#         else:
+#             topN = token_num
+#         counts = dict(Counter(keyall).most_common(topN))
+#         num_clusters = int(val)
+#         if len(counts) > num_clusters:
+#             key = []
+#             for k in counts:
+#                 k = k.lower()
+#                 key.append(k)
+#             nlp = spacy.load('en')
+#             listvec = []
+#             for keyw in key:
+#                 test_doc = nlp(keyw)
+#                 vec = zeros(300)
+#                 for token in test_doc:
+#                     vec += token.vector
+#                 listvec.append(vec)
+#
+#             km_cluster = KMeans(n_clusters=num_clusters, max_iter=500, n_init=40, init='k-means++', n_jobs=1)
+#             km_result = km_cluster.fit_predict(listvec)
+#             index = zip(km_result, key)
+#             result = defaultdict(list)
+#             for i, j in index:
+#                 result[i].append(j)
+#
+#             for k, v in result.items():
+#                 dictr = {}
+#                 dictr['name'] = 'class ' + str(k)
+#                 dictr['y'] = len(v)
+#                 dictr['Keywords'] = '; '.join(v)
+#                 listr.append(dictr)
+#     elif len(listb_abstract) != 0:
+#         new_model = gensim.models.KeyedVectors.load_word2vec_format('wiki.zh.text.vector.bin', binary=True)
+#         list_cut = []
+#         jieba.load_userdict("dict/userdict.txt")
+#         for abstract in listb_abstract:
+#             abstract = abstract.replace('\xe2\x80\xa2', '_')
+#             abstract = abstract.replace('\xc2\xb7', '_')
+#             abstract = abstract.replace('-', '_')
+#             fenci = jieba.cut(abstract)
+#             fenci = list(fenci)
+#             fenci2 = [x for x in fenci if len(x) > 1]
+#             fencis = ' '.join(fenci2)
+#             fencis = re.sub("_", "\xc2\xb7".decode('utf-8'), fencis)
+#             list_cut.append(fencis)
+#
+#         stoplist = []
+#         with open('dict/ch_stopword.txt', 'r') as fr:
+#             for line in fr:
+#                 line = re.sub('\n', '', line)
+#                 stoplist.append(line)
+#             texts = [[word for word in document.split() if word not in stoplist]
+#                      for document in list_cut]
+#
+#             # 去掉只出现一次的单词
+#             frequency = defaultdict(int)
+#             for text in texts:
+#                 for token in text:
+#                     frequency[token] += 1
+#             texts = [[token for token in text if frequency[token] > 1]
+#                      for text in texts]
+#             dictionary = corpora.Dictionary(texts)
+#             diction = dictionary.token2id
+#             corpus = [dictionary.doc2bow(text) for text in texts]
+#
+#             tfidf_model = models.TfidfModel(corpus)
+#             tfidf = tfidf_model[corpus]
+#             listw = []
+#             for i in tfidf:
+#                 temp = []
+#                 if len(i) != 0:
+#                     i = sorted(i, key=lambda x: x[1], reverse=True)
+#                     temp = i[0:6]
+#                     for k, v in diction.items():
+#                         for j in range(len(temp)):
+#                             temp[j] = list(temp[j])
+#                             if temp[j][0] == v:
+#                                 temp[j][0] = k
+#
+#                 listw.extend([x[0] for x in temp])
+#
+#             token_num = len(Counter(listw))
+#             if token_num > 35:
+#                 topN = 35
+#             else:
+#                 topN = token_num
+#             count = dict(Counter(listw).most_common(topN))
+#             alist = []
+#             wlist = []
+#             error = []
+#             for word in count:
+#                 try:
+#                     vector = new_model[word]
+#                     wlist.append(word)
+#                     alist.append(vector)
+#                 except:
+#                     error.append(word)
+#
+#         num_clusters = int(val)
+#         km_cluster = KMeans(n_clusters=num_clusters, max_iter=500, n_init=40, init='k-means++', n_jobs=1)
+#         km_result = km_cluster.fit_predict(alist)
+#         index = zip(km_result, wlist)
+#         result = defaultdict(list)
+#         for i, j in index:
+#             result[i].append(j)
+#         # listr = []
+#         for k, v in result.items():
+#             dictr = {}
+#             dictr['name'] = 'class ' + str(k)
+#             dictr['y'] = len(v)
+#             dictr['Keywords'] = '; '.join(v)
+#             listr.append(dictr)
+#     return render_to_response('himalaya/cluster_b.html',{'listr':json.dumps(listr),'listr2':listr})
+# def base_cocreator(request):
+#     query = request.session.get('qq')
+#     ret_num = request.session.get('ret_num')
+#     queryb = request.session.get('queryb')
+#     choiceitems1 = request.session.get('earlychoiceitems1')
+#     # print 'hthththththth',listb_creator
+#     advanceb = []
+#     temp = []
+#
+#     advanceb.append(query)
+#     for q in queryb:
+#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
+#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
+#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
+#             temp.append(q[1])
+#     for u in temp:
+#         for uu in u:
+#             advanceb.append(uu)
+#     for m in choiceitems1:
+#         advanceb.append(m[1])
+#     advanceb = filter(lambda x: str(x) != '', advanceb)
+#     list_cre = range(1,51)
+#
+#     return render(request, 'himalaya/base_cocreator.html', {'list_cre':list_cre,
+#                                                            'query': query, 'ret_num': ret_num, 'advanceb': advanceb,
 #                                                            })
+#
+# def creator_b(request):
+#     listb_creator = request.session.get('listb_creator')
+#     val = 30
+#     if request.GET.has_key('numcb'):
+#         if request.GET['numcb']:
+#             val = request.GET['numcb']
+#
+#     list = []
+#     listco = []
+#     nodes = []
+#     edges = []
+#     maxnum = 0
+#     maxco = 0
+#     nodedic = {}
+#     if listb_creator == [None]:
+#         qk = FileBaseInfo.objects.filter(subjecttype=-1).values_list('creator')
+#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
+#         listb_creator = [i[0] for i in qk]
+#     if len(listb_creator) != 0:
+#         for creator in listb_creator:
+#             creators = creator.split(';')
+#             creators = filter(lambda x: x != None and x != u'Anonymous' and x != u' et al', creators)
+#             for i in range(len(creators)):
+#                 creators[i] = creators[i].title()
+#                 creators[i] = re.sub('-', ' ', creators[i])
+#                 creators[i] = creators[i].strip()
+#                 if creators[i].__contains__('\n'):
+#                     creators[i] = creators[i].split('\n')[0]
+#                 list.append(creators[i])
+#             if len(creators) != 0:
+#                 listco.append(creators)
+#
+#         counts = dict(Counter(list).most_common(int(val)))
+#         maxnum = Counter(list).most_common(int(val))[0][1]
+#         # print len(dict(Counter(list)))
+#         # SortCounts = sorted(counts.items(), key=lambda a:a[1],reverse=True)
+#
+#         num = 0
+#         for k, v in counts.items():
+#             tdict = {}
+#             tdict['name'] = k
+#             tdict['value'] = v
+#             nodes.append(tdict)
+#             nodedic[k] = num
+#             num += 1
+#
+#         matx = zeros((len(nodedic), len(nodedic)))
+#
+#         for m in listco:
+#             for mi in range(len(m)):
+#                 for k, v in nodedic.items():
+#                     if m[mi] == k:
+#                         m[mi] = v
+#         kk = 0
+#         for keyInx in listco:
+#             combine = itertools.combinations(keyInx, 2)
+#             for j in combine:
+#                 j = sorted(j)
+#                 try:
+#                     matx[j[0]][j[1]] += 1
+#                 except:
+#                     kk += 1
+#         try:
+#             maxco = amax(matx)
+#         except:
+#             maxco = 0
+#         for i in range(len(nodedic)):
+#             for j in range(len(nodedic)):
+#                 edict = {}
+#                 if matx[i][j] > 0:
+#                     edict['source'] = i
+#                     edict['target'] = j
+#                     edict['value'] = matx[i][j]
+#                     edges.append(edict)
+#
+#     return render_to_response('himalaya/creator_b.html',{'nodes': json.dumps(nodes), 'edges': json.dumps(edges),'maxnum': maxnum,'maxco':maxco})
+#
+#
+#
+# def full_keywords(request):
+#     query = request.session.get('qq')
+#     ret_num = request.session.get('ret_num')
+#     queryf = request.session.get('queryf')
+#     choiceitems2 = request.session.get('earlychoiceitems2')
+#     advancef = []
+#     temp = []
+#     advancef.append(query)
+#     for q in queryf:
+#         if (q[0] == u'language' or q[0] == u'creator' or q[0] == u'fileType' or q[0] == u'inp_start_date' or q[
+#             0] == u'keywords' or q[0] == u'title' or q[0] == u'inp_end_date'
+#             or q[0] == u'fileFormat' or q[0] == u'spatial' or q[0] == u'discipline') and q[1] != [u'']:
+#             temp.append(q[1])
+#
+#     for u in temp:
+#         for uu in u:
+#             advancef.append(uu)
+#
+#     for m in choiceitems2:
+#         advancef.append(m[1])
+#
+#     advancef = filter(lambda x: str(x) != '', advancef)
+#     list_coN = range(1, 31)
+#     list_num = range(10, 51)
+#     return render(request, 'himalaya/full_keywords.html', {'list_coN': list_coN, 'list_num': list_num,
+#                                                            'query': query, 'ret_num': ret_num, 'advancef': advancef,
+#                                                            })
+# def keyword_f(request):
+#     listf_keywords = request.session.get('listf_keywords')
+#     listf_abstract = request.session.get('listf_abstract')
+#     val = 5
+#     val1 = 50
+#     if request.GET.has_key('fullc'):
+#         if request.GET['fullc']:
+#             val = request.GET['fullc']
+#     if request.GET.has_key('numf'):
+#         if request.GET['numf']:
+#             val1 = request.GET['numf']
+#
+#     keyall = []
+#     keylistAll = []
+#     nodedic = {}
+#     nodes = []
+#     edges = []
+#     maxnum = 0
+#     maxco = 0
+#
+#     if listf_keywords == [None] and listf_abstract == [None]:
+#         qk = FileBaseInfo.objects.all().values_list('keywords')
+#         qk = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qk)
+#         listf_keywords = [i[0] for i in qk]
+#         if listf_keywords == []:
+#             qa = FileBaseInfo.objects.all().values_list('description')
+#             qa = filter(lambda x: x[0] != None and x[0] != u'None' and x[0] != u'', qa)
+#             listf_abstract = [i[0] for i in qa]
+#
+#     if len(listf_keywords) != 0:
+#         for keyword in listf_keywords:
+#             keyword = keyword.replace('HimalayaMountain', 'Himalaya Mountain')
+#             keyword = keyword.replace('\xe2\x80\xa2', '\xc2\xb7')
+#             keyword = keyword.replace('--', ';')
+#             keyword = keyword.replace(',', ';')
+#             keyword = keyword.replace('&', ';')
+#             keyword = keyword.replace('；', ';')
+#             keylist = keyword.split(';')
+#
+#             for v in range(len(keylist)):
+#                 keylist[v] = keylist[v].strip()
+#                 keylist[v] = re.sub('[0,9]*:', '', keylist[v])
+#                 if keylist[v] != u'':
+#                     keyall.append(keylist[v])
+#
+#             keylistAll.append(keylist)
+#         # print keyall
+#
+#         counts = dict(Counter(keyall).most_common(int(val1)))
+#         maxnum = Counter(keyall).most_common(int(val1))[0][1]
+#
+#         # print 'ccc',counts
+#         num = 0
+#         for k, v in counts.items():
+#             tdict = {}
+#             tdict['name'] = k
+#             tdict['value'] = v
+#             nodes.append(tdict)
+#             nodedic[k] = num
+#             num += 1
+#         matx = zeros((len(nodedic), len(nodedic)))
+#         for k, v in nodedic.items():
+#             for m in keylistAll:
+#                 for mi in range(len(m)):
+#                     if m[mi] == k:
+#                         m[mi] = v
+#         kk = 0
+#         for keyInx in keylistAll:
+#             combine = itertools.combinations(keyInx, 2)
+#             for j in combine:
+#                 j = sorted(j)
+#                 try:
+#                     matx[j[0]][j[1]] += 1
+#                 except:
+#                     kk += 1
+#         try:
+#             maxco = amax(matx)
+#         except:
+#             maxco = 0
+#
+#         for i in range(len(nodedic)):
+#             for j in range(len(nodedic)):
+#                 edict = {}
+#                 if matx[i][j] != 0 and matx[i][j] >= int(val):
+#                     edict['source'] = i
+#                     edict['target'] = j
+#                     edict['value'] = matx[i][j]
+#                     edges.append(edict)
+#     elif len(listf_abstract) != 0:
+#         list_cut = []
+#         jieba.load_userdict("dict/userdict.txt")
+#         for abstract in listf_abstract:
+#             abstract = abstract.replace('\xe2\x80\xa2', '_')
+#             abstract = abstract.replace('\xc2\xb7', '_')
+#             abstract = abstract.replace('-', '_')
+#             fenci = jieba.cut(abstract)
+#             fenci = list(fenci)
+#             fenci2 = [x for x in fenci if len(x) > 1]
+#             fencis = ' '.join(fenci2)
+#             fencis = re.sub("_", "\xc2\xb7".decode('utf-8'), fencis)
+#             list_cut.append(fencis)
+#
+#         stoplist = []
+#         with open('dict/ch_stopword.txt', 'r') as fr:
+#             for line in fr:
+#                 line = re.sub('\n', '', line)
+#                 stoplist.append(line)
+#             texts = [[word for word in document.split() if word not in stoplist]
+#                      for document in list_cut]
+#
+#             # #去掉只出现一次的单词
+#             frequency = defaultdict(int)
+#             for text in texts:
+#                 for token in text:
+#                     frequency[token] += 1
+#             texts = [[token for token in text if frequency[token] > 1]
+#                      for text in texts]
+#             dictionarygl = corpora.Dictionary(texts)
+#             dictiongl = dictionarygl.token2id
+#
+#             corpus = [dictionarygl.doc2bow(text) for text in texts]
+#
+#             tfidf_model = models.TfidfModel(corpus)
+#             tfidf = tfidf_model[corpus]
+#             lista = []
+#             listw = []
+#             nodes = []
+#             edges = []
+#             nodedic = {}
+#             for i in tfidf:
+#                 temp = []
+#                 i = sorted(i, key=lambda x: x[1], reverse=True)
+#                 temp = i[0:6]
+#
+#                 for k, v in dictiongl.items():
+#                     for j in range(len(temp)):
+#                         temp[j] = list(temp[j])
+#                         if temp[j][0] == v:
+#                             temp[j][0] = k
+#                 lista.append([x[0] for x in temp])
+#                 listw.extend([x[0] for x in temp])
+#
+#             counts = dict(Counter(listw).most_common(int(val1)))
+#             maxnum = Counter(listw).most_common(int(val1))[0][1]
+#
+#             num = 0
+#             for k, v in counts.items():
+#                 tdict = {}
+#                 tdict['name'] = k
+#                 tdict['value'] = v
+#                 nodes.append(tdict)
+#                 nodedic[k] = num
+#                 num += 1
+#             matx = zeros((len(nodedic), len(nodedic)))
+#             for k, v in nodedic.items():
+#                 for m in lista:
+#                     for mi in range(len(m)):
+#                         if m[mi] == k:
+#                             m[mi] = v
+#
+#             kk = 0
+#             for keyInx in lista:
+#                 combine = itertools.combinations(keyInx, 2)
+#                 for j in combine:
+#                     j = sorted(j)
+#                     try:
+#                         matx[j[0]][j[1]] += 1
+#                     except:
+#                         kk += 1
+#
+#             try:
+#                 maxco = amax(matx)
+#             except:
+#                 maxco = 0
+#
+#             for i in range(len(nodedic)):
+#                 for j in range(len(nodedic)):
+#                     edict = {}
+#                     if matx[i][j] != 0 and matx[i][j] >= int(val):
+#                         edict['source'] = i
+#                         edict['target'] = j
+#                         edict['value'] = matx[i][j]
+#                         edges.append(edict)
+#     return render_to_response('himalaya/keyword_f.html',{'nodes': json.dumps(nodes), 'edges': json.dumps(edges),'maxco':maxco,'maxnum':maxnum})
+#

@@ -148,92 +148,15 @@
               <div  class="col-md-12" >
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div id="container" style="min-width:500px;height:500px"></div>
+                        <select id="cb" type="submit" onchange="">
+                        <option >簇个数</option>
+                               {% for i in list_class  %}
+                                   <option  name="cb" value={{ i }}>{{ i }}</option>
+                               {% endfor %}
+                      </select>
+                        <input style="margin: 5px" type="button" id="send_cluster_b" name="send_cluster_b" value="确定" >
 
-        <script>
-            var chart = null;
-            $(function () {
-                $('#container').highcharts({
-                    chart: {
-                        plotBackgroundColor: null,
-                        plotBorderWidth: null,
-                        plotShadow: false,
-                        spacing : [40, 40 , 40, 0]
-                    },
-                    title: {
-                        floating:true,
-                        text:'KEYWORDS',
-                        align: 'center'
-
-                    },
-                    tooltip: {
-                        pointFormat: '{series.name}: <b>{point.y}</b>',
-
-
-                    },
-
-                    plotOptions: {
-                        pie: {
-                            allowPointSelect: true,
-                            cursor: 'pointer',
-                            dataLabels: {
-                                enabled: true,
-                                format: '<b>{point.name}</b>',
-                                style: {
-                                    color: (Highcharts.theme && Highcharts.theme.contrastTextColor)
-                                }
-
-                            },
-            {#                showInLegend: true,#}
-
-
-                            point: {
-                                events: {
-                                    mouseOver: function(e) {  // 鼠标滑过时动态更新标题
-                                        // 标题更新函数，API 地址：https://api.hcharts.cn/highcharts#Chart.setTitle
-                                        chart.setTitle({
-                                            text: e.target.name+ '：\t'+ e.target.Keywords
-                                        });
-                                    }
-                                    //,
-                                    // click: function(e) { // 同样的可以在点击事件里处理
-                                    //     chart.setTitle({
-                                    //         text: e.point.name+ '\t'+ e.point.y + ' %'
-                                    //     });
-                                    // }
-                                }
-                            }
-
-                        }
-
-                    },
-                    credits: {
-                        enabled: false
-                     },
-
-                    series: [{
-                        type: 'pie',
-                        innerSize: '80%',
-                        name: 'Keywords',
-                        data: {{listr|safe}}
-                    }]
-                }, function(c) {
-                    // 环形图圆心
-                    var centerY = c.series[0].center[1],
-                        titleHeight = parseInt(c.title.styles.fontSize);
-                    c.setTitle({
-                        y:centerY + titleHeight/2
-                    });
-                    chart = c;
-                });
-            });
-
-        </script>
-
-{% for i in listr2%}
-    <div><font color="red">{{ i.name }}:</font> {{ i.Keywords }}</div>
-
-{% endfor %}
+                        <div id="clusterb"></div>
 
 {#######################################}
 
@@ -303,7 +226,21 @@
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <script crossorigin="anonymous" src="{% static 'himadatabase/test/ie10-viewport-bug-workaround.js' %}" charset="utf-8"></script>
 {#    内容滑动菜单栏样式#}
+<script>
+    $("#clusterb").load("/cluster_b/");
+    $(function(){
+    $("#send_cluster_b").click(function () {
+        $.get("/cluster_b/",{
+            cb:$("#cb").val()
+        },function (data,textStatus) {
+            $("#clusterb").html(data);
+        });
 
+    }
+    )
+})
+
+</script>
 </body>
 </html>
 

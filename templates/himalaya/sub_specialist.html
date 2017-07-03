@@ -24,7 +24,7 @@
                 <!--导航条顶部 end-->
 
      <!--界面上面图片部分 start-->
-    <div id="section-promo" class="homepage-promo">
+      <div id="section-promo" class="homepage-promo">
            <img class="central" src="{% static 'himadatabase/images/zhuanti.png' %}" width="100%" height="240px" >
 
            <div class="container">
@@ -47,8 +47,8 @@
                             <div class="corner"></div>
                         </a>
                     </li>
-                    <li class="active">
-                        <a data-target="#product-ajenti" data-toggle="tab">
+                    <li >
+                        <a href="{% url 'himalaya:specialist' %}">
                             <img src="{% static 'himadatabase/my_css/images/01.png' %}" >
                             <div>
                                 <div class="title">专题文献</div>
@@ -69,6 +69,20 @@
                             <div class="corner"></div>
                         </a>
                     </li>
+
+                      <li>
+                        <a href="{% url 'himalaya:mapview' %}">
+                            <img src="{% static 'himadatabase/my_css/images/gis4.png' %}">
+                            <div>
+                                <div class="title">
+                                     GIS数据库
+                                </div>
+                                <div class="desc">GIS Database</div>
+                            </div>
+                            <div class="corner"></div>
+                        </a>
+                    </li>
+
                   </ul>
                 </div>
             </div>
