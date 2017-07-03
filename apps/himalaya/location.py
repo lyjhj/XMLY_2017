@@ -502,10 +502,5 @@ def routenameitem(final):
         routeitem.append(result[0].RouteName)
     return routeitem
 
-def te():
-    print 'te'
-    print 'test'
-    print 'test111'
-
 #Map 功能函数 定义 end
 
